@@ -13,33 +13,40 @@ sequenceDiagram
     actor BM as BufferManager
     participant FW as FileWriter
     participant OE as OpenFileEntry
+    participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FW: writePage(OpenFileEntry, pageId, inBuffer)
+    BM->>FW: writePage(openFileEntry, pageId, source)
     activate FW
     
-    FW->>OE: getState()
+    FW->>OE: get AccessMode
+    OE-->>FW: accessMode
+    
+    FW->>FW: validateAccessMode(accessMode)
+    
+    FW->>OE: DataFile
     activate OE
-    OE-->>FW: FileState.Open
+    OE-->>FW: dataFile
     deactivate OE
     
-    FW->>OE: getAccessMode()
-    activate OE
-    OE-->>FW: FileAccessMode.ReadWrite
-    deactivate OE
+    FW->>FW: validatePageId(pageId, dataFile)
     
-    FW->>OE: getFileHandle()
-    activate OE
-    OE-->>FW: FileHandle
-    deactivate OE
+    FW->>OE: get Handle
+    OE-->>FW: fileHandle
     
-    FW->>FW: calculateOffset(pageId)
+    FW->>DF: Header
+    activate DF
+    DF-->>FW: fileHeader
+    deactivate DF
     
-    FW->>FH: write(offset, pageSize, inBuffer)
+    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    
+    FW->>FH: write(offset, pageSize, source)
     activate FH
-    note right of FH: OS write system call.
     FH-->>FW: bytesWritten
     deactivate FH
+    
+    FW->>FW: validateBytesWritten(bytesWritten, pageSize)
     
     FW-->>BM: success
     deactivate FW
@@ -55,18 +62,15 @@ sequenceDiagram
     participant FW as FileWriter
     participant OE as OpenFileEntry
 
-    BM->>FW: writePage(OpenFileEntry, pageId, inBuffer)
+    BM->>FW: writePage(openFileEntry, pageId, source)
     activate FW
     
-    FW->>OE: getState()
-    activate OE
-    OE-->>FW: FileState.Open
-    deactivate OE
+    FW->>OE: get AccessMode
+    OE-->>FW: accessMode
     
-    FW->>OE: getAccessMode()
-    activate OE
-    OE-->>FW: FileAccessMode.ReadOnly
-    deactivate OE
+    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: AccessMode is ReadOnly.
+    FW-->>FW: throw ReadOnlyFileException
     
     FW-->>BM: throw ReadOnlyFileException
     deactivate FW
@@ -74,36 +78,122 @@ sequenceDiagram
 
 ---
 
-## 3. Failure Path: OS Level Disk Write Error (Disk Failure)
+## 3. Failure Path: Invalid PageId
 ```mermaid
 sequenceDiagram
     autonumber
     actor BM as BufferManager
     participant FW as FileWriter
     participant OE as OpenFileEntry
-    participant FH as FileHandle
 
-    BM->>FW: writePage(OpenFileEntry, pageId, inBuffer)
+    BM->>FW: writePage(openFileEntry, pageId, source)
     activate FW
     
-    FW->>OE: getState()
+    FW->>OE: get AccessMode
+    OE-->>FW: accessMode
+    
+    FW->>FW: validateAccessMode(accessMode)
+    
+    FW->>OE: DataFile
     activate OE
-    OE-->>FW: FileState.Open
+    OE-->>FW: dataFile
     deactivate OE
     
-    FW->>OE: getAccessMode()
+    FW->>FW: validatePageId(pageId, dataFile)
+    note right of FW: PageId is negative, exceeds total pages, or falls outside data region.
+    FW-->>FW: throw InvalidPageIdException
+    
+    FW-->>BM: throw InvalidPageIdException
+    deactivate FW
+```
+
+---
+
+## 4. Failure Path: Incomplete Page Write
+```mermaid
+sequenceDiagram
+    autonumber
+    actor BM as BufferManager
+    participant FW as FileWriter
+    participant OE as OpenFileEntry
+    participant DF as DataFile
+    participant FH as FileHandle
+
+    BM->>FW: writePage(openFileEntry, pageId, source)
+    activate FW
+    
+    FW->>OE: get AccessMode
+    OE-->>FW: accessMode
+    
+    FW->>FW: validateAccessMode(accessMode)
+    
+    FW->>OE: DataFile
     activate OE
-    OE-->>FW: FileAccessMode.ReadWrite
+    OE-->>FW: dataFile
     deactivate OE
     
-    FW->>OE: getFileHandle()
+    FW->>FW: validatePageId(pageId, dataFile)
+    
+    FW->>OE: get Handle
+    OE-->>FW: fileHandle
+    
+    FW->>DF: Header
+    activate DF
+    DF-->>FW: fileHeader
+    deactivate DF
+    
+    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    
+    FW->>FH: write(offset, pageSize, source)
+    activate FH
+    FH-->>FW: bytesWritten (bytesWritten < pageSize)
+    deactivate FH
+    
+    FW->>FW: validateBytesWritten(bytesWritten, pageSize)
+    FW-->>FW: throw IncompletePageWriteException
+    
+    FW-->>BM: throw IncompletePageWriteException
+    deactivate FW
+```
+
+---
+
+## 5. Failure Path: OS I/O Error
+```mermaid
+sequenceDiagram
+    autonumber
+    actor BM as BufferManager
+    participant FW as FileWriter
+    participant OE as OpenFileEntry
+    participant DF as DataFile
+    participant FH as FileHandle
+
+    BM->>FW: writePage(openFileEntry, pageId, source)
+    activate FW
+    
+    FW->>OE: get AccessMode
+    OE-->>FW: accessMode
+    
+    FW->>FW: validateAccessMode(accessMode)
+    
+    FW->>OE: DataFile
     activate OE
-    OE-->>FW: FileHandle
+    OE-->>FW: dataFile
     deactivate OE
     
-    FW->>FW: calculateOffset(pageId)
+    FW->>FW: validatePageId(pageId, dataFile)
     
-    FW->>FH: write(offset, pageSize, inBuffer)
+    FW->>OE: get Handle
+    OE-->>FW: fileHandle
+    
+    FW->>DF: Header
+    activate DF
+    DF-->>FW: fileHeader
+    deactivate DF
+    
+    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    
+    FW->>FH: write(offset, pageSize, source)
     activate FH
     FH-->>FW: throw IOException
     deactivate FH
@@ -117,13 +207,14 @@ sequenceDiagram
 ## Discovered Candidates
 
 ### Method Candidates
-- `FileWriter.writePage(entry: OpenFileEntry, pageId: int, buffer: ByteBuffer) : void`
-- `FileWriter.calculateOffset(pageId: int) : long`
-- `OpenFileEntry.getState() : FileState`
-- `OpenFileEntry.getAccessMode() : FileAccessMode`
-- `OpenFileEntry.getFileHandle() : FileHandle`
+- `FileWriter.writePage(entry: OpenFileEntry, pageId: PageId, source: ByteBuffer) : void`
+- `FileWriter.validateAccessMode(accessMode: FileAccessMode) : void`
+- `FileWriter.validatePageId(pageId: PageId, file: DataFile) : void`
+- `FileWriter.calculatePageOffset(pageId: PageId, header: FileHeader) : long`
+- `FileWriter.validateBytesWritten(bytesWritten: int, expectedBytes: int) : void`
 - `FileHandle.write(offset: long, length: int, source: ByteBuffer) : int`
 
 ### State Candidates
-- `FileAccessMode` enum values (ReadOnly, ReadWrite)
-- `FileState` enum values (Open, Closed, Corrupted)
+- `PageId` type (representing the unique identifier of a database page).
+- `ByteBuffer` representing the source stream buffer.
+- `FileAccessMode` enum values (ReadOnly, ReadWrite).

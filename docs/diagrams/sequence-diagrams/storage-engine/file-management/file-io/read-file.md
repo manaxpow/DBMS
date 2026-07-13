@@ -2,7 +2,7 @@
 
 ## Usecase Overview
 **Actor**: `BufferManager`
-**Purpose**: Shows how the system reads physical blocks/pages from an open database file using the active descriptor and handle.
+**Purpose**: Shows how the system reads physical blocks/pages from an open database file using the active file handle.
 
 ---
 
@@ -13,28 +13,35 @@ sequenceDiagram
     actor BM as BufferManager
     participant FR as FileReader
     participant OE as OpenFileEntry
+    participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FR: readPage(OpenFileEntry, pageId, outBuffer)
+    BM->>FR: readPage(openFileEntry, pageId, destination)
     activate FR
     
-    FR->>OE: getState()
+    FR->>OE: DataFile
     activate OE
-    OE-->>FR: FileState.Open
+    OE-->>FR: dataFile
     deactivate OE
     
-    FR->>OE: getFileHandle()
-    activate OE
-    OE-->>FR: FileHandle
-    deactivate OE
+    FR->>FR: validatePageId(pageId, dataFile)
     
-    FR->>FR: calculateOffset(pageId)
+    FR->>OE: get Handle
+    OE-->>FR: fileHandle
     
-    FR->>FH: read(offset, pageSize, outBuffer)
+    FR->>DF: Header
+    activate DF
+    DF-->>FR: fileHeader
+    deactivate DF
+    
+    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    
+    FR->>FH: read(offset, pageSize, destination)
     activate FH
-    note right of FH: OS read system call.
     FH-->>FR: bytesRead
     deactivate FH
+    
+    FR->>FR: validateBytesRead(bytesRead, pageSize)
     
     FR-->>BM: success
     deactivate FR
@@ -42,7 +49,7 @@ sequenceDiagram
 
 ---
 
-## 2. Failure Path: Read Access Lock Violation
+## 2. Failure Path: Invalid PageId
 ```mermaid
 sequenceDiagram
     autonumber
@@ -50,45 +57,101 @@ sequenceDiagram
     participant FR as FileReader
     participant OE as OpenFileEntry
 
-    BM->>FR: readPage(OpenFileEntry, pageId, outBuffer)
+    BM->>FR: readPage(openFileEntry, pageId, destination)
     activate FR
     
-    FR->>OE: getState()
+    FR->>OE: DataFile
     activate OE
-    OE-->>FR: FileState.Corrupted
+    OE-->>FR: dataFile
     deactivate OE
     
-    FR-->>BM: throw InvalidFileStateException
+    FR->>FR: validatePageId(pageId, dataFile)
+    note right of FR: PageId is negative, exceeds total pages, or falls outside data region.
+    FR-->>FR: throw InvalidPageIdException
+    
+    FR-->>BM: throw InvalidPageIdException
     deactivate FR
 ```
 
 ---
 
-## 3. Failure Path: OS Level Read Error (Bad Sector/Disk Failure)
+## 3. Failure Path: Incomplete Page Read
 ```mermaid
 sequenceDiagram
     autonumber
     actor BM as BufferManager
     participant FR as FileReader
     participant OE as OpenFileEntry
+    participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FR: readPage(OpenFileEntry, pageId, outBuffer)
+    BM->>FR: readPage(openFileEntry, pageId, destination)
     activate FR
     
-    FR->>OE: getState()
+    FR->>OE: DataFile
     activate OE
-    OE-->>FR: FileState.Open
+    OE-->>FR: dataFile
     deactivate OE
     
-    FR->>OE: getFileHandle()
+    FR->>FR: validatePageId(pageId, dataFile)
+    
+    FR->>OE: get Handle
+    OE-->>FR: fileHandle
+    
+    FR->>DF: Header
+    activate DF
+    DF-->>FR: fileHeader
+    deactivate DF
+    
+    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    
+    FR->>FH: read(offset, pageSize, destination)
+    activate FH
+    FH-->>FR: bytesRead (bytesRead < pageSize)
+    deactivate FH
+    
+    FR->>FR: validateBytesRead(bytesRead, pageSize)
+    FR-->>FR: throw IncompletePageReadException
+    
+    FR-->>BM: throw IncompletePageReadException
+    deactivate FR
+```
+
+---
+
+## 4. Failure Path: OS I/O Error
+```mermaid
+sequenceDiagram
+    autonumber
+    actor BM as BufferManager
+    participant FR as FileReader
+    participant OE as OpenFileEntry
+    participant DF as DataFile
+    participant FH as FileHandle
+
+    BM->>FR: readPage(openFileEntry, pageId, destination)
+    activate FR
+    
+    FR->>OE: DataFile
     activate OE
-    OE-->>FR: FileHandle
+    OE-->>FR: dataFile
     deactivate OE
     
-    FR->>FR: calculateOffset(pageId)
+    FR->>FR: validatePageId(pageId, dataFile)
     
-    FR->>FH: read(offset, pageSize, outBuffer)
+    FR->>OE: Handle
+    activate OE
+    OE-->>FR: fileHandle
+    deactivate OE
+    
+    FR->>DF: Header
+    activate DF
+    DF-->>FR: fileHeader
+    deactivate DF
+    
+    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    
+    FR->>FH: read(offset, pageSize, destination)
     activate FH
     FH-->>FR: throw IOException
     deactivate FH
@@ -102,12 +165,12 @@ sequenceDiagram
 ## Discovered Candidates
 
 ### Method Candidates
-- `FileReader.readPage(entry: OpenFileEntry, pageId: int, buffer: ByteBuffer) : void`
-- `FileReader.calculateOffset(pageId: int) : long`
-- `OpenFileEntry.getState() : FileState`
-- `OpenFileEntry.getFileHandle() : FileHandle`
+- `FileReader.readPage(entry: OpenFileEntry, pageId: PageId, destination: ByteBuffer) : void`
+- `FileReader.calculatePageOffset(pageId: PageId, header: FileHeader) : long`
+- `FileReader.validatePageId(pageId: PageId, file: DataFile) : void`
+- `FileReader.validateBytesRead(bytesRead: int, expectedBytes: int) : void`
 - `FileHandle.read(offset: long, length: int, destination: ByteBuffer) : int`
 
 ### State Candidates
-- `FileState` enum values (e.g. Open, Corrupted)
-- `FileAccessMode` enum values
+- `PageId` type (representing the unique identifier of a database page).
+- `ByteBuffer` representing the destination stream buffer.

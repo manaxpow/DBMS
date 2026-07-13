@@ -6,74 +6,104 @@ Illustrates the static structural composition of a physical data file representa
 ### Mermaid classDiagram
 ```mermaid
 classDiagram
+    direction LR
+
     class DataFile {
-        +FileName : String
-        +FileType : FileType
-        +Header : FileHeader
-        +AllocationMetadata : AllocationMetadata
-        +ExtentBitmap : ExtentBitmap
-        +Extents : List~Extent~
-        +create(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) DataFile
-        +reconstruct(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) DataFile
-        +addExtent(extent: Extent) void
+        +FileName: string
+        +Header: FileHeader
+        +AllocationMetadata: AllocationMetadata
+        +CurrentSize: long
+        +MaximumSize: long?
+        +AutoExtendEnabled: bool
+
+        +Create(fileName: string, header: FileHeader, metadata: AllocationMetadata, currentSize: long, maximumSize: long?, autoExtendEnabled: bool) DataFile
+        +Reconstruct(fileName: string, header: FileHeader, metadata: AllocationMetadata, currentSize: long, maximumSize: long?, autoExtendEnabled: bool) DataFile
     }
 
     class FileHeader {
-        +FileType : FileType
-        +PageSize : int
-        +FormatVersion : int
-        +MetadataOffset : long
-        +ExtentBitmapOffset : long
-        +create(fileType: FileType, pageSize: int, formatVersion: int) FileHeader
+        +MagicNumber: uint
+        +FormatVersion: int
+        +HeaderSize: int
+        +FileId: FileId
+        +FileType: FileType
+        +PageSize: int
+        +ExtentSize: int
+        +AllocationMetadataOffset: long
+        +ExtentBitmapOffset: long
+
+        +Create(fileId: FileId, fileType: FileType, pageSize: int, extentSize: int, formatVersion: int) FileHeader
     }
 
     class AllocationMetadata {
-        +InitialFileSize : long
-        +PageSize : int
-        +TotalExtents : int
-        +AllocatedPages : int
-        +create(initialFileSize: long, pageSize: int) AllocationMetadata
-        +incrementAllocatedPages(count: int) void
+        +TotalExtentCount: int
+        +FreeExtentCount: int
+        +ExtentBitmap: ExtentBitmap
+
+        +Create(totalExtentCount: int) AllocationMetadata
+        +FindFreeExtent() ExtentId?
+        +ContainsExtent(extentId: ExtentId) bool
+        +GetExtentState(extentId: ExtentId) ExtentState
+        +MarkExtentAllocated(extentId: ExtentId) void
+        +MarkExtentFree(extentId: ExtentId) void
+        +AddExtents(count: int) void
+        +CanTruncateTo(newExtentCount: int) bool
+        +TruncateTo(newExtentCount: int) void
+        +CalculateFileOffset(extentId: ExtentId, header: FileHeader) FileOffset
     }
 
     class ExtentBitmap {
-        +TotalExtents : int
-        +BitmapBytes : byte[]
-        +create(totalExtents: int) ExtentBitmap
-        +findFreeExtentBit() int
-        +setAllocatedBit(index: int, allocated: boolean) void
+        +TotalExtents: int
+        -bitmapBytes: byte[]
+
+        +Create(totalExtents: int) ExtentBitmap
+        +FindFirstFree() int?
+        +IsAllocated(index: int) bool
+        +MarkUsed(index: int) void
+        +MarkFree(index: int) void
+        +AppendFreeExtents(count: int) void
+        +Truncate(newTotalExtents: int) void
     }
 
-    class Extent {
-        +Index : int
-        +Status : AllocationStatus
-        +create(index: int, status: AllocationStatus) Extent
+    class FileId {
+        +Value: int
+    }
+
+    class ExtentId {
+        +Value: long
+    }
+
+    class FileOffset {
+        +Value: long
     }
 
     class FileType {
         <<enumeration>>
-        Table
+        Data
+        Index
         Log
         Temporary
     }
-    class AllocationStatus {
+
+    class ExtentState {
         <<enumeration>>
         Free
         Allocated
-        Reserved
     }
 
-    %% Compositions
-    DataFile "1" *-- "1" FileHeader : composes
-    DataFile "1" *-- "1" AllocationMetadata : composes
-    DataFile "1" *-- "1" ExtentBitmap : composes
-    DataFile "1" *-- "0..*" Extent : composes
+    DataFile "1" *-- "1" FileHeader
+    DataFile "1" *-- "1" AllocationMetadata
+    AllocationMetadata "1" *-- "1" ExtentBitmap
 
-    %% Associations
-    DataFile "0..*" --> "1" FileType : references
-    Extent "0..*" --> "1" AllocationStatus : references
+    FileHeader "1" *-- "1" FileId
+
+    DataFile ..> FileType
+    AllocationMetadata ..> ExtentId
+    AllocationMetadata ..> FileOffset
+    AllocationMetadata ..> ExtentState
 ```
 
 ### Relationship Explanation
 - **Composition (`*--`)**:
-  - **`DataFile` composes `FileHeader`, `AllocationMetadata`, `ExtentBitmap`, and `Extent`**: The physical header, metadata tracker, extent occupancy bitmap, and individual extents are structural parts of a single `DataFile`. They are created together with the `DataFile` and their lifetimes are bound to the `DataFile`. They cannot exist or be shared outside of it.
+  - `DataFile` strictly composes the structural `FileHeader` and `AllocationMetadata`.
+- **Association (`-->`)**:
+  - `AllocationMetadata` holds direct references to enums (`ExtentState`) and structural IDs (`ExtentId`) for allocation lookups.

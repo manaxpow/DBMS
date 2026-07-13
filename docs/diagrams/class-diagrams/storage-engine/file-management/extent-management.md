@@ -6,18 +6,59 @@ Details the service interface and implementation for allocating space in terms o
 ### Mermaid classDiagram
 ```mermaid
 classDiagram
+    direction LR
+
     class IExtentManager {
         <<interface>>
-        +allocateExtent(file: DataFile) Extent
+        +AllocateExtent(entry: OpenFileEntry) AllocatedExtent
+        +FreeExtent(entry: OpenFileEntry, extentId: ExtentId) void
     }
 
     class ExtentManager {
-        +allocateExtent(file: DataFile) Extent
+        -fileLifecycleManager: IFileLifecycleManager
+        -fileWriter: IFileWriter
+
+        +AllocateExtent(entry: OpenFileEntry) AllocatedExtent
+        +FreeExtent(entry: OpenFileEntry, extentId: ExtentId) void
     }
 
-    ExtentManager ..|> IExtentManager
+    class IFileLifecycleManager {
+        <<interface>>
+    }
+
+    class IFileWriter {
+        <<interface>>
+    }
+
+    class AllocatedExtent {
+        +ExtentId: ExtentId
+        +DiskAddress: DiskAddress
+        +Size: int
+    }
+
+    class ExtentId {
+        +Value: long
+    }
+
+    class DiskAddress {
+        +Offset: long
+    }
+
+    IExtentManager <|.. ExtentManager
+
+    ExtentManager ..> IFileLifecycleManager : requests resize
+    ExtentManager ..> IFileWriter : persists metadata
+
+    IExtentManager ..> AllocatedExtent : returns
+
+    AllocatedExtent *-- ExtentId
+    AllocatedExtent *-- DiskAddress
 ```
 
 ### Relationship Explanation
 - **Interface Realization (`..|>`)**:
-  - `ExtentManager` implements `IExtentManager` to isolate space allocation operations from other storage engine components.
+  - `ExtentManager` implements `IExtentManager` to isolate space allocation operations.
+  - `ExtentUsageTracker` implements `IExtentUsageTracker` to track page allocation statuses independently.
+- **Association (`-->`)**:
+  - `ExtentManager` references the `IExtentUsageTracker` interface to determine if extents can be safely released.
+  - `AllocatedExtent` references `ExtentId` and `DiskAddress` value objects.

@@ -1,107 +1,171 @@
 # Service Architecture Diagram - File Management
 
 ### Purpose
-Shows the service classes, their corresponding interfaces, and how the manager references helper services.
 
-### Mermaid classDiagram
+Shows detailed File Management service interfaces, concrete implementations, and dependencies, grouped by responsibility.
+
+### Mermaid Class Diagram
+
 ```mermaid
 classDiagram
-    class IFileLifecycleManager {
-        <<interface>>
-        +createFile(fileName: String, fileType: FileType, pageSize: int, initialFileSize: long) DataFile
-        +openFile(fileName: String, accessMode: FileAccessMode, lockMode: FileLockMode) OpenFileEntry
-        +closeFile(fileName: String) void
-        +deleteFile(fileName: String) void
+    direction LR
+
+    namespace FileLifecycle {
+        class IFileLifecycleManager {
+            <<interface>>
+            +CreateFile(fileName: string, fileType: FileType, pageSize: int, initialFileSize: long) DataFile
+            +OpenFile(fileName: string, accessMode: FileAccessMode, lockMode: FileLockMode) OpenFileEntry
+            +CloseFile(fileName: string) void
+            +DeleteFile(fileName: string) void
+            +ResizeFile(entry: OpenFileEntry, newSize: long) void
+        }
+
+        class FileLifecycleManager {
+            -fileReader: IFileReader
+            -fileWriter: IFileWriter
+            -fileSynchronizer: IFileSynchronizer
+            -openFileManager: IOpenFileManager
+            -fileValidator: IFileValidator
+
+            +CreateFile(fileName: string, fileType: FileType, pageSize: int, initialFileSize: long) DataFile
+            +OpenFile(fileName: string, accessMode: FileAccessMode, lockMode: FileLockMode) OpenFileEntry
+            +CloseFile(fileName: string) void
+            +DeleteFile(fileName: string) void
+            +ResizeFile(entry: OpenFileEntry, newSize: long) void
+
+            -CheckFileExists(fileName: string) bool
+            -CreatePhysicalFile(fileName: string, initialFileSize: long) FileHandle
+            -OpenPhysicalFile(fileName: string, accessMode: FileAccessMode) FileHandle
+            -ClosePhysicalFile(handle: FileHandle) void
+            -DeletePhysicalFile(fileName: string) void
+            -GetPhysicalFileSize(handle: FileHandle) long
+        }
+
+        class IFileValidator {
+            <<interface>>
+            +Validate(header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap, physicalFileSize: long) void
+        }
+
+        class FileValidator {
+            +Validate(header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap, physicalFileSize: long) void
+
+            -ValidateMagicNumber(header: FileHeader) void
+            -ValidateFormatVersion(header: FileHeader) void
+            -ValidateFileBoundary(header: FileHeader, physicalFileSize: long) void
+            -ValidateAllocationMetadata(metadata: AllocationMetadata, bitmap: ExtentBitmap) void
+        }
     }
 
-    class IFileReader {
-        <<interface>>
-        +readHeader(handle: FileHandle) FileHeader
-        +readAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
-        +readExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) ExtentBitmap
+    namespace FileIO {
+        class IFileReader {
+            <<interface>>
+            +ReadAtOffset(entry: OpenFileEntry, offset: long, destination: Memory~byte~) int
+            +ReadHeader(handle: FileHandle) FileHeader
+            +ReadAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
+            +ReadExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) ExtentBitmap
+        }
+
+        class FileReader {
+            +ReadAtOffset(entry: OpenFileEntry, offset: long, destination: Memory~byte~) int
+            +ReadHeader(handle: FileHandle) FileHeader
+            +ReadAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
+            +ReadExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) ExtentBitmap
+
+            -ValidateReadRange(entry: OpenFileEntry, offset: long, length: int) void
+            -ValidateBytesRead(bytesRead: int, expectedBytes: int) void
+        }
+
+        class IFileWriter {
+            <<interface>>
+            +WriteAtOffset(entry: OpenFileEntry, offset: long, source: ReadOnlyMemory~byte~) void
+            +WriteHeader(handle: FileHandle, header: FileHeader) void
+            +WriteAllocationMetadata(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
+            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap) void
+        }
+
+        class FileWriter {
+            +WriteAtOffset(entry: OpenFileEntry, offset: long, source: ReadOnlyMemory~byte~) void
+            +WriteHeader(handle: FileHandle, header: FileHeader) void
+            +WriteAllocationMetadata(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
+            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap) void
+
+            -ValidateAccessMode(accessMode: FileAccessMode) void
+            -ValidateWriteRange(entry: OpenFileEntry, offset: long, length: int) void
+            -ValidateBytesWritten(bytesWritten: int, expectedBytes: int) void
+        }
+
+        class IFileSynchronizer {
+            <<interface>>
+            +Sync(entry: OpenFileEntry) void
+        }
+
+        class FileSynchronizer {
+            +Sync(entry: OpenFileEntry) void
+        }
     }
 
-    class IFileWriter {
-        <<interface>>
-        +writeHeader(handle: FileHandle, header: FileHeader) void
-        +writeAllocationMetadata(handle: FileHandle, metadata: AllocationMetadata) void
-        +writeExtentBitmap(handle: FileHandle, bitmap: ExtentBitmap) void
+    namespace RuntimeFileManagement {
+        class IOpenFileManager {
+            <<interface>>
+            +GetOpenFile(fileName: string) OpenFileEntry?
+            +RegisterOpenFile(fileName: string, entry: OpenFileEntry) void
+            +UnregisterOpenFile(fileName: string) void
+            +TryBeginDelete(fileName: string) bool
+            +CompleteDelete(fileName: string) void
+            +CancelDelete(fileName: string) void
+        }
+
+        class OpenFileManager {
+            -openFiles: ConcurrentDictionary~string, OpenFileEntry~
+
+            +GetOpenFile(fileName: string) OpenFileEntry?
+            +RegisterOpenFile(fileName: string, entry: OpenFileEntry) void
+            +UnregisterOpenFile(fileName: string) void
+            +TryBeginDelete(fileName: string) bool
+            +CompleteDelete(fileName: string) void
+            +CancelDelete(fileName: string) void
+        }
     }
 
-    class IFileSynchronizer {
-        <<interface>>
-        +flush(handle: FileHandle) void
+    namespace ExtentManagement {
+        class IExtentManager {
+            <<interface>>
+            +AllocateExtent(entry: OpenFileEntry) AllocatedExtent
+            +FreeExtent(entry: OpenFileEntry, extentId: ExtentId) void
+        }
+
+        class ExtentManager {
+            -fileLifecycleManager: IFileLifecycleManager
+            -fileWriter: IFileWriter
+
+            +AllocateExtent(entry: OpenFileEntry) AllocatedExtent
+            +FreeExtent(entry: OpenFileEntry, extentId: ExtentId) void
+        }
+
+        class AllocatedExtent {
+            +ExtentId: ExtentId
+            +DiskAddress: DiskAddress
+            +Size: int
+        }
     }
 
-    class IOpenFileManager {
-        <<interface>>
-        +getOpenFile(fileName: String) OpenFileEntry?
-        +registerOpenFile(fileName: String, entry: OpenFileEntry) void
-        +unregisterOpenFile(fileName: String) void
-        +tryBeginDelete(fileName: String) boolean
-        +completeDelete(fileName: String) void
-        +cancelDelete(fileName: String) void
-    }
+    IFileLifecycleManager <|.. FileLifecycleManager
+    IFileValidator <|.. FileValidator
 
-    class FileLifecycleManager {
-        -fileReader : IFileReader
-        -fileWriter : IFileWriter
-        -fileSynchronizer : IFileSynchronizer
-        -openFileManager : IOpenFileManager
+    IFileReader <|.. FileReader
+    IFileWriter <|.. FileWriter
+    IFileSynchronizer <|.. FileSynchronizer
 
-        +createFile(fileName: String, fileType: FileType, pageSize: int, initialFileSize: long) DataFile
-        +openFile(fileName: String, accessMode: FileAccessMode, lockMode: FileLockMode) OpenFileEntry
-        +closeFile(fileName: String) void
-        +deleteFile(fileName: String) void
+    IOpenFileManager <|.. OpenFileManager
+    IExtentManager <|.. ExtentManager
 
-        -checkFileExists(fileName: String) boolean
-        -createPhysicalFile(fileName: String, initialFileSize: long) FileHandle
-        -openPhysicalFile(fileName: String, accessMode: FileAccessMode) FileHandle
-        -closePhysicalFile(handle: FileHandle) void
-        -deletePhysicalFile(fileName: String) void
-        -validateHeader(header: FileHeader) void
-    }
+    FileLifecycleManager ..> IFileReader
+    FileLifecycleManager ..> IFileWriter
+    FileLifecycleManager ..> IFileSynchronizer
+    FileLifecycleManager ..> IOpenFileManager
+    FileLifecycleManager ..> IFileValidator
 
-    class FileReader {
-        +readHeader(handle: FileHandle) FileHeader
-        +readAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
-        +readExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) ExtentBitmap
-    }
+    ExtentManager ..> IFileLifecycleManager
+    ExtentManager ..> IFileWriter
 
-    class FileWriter {
-        +writeHeader(handle: FileHandle, header: FileHeader) void
-        +writeAllocationMetadata(handle: FileHandle, metadata: AllocationMetadata) void
-        +writeExtentBitmap(handle: FileHandle, bitmap: ExtentBitmap) void
-    }
-
-    class FileSynchronizer {
-        +flush(handle: FileHandle) void
-    }
-
-    class OpenFileManager {
-        -openFiles : Map~String, OpenFileEntry~
-        +getOpenFile(fileName: String) OpenFileEntry?
-        +registerOpenFile(fileName: String, entry: OpenFileEntry) void
-        +unregisterOpenFile(fileName: String) void
-        +tryBeginDelete(fileName: String) boolean
-        +completeDelete(fileName: String) void
-        +cancelDelete(fileName: String) void
-    }
-
-    FileLifecycleManager ..|> IFileLifecycleManager
-    FileReader ..|> IFileReader
-    FileWriter ..|> IFileWriter
-    FileSynchronizer ..|> IFileSynchronizer
-    OpenFileManager ..|> IOpenFileManager
-
-    FileLifecycleManager "1" --> "1" IFileReader : uses
-    FileLifecycleManager "1" --> "1" IFileWriter : uses
-    FileLifecycleManager "1" --> "1" IFileSynchronizer : uses
-    FileLifecycleManager "1" --> "1" IOpenFileManager : uses
-```
-
-### Relationship Explanation
-- **Interface Realization (`..|>`)**:
-  - Used for all service components (`FileLifecycleManager`, `FileReader`, `FileWriter`, `FileSynchronizer`, `OpenFileManager`) to isolate implementation details from other database subsystems.
-- **Association (`-->`)**:
-  - **`FileLifecycleManager` uses helper services**: It holds references to `IFileReader`, `IFileWriter`, `IFileSynchronizer`, and `IOpenFileManager` to delegate specific sub-tasks. These helper services are typically injected via dependency injection.
+    IExtentManager ..> AllocatedExtent : returns

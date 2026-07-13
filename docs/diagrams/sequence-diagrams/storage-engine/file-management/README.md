@@ -16,5 +16,11 @@ This folder contains the Sequence Diagrams for the File Management component und
    - Writes block-level data offsets.
 7. [Sync File](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/file-io/sync-file.md)
    - Flushes and forces write buffers to disk to guarantee ACID durability.
-8. [Allocate Space](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/allocate-space.md)
-   - Dynamic extent allocation.
+8. [Resize File](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/file-lifecycle/resize-file.md)
+   - Extends or truncates the physical database files safely.
+9. [Validate File](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/file-lifecycle/validate-file.md)
+   - Verifies format, structure, and integrity before registration.
+10. [Allocate Extent](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/extent-management/allocate-extent.md)
+    - Allocates free space inside the database data files.
+11. [Free Extent](file:///c:/Users/ADMIN/Desktop/DBMS/docs/diagrams/sequence-diagrams/storage-engine/file-management/extent-management/free-extent.md)
+    - Releases allocated extents back to free space.

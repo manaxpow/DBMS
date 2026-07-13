@@ -6,17 +6,61 @@ Illustrates the static structural composition of a physical data file representa
 ### Mermaid classDiagram
 ```mermaid
 classDiagram
-    class DataFile
-    class FileHeader
-    class AllocationMetadata
-    class ExtentBitmap
-    class Extent
+    class DataFile {
+        +FileName : String
+        +FileType : FileType
+        +Header : FileHeader
+        +AllocationMetadata : AllocationMetadata
+        +ExtentBitmap : ExtentBitmap
+        +Extents : List~Extent~
+        +create(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) DataFile
+        +reconstruct(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) DataFile
+        +addExtent(extent: Extent) void
+    }
+
+    class FileHeader {
+        +FileType : FileType
+        +PageSize : int
+        +FormatVersion : int
+        +MetadataOffset : long
+        +ExtentBitmapOffset : long
+        +create(fileType: FileType, pageSize: int, formatVersion: int) FileHeader
+    }
+
+    class AllocationMetadata {
+        +InitialFileSize : long
+        +PageSize : int
+        +TotalExtents : int
+        +AllocatedPages : int
+        +create(initialFileSize: long, pageSize: int) AllocationMetadata
+        +incrementAllocatedPages(count: int) void
+    }
+
+    class ExtentBitmap {
+        +TotalExtents : int
+        +BitmapBytes : byte[]
+        +create(totalExtents: int) ExtentBitmap
+        +findFreeExtentBit() int
+        +setAllocatedBit(index: int, allocated: boolean) void
+    }
+
+    class Extent {
+        +Index : int
+        +Status : AllocationStatus
+        +create(index: int, status: AllocationStatus) Extent
+    }
 
     class FileType {
         <<enumeration>>
+        Table
+        Log
+        Temporary
     }
     class AllocationStatus {
         <<enumeration>>
+        Free
+        Allocated
+        Reserved
     }
 
     %% Compositions

@@ -6,16 +6,44 @@ Details how active, open files and their OS-level handles are managed at runtime
 ### Mermaid classDiagram
 ```mermaid
 classDiagram
-    class OpenFileManager
-    class OpenFileEntry
-    class FileHandle
+    class OpenFileManager {
+        -openFiles : Map~String, OpenFileEntry~
+        +getOpenFile(fileName: String) OpenFileEntry
+        +registerOpenFile(fileName: String, entry: OpenFileEntry) void
+        +unregisterOpenFile(fileName: String) void
+        +tryBeginDelete(fileName: String) boolean
+        +completeDelete(fileName: String) void
+        +cancelDelete(fileName: String) void
+    }
+
+    class OpenFileEntry {
+        +Handle : FileHandle
+        +DataFile : DataFile
+        +AccessMode : FileAccessMode
+        +LockMode : FileLockMode
+        +ReferenceCount : int
+        +create(handle: FileHandle, file: DataFile, accessMode: FileAccessMode, lockMode: FileLockMode) OpenFileEntry
+        +incrementRefCount() int
+        +decrementRefCount() int
+    }
+
+    class FileHandle {
+        -descriptor : int
+    }
+
     class DataFile
 
-    class FileState {
+    class FileAccessMode {
         <<enumeration>>
+        ReadOnly
+        ReadWrite
     }
+
     class FileLockMode {
         <<enumeration>>
+        Shared
+        Exclusive
+        None
     }
 
     %% Aggregations
@@ -26,7 +54,7 @@ classDiagram
 
     %% Associations
     OpenFileEntry "0..*" --> "1" DataFile : references
-    OpenFileEntry "0..*" --> "1" FileState : references
+    OpenFileEntry "0..*" --> "1" FileAccessMode : references
     OpenFileEntry "0..*" --> "1" FileLockMode : references
 ```
 

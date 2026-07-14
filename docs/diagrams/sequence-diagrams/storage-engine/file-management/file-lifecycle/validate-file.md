@@ -7,8 +7,8 @@
 
 ### Preconditions
 
-- The physical file has already been opened.
-- A valid `FileHandle` is available.
+- The physical file has already been opened and its header, allocation metadata, and extent bitmap have been read into memory.
+- The `physicalFileSize` has been determined.
 - The file has not yet been registered in `OpenFileManager`.
 
 ---
@@ -21,47 +21,21 @@ sequenceDiagram
 
     actor FLM as FileLifecycleManager
     participant FV as FileValidator
-    participant FR as FileReader
-    participant FH as FileHandle
-    participant H as FileHeader
-    participant AM as AllocationMetadata
 
-    FLM->>FV: Validate(fileHandle)
+    FLM->>FV: Validate(header, metadata, bitmap, physicalFileSize)
     activate FV
 
-    FV->>FR: ReadHeader(fileHandle)
-    activate FR
-    FR->>FH: ReadAtOffset(headerOffset, headerSize)
-    activate FH
-    FH-->>FR: headerBytes
-    deactivate FH
-    FR-->>FV: fileHeader
-    deactivate FR
+    FV->>FV: ValidateMagicNumber(header)
+    FV->>FV: ValidateFormatVersion(header)
+    FV->>FV: ValidateFileBoundary(header, physicalFileSize)
+    
+    note right of FV: Validates physical size can contain the header and metadata.
 
-    FV->>H: ValidateMagicNumber()
-    H-->>FV: Valid
+    FV->>FV: ValidateAllocationMetadata(metadata, bitmap)
 
-    FV->>H: ValidateFormatVersion()
-    H-->>FV: Valid
+    note right of FV: Validates extent count, bitmap size,<br/>offset ranges and capacity bounds.
 
-    FV->>H: ValidatePageSize()
-    H-->>FV: Valid
-
-    FV->>H: ValidateFileType()
-    H-->>FV: Valid
-
-    FV->>FR: ReadAllocationMetadata(fileHandle, fileHeader)
-    activate FR
-    FR-->>FV: allocationMetadata
-    deactivate FR
-
-    FV->>AM: Validate(fileHeader)
-    activate AM
-    note right of AM: Validates extent count, bitmap size,<br/>offset ranges and file boundaries.
-    AM-->>FV: Valid
-    deactivate AM
-
-    FV-->>FLM: FileValidationResult.Valid
+    FV-->>FLM: void (Success)
     deactivate FV
 ```
 
@@ -75,21 +49,11 @@ sequenceDiagram
 
     actor FLM as FileLifecycleManager
     participant FV as FileValidator
-    participant FR as FileReader
-    participant H as FileHeader
 
-    FLM->>FV: Validate(fileHandle)
+    FLM->>FV: Validate(header, metadata, bitmap, physicalFileSize)
     activate FV
 
-    FV->>FR: ReadHeader(fileHandle)
-    activate FR
-    FR-->>FV: fileHeader
-    deactivate FR
-
-    FV->>H: ValidateMagicNumber()
-    activate H
-    H-->>FV: Invalid
-    deactivate H
+    FV->>FV: ValidateMagicNumber(header)
 
     FV-->>FLM: throw InvalidFileFormatException
     deactivate FV
@@ -105,24 +69,12 @@ sequenceDiagram
 
     actor FLM as FileLifecycleManager
     participant FV as FileValidator
-    participant FR as FileReader
-    participant H as FileHeader
 
-    FLM->>FV: Validate(fileHandle)
+    FLM->>FV: Validate(header, metadata, bitmap, physicalFileSize)
     activate FV
 
-    FV->>FR: ReadHeader(fileHandle)
-    activate FR
-    FR-->>FV: fileHeader
-    deactivate FR
-
-    FV->>H: ValidateMagicNumber()
-    H-->>FV: Valid
-
-    FV->>H: ValidateFormatVersion()
-    activate H
-    H-->>FV: Unsupported
-    deactivate H
+    FV->>FV: ValidateMagicNumber(header)
+    FV->>FV: ValidateFormatVersion(header)
 
     FV-->>FLM: throw UnsupportedFileVersionException
     deactivate FV
@@ -138,24 +90,17 @@ sequenceDiagram
 
     actor FLM as FileLifecycleManager
     participant FV as FileValidator
-    participant FR as FileReader
-    participant AM as AllocationMetadata
 
-    FLM->>FV: Validate(fileHandle)
+    FLM->>FV: Validate(header, metadata, bitmap, physicalFileSize)
     activate FV
 
-    FV->>FR: ReadHeader(fileHandle)
-    FR-->>FV: fileHeader
-
-    FV->>FR: ReadAllocationMetadata(fileHandle, fileHeader)
-    activate FR
-    FR-->>FV: allocationMetadata
-    deactivate FR
-
-    FV->>AM: Validate(fileHeader)
-    activate AM
-    AM-->>FV: Invalid metadata
-    deactivate AM
+    FV->>FV: ValidateMagicNumber(header)
+    FV->>FV: ValidateFormatVersion(header)
+    FV->>FV: ValidateFileBoundary(header, physicalFileSize)
+    
+    FV->>FV: ValidateAllocationMetadata(metadata, bitmap)
+    
+    note right of FV: E.g., free extent count exceeds total extent count
 
     FV-->>FLM: throw CorruptedFileMetadataException
     deactivate FV
@@ -209,82 +154,40 @@ Metadata offsets do not exceed the physical file boundary.
 
 ```text
 FileValidator.Validate(
-    handle: FileHandle
-) : FileValidationResult
+    header: FileHeader,
+    metadata: AllocationMetadata,
+    bitmap: ExtentBitmap,
+    physicalFileSize: long
+) : void
 
-FileHeader.ValidateMagicNumber() : bool
-
-FileHeader.ValidateFormatVersion() : bool
-
-FileHeader.ValidatePageSize() : bool
-
-FileHeader.ValidateFileType() : bool
-
-AllocationMetadata.Validate(
+FileValidator.ValidateMagicNumber(
     header: FileHeader
-) : bool
+) : void
 
-FileReader.ReadHeader(
-    handle: FileHandle
-) : FileHeader
-
-FileReader.ReadAllocationMetadata(
-    handle: FileHandle,
+FileValidator.ValidateFormatVersion(
     header: FileHeader
-) : AllocationMetadata
-```
+) : void
 
-### Property Candidates
+FileValidator.ValidateFileBoundary(
+    header: FileHeader,
+    physicalFileSize: long
+) : void
 
-```text
-FileHeader.MagicNumber : uint
-
-FileHeader.FormatVersion : int
-
-FileHeader.FileType : FileType
-
-FileHeader.FileId : FileId
-
-FileHeader.PageSize : int
-
-FileHeader.HeaderSize : int
-
-FileHeader.AllocationMetadataOffset : long
-
-AllocationMetadata.ExtentSize : int
-
-AllocationMetadata.TotalExtentCount : int
-
-AllocationMetadata.FreeExtentCount : int
+FileValidator.ValidateAllocationMetadata(
+    metadata: AllocationMetadata,
+    bitmap: ExtentBitmap
+) : void
 ```
 
 ### Result Candidates
 
 ```text
-FileValidationResult
-
-FileValidationStatus
-```
-
-Possible validation statuses:
-
-```text
-Valid
-
-InvalidHeader
-
-UnsupportedVersion
-
-InvalidMetadata
-
-InvalidFileBoundary
+void (Success)
 ```
 
 ### Exception Candidates
 
 ```text
-FileValidationException
-
 InvalidFileFormatException
 
 UnsupportedFileVersionException
@@ -296,7 +199,7 @@ CorruptedFileMetadataException
 
 No runtime state change is required.
 
-Validation only reads and verifies existing file structures.
+Validation only reads and verifies existing in-memory data structures.
 
 ---
 
@@ -306,23 +209,9 @@ Validation only reads and verifies existing file structures.
 
 - Coordinates all file validation rules.
 - Validates relationships between header, metadata and physical file size.
-- Converts validation failures into domain-specific exceptions.
-
-### `FileHeader`
-
-- Validates its own primitive values.
-- Does not read data from disk.
-- Does not validate unrelated file regions.
-
-### `AllocationMetadata`
-
 - Validates extent counters and bitmap consistency.
-- Validates allocation boundaries.
-
-### `FileReader`
-
-- Reads and deserializes file structures.
-- Does not determine whether the structures are logically valid.
+- Converts validation failures into domain-specific exceptions.
+- Does not interact with disk or read structures directly.
 
 ---
 
@@ -332,8 +221,8 @@ Validation only reads and verifies existing file structures.
 
 ```text
 Open physical file
-    → Read file structures
-    → Validate file
+    → Read file structures (FileReader)
+    → Validate file (FileValidator)
     → Create DataFile
     → Create OpenFileEntry
     → Register OpenFileEntry

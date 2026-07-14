@@ -21,6 +21,7 @@ classDiagram
         }
 
         class FileLifecycleManager {
+            -physicalFileSystem: IPhysicalFileSystem
             -fileReader: IFileReader
             -fileWriter: IFileWriter
             -fileSynchronizer: IFileSynchronizer
@@ -32,13 +33,6 @@ classDiagram
             +CloseFile(fileName: string) void
             +DeleteFile(fileName: string) void
             +ResizeFile(entry: OpenFileEntry, newSize: long) void
-
-            -CheckFileExists(fileName: string) bool
-            -CreatePhysicalFile(fileName: string, initialFileSize: long) FileHandle
-            -OpenPhysicalFile(fileName: string, accessMode: FileAccessMode) FileHandle
-            -ClosePhysicalFile(handle: FileHandle) void
-            -DeletePhysicalFile(fileName: string) void
-            -GetPhysicalFileSize(handle: FileHandle) long
         }
 
         class IFileValidator {
@@ -127,6 +121,21 @@ classDiagram
         }
     }
 
+    namespace PhysicalStorage {
+        class IPhysicalFileSystem {
+            <<interface>>
+            +Exists(fileName: string) bool
+            +Create(fileName: string, initialFileSize: long) FileHandle
+            +Open(fileName: string, accessMode: FileAccessMode) FileHandle
+            +Close(handle: FileHandle) void
+            +Delete(fileName: string) void
+            +Resize(handle: FileHandle, newSize: long) void
+            +GetSize(handle: FileHandle) long
+        }
+
+        class PhysicalFileSystem
+    }
+
     namespace ExtentManagement {
         class IExtentManager {
             <<interface>>
@@ -152,6 +161,8 @@ classDiagram
     IFileLifecycleManager <|.. FileLifecycleManager
     IFileValidator <|.. FileValidator
 
+    IPhysicalFileSystem <|.. PhysicalFileSystem
+
     IFileReader <|.. FileReader
     IFileWriter <|.. FileWriter
     IFileSynchronizer <|.. FileSynchronizer
@@ -159,6 +170,7 @@ classDiagram
     IOpenFileManager <|.. OpenFileManager
     IExtentManager <|.. ExtentManager
 
+    FileLifecycleManager ..> IPhysicalFileSystem
     FileLifecycleManager ..> IFileReader
     FileLifecycleManager ..> IFileWriter
     FileLifecycleManager ..> IFileSynchronizer

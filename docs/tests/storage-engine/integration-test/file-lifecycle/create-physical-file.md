@@ -27,7 +27,7 @@ Verifies that calling `CreateFile` physically creates a database file on disk wi
 
 ### 3. Structural Round-Trip Verification
 1. Reopen the file in raw mode to read the bytes:
-   * Open physical handle using `OpenPhysicalFile("test_physical.db", ReadOnly)`.
+   * Open physical handle using `PhysicalFileSystem.Open("test_physical.db", ReadOnly)`.
    * Read the header block and assert:
      * `MagicNumber` matches the configured DBMS signature.
      * `FormatVersion` matches the active layout version.

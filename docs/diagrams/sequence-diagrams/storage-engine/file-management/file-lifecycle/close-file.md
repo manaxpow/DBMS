@@ -43,6 +43,7 @@ sequenceDiagram
     participant OM as OpenFileManager
     participant OE as OpenFileEntry
     participant FS as FileSynchronizer
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: closeFile(fileName)
     activate LM
@@ -57,18 +58,19 @@ sequenceDiagram
     OE-->>LM: 0
     deactivate OE
     
-    LM->>OE: Handle
-    activate OE
-    OE-->>LM: fileHandle
-    deactivate OE
-    
-    LM->>FS: flush(fileHandle)
+    LM->>FS: Sync(openFileEntry)
     activate FS
     note right of FS: Flushes pending stream buffers before releasing the file handle.
     FS-->>LM: success
     deactivate FS
     
-    LM->>LM: closePhysicalFile(fileHandle)
+    LM->>OE: Handle
+    activate OE
+    OE-->>LM: fileHandle
+    deactivate OE
+
+    LM->>PFS: Close(fileHandle)
+    PFS-->>LM: success
     
     LM->>OM: unregisterOpenFile(fileName)
     activate OM
@@ -103,11 +105,58 @@ sequenceDiagram
 
 ---
 
+## 4. Failure Path: Final Close Failed (Sync or PFS Close)
+```mermaid
+sequenceDiagram
+    autonumber
+    actor DB as DatabaseManager
+    participant LM as FileLifecycleManager
+    participant OM as OpenFileManager
+    participant OE as OpenFileEntry
+    participant FS as FileSynchronizer
+    participant PFS as IPhysicalFileSystem
+
+    DB->>LM: closeFile(fileName)
+    activate LM
+    
+    LM->>OM: getOpenFile(fileName)
+    activate OM
+    OM-->>LM: openFileEntry
+    deactivate OM
+    
+    LM->>OE: decrementRefCount()
+    activate OE
+    OE-->>LM: 0
+    deactivate OE
+    
+    alt Sync Failure
+        LM->>FS: Sync(openFileEntry)
+        activate FS
+        FS-->>LM: exception
+        deactivate FS
+        LM-->>DB: propagate exception (File remains open and registered)
+    else Physical Close Failure
+        LM->>FS: Sync(openFileEntry)
+        FS-->>LM: success
+        LM->>OE: Handle
+        OE-->>LM: fileHandle
+        LM->>PFS: Close(fileHandle)
+        PFS-->>LM: exception
+        LM-->>DB: propagate exception (File remains registered, Unregister is skipped)
+    end
+    
+    deactivate LM
+```
+> [!NOTE] 
+> In either failure path, `UnregisterOpenFile` is NOT called. The failure is propagated immediately, preserving the original state or leaving the entry registered.
+
+---
+
 ## Concurrency & Implementation Requirements
 1. **Safe Close Lifecycle (Anti-Race Condition)**: To prevent thread races where Thread A is closing the file handle (reference count has dropped to `0`) and Thread B concurrently requests the same file via `openFile()`, the final-close sequence (decrementing to `0`, flushing, closing, and unregistering) must be executed atomically under a lock. Requests must not be allowed to reuse or acquire an entry that has started its closing sequence.
 2. **Internal Entry States**: If necessary, `OpenFileManager` can track internal state transitions (e.g., `Open` -> `Closing` -> `Removed`) to coordinate concurrent requests safely without exposing these transient states to the public domain model.
 3. **Flushing Scopes**:
-   - `FileSynchronizer.flush(fileHandle)` only flushes pending stream/file handle buffers.
+   - `FileSynchronizer.Sync(openFileEntry)` only flushes pending stream/file handle buffers.
    - It **does not** flush dirty database pages sitting in a DBMS buffer pool. Writing dirty pages from the buffer pool to disk is the distinct responsibility of a `BufferManager` (e.g. `BufferManager.flushFile(fileId)`) and should occur prior to closing the file.
 
 ---
@@ -116,10 +165,10 @@ sequenceDiagram
 
 ### Method Candidates
 - `FileLifecycleManager.closeFile(fileName: String) : void`
-- `FileLifecycleManager.closePhysicalFile(handle: FileHandle) : void`
+- `IPhysicalFileSystem.Close(handle: FileHandle) : void`
 - `OpenFileManager.getOpenFile(fileName: String) : OpenFileEntry?`
 - `OpenFileManager.unregisterOpenFile(fileName: String) : void`
-- `FileSynchronizer.flush(handle: FileHandle) : void`
+- `FileSynchronizer.Sync(entry: OpenFileEntry) : void`
 - `OpenFileEntry.Handle : FileHandle`
 - `OpenFileEntry.decrementRefCount() : int`
 

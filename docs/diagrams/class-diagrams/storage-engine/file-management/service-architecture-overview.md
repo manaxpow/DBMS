@@ -62,6 +62,14 @@ classDiagram
         class AllocatedExtent
     }
 
+    namespace PhysicalStorage {
+        class IPhysicalFileSystem {
+            <<interface>>
+        }
+
+        class PhysicalFileSystem
+    }
+
     IFileLifecycleManager <|.. FileLifecycleManager
     IFileValidator <|.. FileValidator
 
@@ -73,6 +81,9 @@ classDiagram
 
     IExtentManager <|.. ExtentManager
 
+    IPhysicalFileSystem <|.. PhysicalFileSystem
+
+    FileLifecycleManager ..> IPhysicalFileSystem
     FileLifecycleManager ..> IFileReader
     FileLifecycleManager ..> IFileWriter
     FileLifecycleManager ..> IFileSynchronizer

@@ -13,13 +13,14 @@ sequenceDiagram
 
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
+    participant PFS as IPhysicalFileSystem
     participant FW as FileWriter
 
     DB->>LM: createFile(fileName, fileType, pageSize, initialFileSize)
     activate LM
 
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: false
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: false
 
     create participant FH as FileHeader
     LM->>FH: create(fileType, pageSize, formatVersion)
@@ -45,8 +46,8 @@ sequenceDiagram
     DF-->>LM: dataFile
     deactivate DF
 
-    LM->>LM: createPhysicalFile(fileName, initialFileSize)
-    LM-->>LM: fileHandle
+    LM->>PFS: Create(fileName, initialFileSize)
+    PFS-->>LM: fileHandle
 
     LM->>FW: writeHeader(fileHandle, dataFile.header)
     activate FW
@@ -63,7 +64,7 @@ sequenceDiagram
     FW-->>LM: success
     deactivate FW
 
-    LM->>LM: closePhysicalFile(fileHandle)
+    LM->>PFS: Close(fileHandle)
     LM-->>DB: dataFile
     deactivate LM
 ```
@@ -77,12 +78,13 @@ sequenceDiagram
 
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: createFile(fileName, fileType, pageSize, initialFileSize)
     activate LM
 
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
 
     LM-->>DB: FileAlreadyExistsError
     deactivate LM
@@ -97,13 +99,14 @@ sequenceDiagram
 
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
+    participant PFS as IPhysicalFileSystem
     participant FW as FileWriter
 
     DB->>LM: createFile(fileName, fileType, pageSize, initialFileSize)
     activate LM
 
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: false
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: false
 
     create participant FH as FileHeader
     LM->>FH: create(fileType, pageSize, formatVersion)
@@ -129,29 +132,38 @@ sequenceDiagram
     DF-->>LM: dataFile
     deactivate DF
 
-    LM->>LM: createPhysicalFile(fileName, initialFileSize)
-    LM-->>LM: fileHandle
+    alt Physical creation failed
+        LM->>PFS: Create(fileName, initialFileSize)
+        PFS-->>LM: exception
+        LM-->>DB: propagate exception
+    else Initialization failed after creation
+        LM->>PFS: Create(fileName, initialFileSize)
+        PFS-->>LM: fileHandle
 
-    LM->>FW: writeHeader(fileHandle, dataFile.header)
-    activate FW
-    FW-->>LM: failure
-    deactivate FW
+        LM->>FW: writeHeader(fileHandle, dataFile.header)
+        activate FW
+        FW-->>LM: failure
+        deactivate FW
 
-    LM->>LM: closePhysicalFile(fileHandle)
-    LM->>LM: deletePhysicalFile(fileName)
-    
-    LM-->>DB: FileCreationError
+        LM->>PFS: Close(fileHandle)
+        LM->>PFS: Delete(fileName)
+        
+        LM-->>DB: propagate original initialization exception
+    end
+
     deactivate LM
 ```
+> [!NOTE] 
+> If `PFS: Close` or `PFS: Delete` fail during rollback, the original initialization exception is preserved as the primary failure. The cleanup failure is recorded/attached according to project exception policy. Note that an `OpenFileEntry` is NEVER registered during any failure path.
 
 ## Discovered Candidates
 
 ### Method Candidates
 - `FileLifecycleManager.createFile(fileName: String, fileType: FileType, pageSize: int, initialFileSize: long) : DataFile`
-- `FileLifecycleManager.checkFileExists(fileName: String) : boolean`
-- `FileLifecycleManager.createPhysicalFile(fileName: String, initialFileSize: long) : FileHandle`
-- `FileLifecycleManager.closePhysicalFile(handle: FileHandle) : void`
-- `FileLifecycleManager.deletePhysicalFile(fileName: String) : void`
+- `IPhysicalFileSystem.Exists(fileName: String) : boolean`
+- `IPhysicalFileSystem.Create(fileName: String, initialFileSize: long) : FileHandle`
+- `IPhysicalFileSystem.Close(handle: FileHandle) : void`
+- `IPhysicalFileSystem.Delete(fileName: String) : void`
 - `FileHeader.create(fileType: FileType, pageSize: int, formatVersion: int) : FileHeader`
 - `AllocationMetadata.create(initialFileSize: long, pageSize: int) : AllocationMetadata`
 - `ExtentBitmap.create(totalExtents: int) : ExtentBitmap`
@@ -167,4 +179,3 @@ sequenceDiagram
 - `initialFileSize` (long)
 - `formatVersion` (int)
 - `totalExtents` (int)
-

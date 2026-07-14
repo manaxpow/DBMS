@@ -13,7 +13,9 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
     participant FR as FileReader
+    participant FV as FileValidator
 
     DB->>LM: openFile(fileName, accessMode, lockMode)
     activate LM
@@ -23,18 +25,16 @@ sequenceDiagram
     OM-->>LM: null
     deactivate OM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
     
-    LM->>LM: openPhysicalFile(fileName, accessMode)
-    LM-->>LM: fileHandle
+    LM->>PFS: Open(fileName, accessMode)
+    PFS-->>LM: fileHandle
     
     LM->>FR: readHeader(fileHandle)
     activate FR
     FR-->>LM: fileHeader
     deactivate FR
-    
-    LM->>LM: validateHeader(fileHeader)
     
     LM->>FR: readAllocationMetadata(fileHandle, fileHeader)
     activate FR
@@ -46,6 +46,14 @@ sequenceDiagram
     FR-->>LM: extentBitmap
     deactivate FR
     
+    LM->>PFS: GetSize(fileHandle)
+    PFS-->>LM: physicalFileSize
+
+    LM->>FV: Validate(fileHeader, allocationMetadata, extentBitmap, physicalFileSize)
+    activate FV
+    FV-->>LM: success
+    deactivate FV
+
     create participant DF as DataFile
     LM->>DF: reconstruct(fileName, fileHeader.fileType, fileHeader, allocationMetadata, extentBitmap)
     activate DF
@@ -116,6 +124,7 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: openFile(fileName, accessMode, lockMode)
     activate LM
@@ -125,8 +134,8 @@ sequenceDiagram
     OM-->>LM: null
     deactivate OM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: false
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: false
     
     LM-->>DB: throw FileNotFoundException
     deactivate LM
@@ -141,7 +150,9 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
     participant FR as FileReader
+    participant FV as FileValidator
 
     DB->>LM: openFile(fileName, accessMode, lockMode)
     activate LM
@@ -151,25 +162,42 @@ sequenceDiagram
     OM-->>LM: null
     deactivate OM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
     
-    LM->>LM: openPhysicalFile(fileName, accessMode)
-    LM-->>LM: fileHandle
+    LM->>PFS: Open(fileName, accessMode)
+    PFS-->>LM: fileHandle
     
     LM->>FR: readHeader(fileHandle)
     activate FR
     FR-->>LM: fileHeader
     deactivate FR
+
+    LM->>FR: readAllocationMetadata(fileHandle, fileHeader)
+    activate FR
+    FR-->>LM: allocationMetadata
+    deactivate FR
     
-    LM->>LM: validateHeader(fileHeader)
-    LM-->>LM: InvalidMagicNumberException
+    LM->>FR: readExtentBitmap(fileHandle, fileHeader, allocationMetadata)
+    activate FR
+    FR-->>LM: extentBitmap
+    deactivate FR
+
+    LM->>PFS: GetSize(fileHandle)
+    PFS-->>LM: physicalFileSize
     
-    LM->>LM: closePhysicalFile(fileHandle)
+    LM->>FV: Validate(fileHeader, allocationMetadata, extentBitmap, physicalFileSize)
+    activate FV
+    FV-->>LM: throw CorruptedFileException
+    deactivate FV
+    
+    LM->>PFS: Close(fileHandle)
     
     LM-->>DB: throw CorruptedFileException
     deactivate LM
 ```
+> [!NOTE] 
+> If any step fails after `PFS.Open` succeeds (e.g., `ReadHeader`, `ReadAllocationMetadata`, `GetSize`, `Validate`), `PFS.Close(handle)` is immediately called, the entry is NOT registered, and the exception is propagated.
 
 ---
 
@@ -220,10 +248,10 @@ sequenceDiagram
 
 ### Method Candidates
 - `FileLifecycleManager.openFile(fileName: String, accessMode: FileAccessMode, lockMode: FileLockMode) : OpenFileEntry`
-- `FileLifecycleManager.checkFileExists(fileName: String) : boolean`
-- `FileLifecycleManager.openPhysicalFile(fileName: String, accessMode: FileAccessMode) : FileHandle`
-- `FileLifecycleManager.closePhysicalFile(handle: FileHandle) : void`
-- `FileLifecycleManager.validateHeader(header: FileHeader) : void`
+- `IPhysicalFileSystem.Exists(fileName: String) : boolean`
+- `IPhysicalFileSystem.Open(fileName: String, accessMode: FileAccessMode) : FileHandle`
+- `IPhysicalFileSystem.Close(handle: FileHandle) : void`
+- `IPhysicalFileSystem.GetSize(handle: FileHandle) : long`
 - `FileLifecycleManager.validateModeCompatibility(requestedAccess: FileAccessMode, requestedLock: FileLockMode, existingAccess: FileAccessMode, existingLock: FileLockMode) : void`
 - `OpenFileManager.getOpenFile(fileName: String) : OpenFileEntry`
 - `OpenFileManager.registerOpenFile(fileName: String, entry: OpenFileEntry) : void`
@@ -235,6 +263,7 @@ sequenceDiagram
 - `OpenFileEntry.getAccessMode() : FileAccessMode`
 - `OpenFileEntry.getLockMode() : FileLockMode`
 - `OpenFileEntry.incrementRefCount() : int`
+- `FileValidator.Validate(header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap, physicalFileSize: long) : void`
 
 ### State Candidates
 - `FileAccessMode` enum (ReadOnly, ReadWrite)

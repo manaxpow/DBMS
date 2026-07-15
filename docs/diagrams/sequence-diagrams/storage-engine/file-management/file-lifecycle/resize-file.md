@@ -25,7 +25,7 @@ sequenceDiagram
     participant OE as OpenFileEntry
     participant DF as DataFile
     participant AM as AllocationMetadata
-    participant FH as FileHandle
+    participant PFS as IPhysicalFileSystem
     participant FW as FileWriter
     participant FS as FileSynchronizer
 
@@ -38,17 +38,13 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>FH: GetLength()
-    activate FH
-    FH-->>FLM: currentSize
-    deactivate FH
+    FLM->>DF: Get Size
+    DF-->>FLM: currentSize
 
     FLM->>FLM: Validate newSize > currentSize
 
-    FLM->>FH: SetLength(newSize)
-    activate FH
-    FH-->>FLM: Success
-    deactivate FH
+    FLM->>PFS: Resize(fileHandle, newSize)
+    PFS-->>FLM: Success
 
     FLM->>DF: Get AllocationMetadata
     DF-->>FLM: allocationMetadata
@@ -86,7 +82,7 @@ sequenceDiagram
     participant OE as OpenFileEntry
     participant DF as DataFile
     participant AM as AllocationMetadata
-    participant FH as FileHandle
+    participant PFS as IPhysicalFileSystem
     participant FW as FileWriter
     participant FS as FileSynchronizer
 
@@ -99,10 +95,8 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>FH: GetLength()
-    activate FH
-    FH-->>FLM: currentSize
-    deactivate FH
+    FLM->>DF: Get Size
+    DF-->>FLM: currentSize
 
     FLM->>FLM: Validate newSize < currentSize
 
@@ -125,10 +119,8 @@ sequenceDiagram
     FW-->>FLM: Success
     deactivate FW
 
-    FLM->>FH: SetLength(newSize)
-    activate FH
-    FH-->>FLM: Success
-    deactivate FH
+    FLM->>PFS: Resize(fileHandle, newSize)
+    PFS-->>FLM: Success
 
     FLM->>FS: Sync(openFileEntry)
     activate FS
@@ -150,7 +142,7 @@ sequenceDiagram
     actor Caller
     participant FLM as FileLifecycleManager
     participant OE as OpenFileEntry
-    participant FH as FileHandle
+    participant DF as DataFile
 
     Caller->>FLM: ResizeFile(openFileEntry, newSize)
     activate FLM
@@ -158,10 +150,11 @@ sequenceDiagram
     FLM->>OE: Get Handle
     OE-->>FLM: fileHandle
 
-    FLM->>FH: GetLength()
-    activate FH
-    FH-->>FLM: currentSize
-    deactivate FH
+    FLM->>OE: Get DataFile
+    OE-->>FLM: dataFile
+
+    FLM->>DF: Get Size
+    DF-->>FLM: currentSize
 
     alt newSize == currentSize
         FLM-->>Caller: Success without modification
@@ -183,7 +176,6 @@ sequenceDiagram
     participant OE as OpenFileEntry
     participant DF as DataFile
     participant AM as AllocationMetadata
-    participant FH as FileHandle
 
     DB->>FLM: ResizeFile(openFileEntry, newSize)
     activate FLM
@@ -194,8 +186,8 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>FH: GetLength()
-    FH-->>FLM: currentSize
+    FLM->>DF: Get Size
+    DF-->>FLM: currentSize
 
     FLM->>DF: Get AllocationMetadata
     DF-->>FLM: allocationMetadata
@@ -220,7 +212,7 @@ sequenceDiagram
     actor Caller
     participant FLM as FileLifecycleManager
     participant OE as OpenFileEntry
-    participant FH as FileHandle
+    participant PFS as IPhysicalFileSystem
 
     Caller->>FLM: ResizeFile(openFileEntry, newSize)
     activate FLM
@@ -228,17 +220,14 @@ sequenceDiagram
     FLM->>OE: Get Handle
     OE-->>FLM: fileHandle
 
-    FLM->>FH: SetLength(newSize)
-    activate FH
-
-    FH-->>FLM: throw IOException
-    deactivate FH
-
-    FLM->>FLM: Wrap exception with file context
-
-    FLM-->>Caller: throw FileResizeException
+    FLM->>PFS: Resize(fileHandle, newSize)
+    PFS-->>FLM: throw Exception
+    
+    FLM-->>Caller: propagate Exception
     deactivate FLM
 ```
+> [!NOTE] 
+> If `PFS.Resize` fails, the exception is propagated immediately. In-memory metadata state must remain completely unchanged and consistent with the state before the method was called. `GetSize` is omitted as post-resize verification is not strictly required by the current contract.
 
 ---
 
@@ -252,9 +241,8 @@ FileLifecycleManager.ResizeFile(
     newSize: long
 ) : void
 
-FileHandle.GetLength() : long
-
-FileHandle.SetLength(
+IPhysicalFileSystem.Resize(
+    handle: FileHandle,
     newSize: long
 ) : void
 
@@ -323,7 +311,7 @@ AllocationMetadata.FreeExtentCount
 - Coordinates the resize operation.
 - Validates the requested size.
 - Prevents unsafe file truncation.
-- Updates physical file size.
+- Calls `IPhysicalFileSystem.Resize`.
 - Coordinates metadata persistence.
 
 ### `AllocationMetadata`
@@ -333,11 +321,10 @@ AllocationMetadata.FreeExtentCount
 - Removes free extents outside the new file boundary.
 - Maintains extent counters.
 
-### `FileHandle`
+### `IPhysicalFileSystem`
 
-- Reads the current physical file length.
 - Requests the operating system to change the physical file length.
-- Converts low-level resize failures into `IOException`.
+- Throws appropriate exceptions if low-level resize fails.
 
 ---
 

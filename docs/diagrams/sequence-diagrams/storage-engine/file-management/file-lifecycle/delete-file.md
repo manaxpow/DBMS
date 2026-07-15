@@ -13,19 +13,21 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: deleteFile(fileName)
     activate LM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
 
     LM->>OM: tryBeginDelete(fileName)
     activate OM
     OM-->>LM: true
     deactivate OM
     
-    LM->>LM: deletePhysicalFile(fileName)
+    LM->>PFS: Delete(fileName)
+    PFS-->>LM: success
     
     LM->>OM: completeDelete(fileName)
     activate OM
@@ -35,6 +37,8 @@ sequenceDiagram
     LM-->>DB: success
     deactivate LM
 ```
+> [!NOTE] 
+> A race condition where `Exists` returns true but the file disappears before `Delete` is called is acceptable. `Exists` acts as a friendly check, but the physical `Delete` operation defines the final outcome.
 
 ---
 
@@ -45,12 +49,13 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: deleteFile(fileName)
     activate LM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
 
     LM->>OM: tryBeginDelete(fileName)
     activate OM
@@ -60,6 +65,8 @@ sequenceDiagram
     LM-->>DB: throw FileInUseException
     deactivate LM
 ```
+> [!IMPORTANT]
+> If `tryBeginDelete` returns `false`, no deletion reservation is acquired. Therefore, `PFS.Delete`, `completeDelete`, and `cancelDelete` MUST NOT be called.
 
 ---
 
@@ -69,12 +76,13 @@ sequenceDiagram
     autonumber
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: deleteFile(fileName)
     activate LM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: false
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: false
     
     LM-->>DB: throw FileNotFoundException
     deactivate LM
@@ -89,27 +97,28 @@ sequenceDiagram
     actor DB as DatabaseManager
     participant LM as FileLifecycleManager
     participant OM as OpenFileManager
+    participant PFS as IPhysicalFileSystem
 
     DB->>LM: deleteFile(fileName)
     activate LM
     
-    LM->>LM: checkFileExists(fileName)
-    LM-->>LM: true
+    LM->>PFS: Exists(fileName)
+    PFS-->>LM: true
 
     LM->>OM: tryBeginDelete(fileName)
     activate OM
     OM-->>LM: true
     deactivate OM
     
-    LM->>LM: deletePhysicalFile(fileName)
-    LM-->>LM: failure
+    LM->>PFS: Delete(fileName)
+    PFS-->>LM: throw Exception
     
     LM->>OM: cancelDelete(fileName)
     activate OM
     OM-->>LM: success
     deactivate OM
     
-    LM-->>DB: throw FileDeleteException
+    LM-->>DB: throw Exception
     deactivate LM
 ```
 
@@ -125,8 +134,8 @@ sequenceDiagram
 
 ### Method Candidates
 - `FileLifecycleManager.deleteFile(fileName: String) : void`
-- `FileLifecycleManager.checkFileExists(fileName: String) : boolean`
-- `FileLifecycleManager.deletePhysicalFile(fileName: String) : void`
+- `IPhysicalFileSystem.Exists(fileName: String) : boolean`
+- `IPhysicalFileSystem.Delete(fileName: String) : void`
 - `OpenFileManager.tryBeginDelete(fileName: String) : boolean`
 - `OpenFileManager.completeDelete(fileName: String) : void`
 - `OpenFileManager.cancelDelete(fileName: String) : void`

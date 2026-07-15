@@ -16,7 +16,7 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FR: readPage(openFileEntry, pageId, destination)
+    BM->>FR: ReadPage(openFileEntry, pageId, destination)
     activate FR
     
     FR->>OE: DataFile
@@ -24,7 +24,7 @@ sequenceDiagram
     OE-->>FR: dataFile
     deactivate OE
     
-    FR->>FR: validatePageId(pageId, dataFile)
+    note right of FR: Validate PageId against DataFile
     
     FR->>OE: get Handle
     OE-->>FR: fileHandle
@@ -34,14 +34,14 @@ sequenceDiagram
     DF-->>FR: fileHeader
     deactivate DF
     
-    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    note right of FR: Calculate physical page offset
     
-    FR->>FH: read(offset, pageSize, destination)
+    FR->>FH: ReadAtOffset(offset, pageSize, destination)
     activate FH
     FH-->>FR: bytesRead
     deactivate FH
     
-    FR->>FR: validateBytesRead(bytesRead, pageSize)
+    note right of FR: Validate bytes read
     
     FR-->>BM: success
     deactivate FR
@@ -57,7 +57,7 @@ sequenceDiagram
     participant FR as FileReader
     participant OE as OpenFileEntry
 
-    BM->>FR: readPage(openFileEntry, pageId, destination)
+    BM->>FR: ReadPage(openFileEntry, pageId, destination)
     activate FR
     
     FR->>OE: DataFile
@@ -65,7 +65,7 @@ sequenceDiagram
     OE-->>FR: dataFile
     deactivate OE
     
-    FR->>FR: validatePageId(pageId, dataFile)
+    note right of FR: Validate PageId
     note right of FR: PageId is negative, exceeds total pages, or falls outside data region.
     FR-->>FR: throw InvalidPageIdException
     
@@ -85,7 +85,7 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FR: readPage(openFileEntry, pageId, destination)
+    BM->>FR: ReadPage(openFileEntry, pageId, destination)
     activate FR
     
     FR->>OE: DataFile
@@ -93,7 +93,7 @@ sequenceDiagram
     OE-->>FR: dataFile
     deactivate OE
     
-    FR->>FR: validatePageId(pageId, dataFile)
+    note right of FR: Validate PageId against DataFile
     
     FR->>OE: get Handle
     OE-->>FR: fileHandle
@@ -103,14 +103,14 @@ sequenceDiagram
     DF-->>FR: fileHeader
     deactivate DF
     
-    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    note right of FR: Calculate physical page offset
     
-    FR->>FH: read(offset, pageSize, destination)
+    FR->>FH: ReadAtOffset(offset, pageSize, destination)
     activate FH
     FH-->>FR: bytesRead (bytesRead < pageSize)
     deactivate FH
     
-    FR->>FR: validateBytesRead(bytesRead, pageSize)
+    note right of FR: Validate bytes read
     FR-->>FR: throw IncompletePageReadException
     
     FR-->>BM: throw IncompletePageReadException
@@ -129,7 +129,7 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FR: readPage(openFileEntry, pageId, destination)
+    BM->>FR: ReadPage(openFileEntry, pageId, destination)
     activate FR
     
     FR->>OE: DataFile
@@ -137,7 +137,7 @@ sequenceDiagram
     OE-->>FR: dataFile
     deactivate OE
     
-    FR->>FR: validatePageId(pageId, dataFile)
+    note right of FR: Validate PageId against DataFile
     
     FR->>OE: Handle
     activate OE
@@ -149,9 +149,9 @@ sequenceDiagram
     DF-->>FR: fileHeader
     deactivate DF
     
-    FR->>FR: calculatePageOffset(pageId, fileHeader)
+    note right of FR: Calculate physical page offset
     
-    FR->>FH: read(offset, pageSize, destination)
+    FR->>FH: ReadAtOffset(offset, pageSize, destination)
     activate FH
     FH-->>FR: throw IOException
     deactivate FH
@@ -165,11 +165,8 @@ sequenceDiagram
 ## Discovered Candidates
 
 ### Method Candidates
-- `FileReader.readPage(entry: OpenFileEntry, pageId: PageId, destination: ByteBuffer) : void`
-- `FileReader.calculatePageOffset(pageId: PageId, header: FileHeader) : long`
-- `FileReader.validatePageId(pageId: PageId, file: DataFile) : void`
-- `FileReader.validateBytesRead(bytesRead: int, expectedBytes: int) : void`
-- `FileHandle.read(offset: long, length: int, destination: ByteBuffer) : int`
+- `FileReader.ReadPage(entry: OpenFileEntry, pageId: PageId, destination: Memory~byte~) : void`
+- `FileHandle.ReadAtOffset(offset: long, destination: Memory~byte~) : int`
 
 ### State Candidates
 - `PageId` type (representing the unique identifier of a database page).

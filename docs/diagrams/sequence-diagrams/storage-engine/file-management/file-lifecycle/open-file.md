@@ -54,8 +54,9 @@ sequenceDiagram
     FV-->>LM: success
     deactivate FV
 
+    note right of LM: Retrieve maximumSize and autoExtendEnabled<br/>from configuration or persistent defaults
     create participant DF as DataFile
-    LM->>DF: reconstruct(fileName, fileHeader.fileType, fileHeader, allocationMetadata, extentBitmap)
+    LM->>DF: Reconstruct(fileName, fileHeader, allocationMetadata, physicalFileSize, maximumSize, autoExtendEnabled)
     activate DF
     DF-->>LM: dataFile
     deactivate DF
@@ -104,7 +105,7 @@ sequenceDiagram
     OE-->>LM: existingLockMode
     deactivate OE
     
-    LM->>LM: validateModeCompatibility(accessMode, lockMode, existingAccessMode, existingLockMode)
+    note right of LM: Validate mode compatibility
     
     LM->>OE: incrementRefCount()
     activate OE
@@ -228,8 +229,7 @@ sequenceDiagram
     OE-->>LM: existingLockMode
     deactivate OE
     
-    LM->>LM: validateModeCompatibility(accessMode, lockMode, existingAccessMode, existingLockMode)
-    note right of LM: Validation fails (e.g. exclusive lock conflict).
+    note right of LM: Validate mode compatibility<br/>Validation fails (e.g. exclusive lock conflict).
     
     LM-->>DB: throw LockConflictException
     deactivate LM
@@ -252,13 +252,12 @@ sequenceDiagram
 - `IPhysicalFileSystem.Open(fileName: String, accessMode: FileAccessMode) : FileHandle`
 - `IPhysicalFileSystem.Close(handle: FileHandle) : void`
 - `IPhysicalFileSystem.GetSize(handle: FileHandle) : long`
-- `FileLifecycleManager.validateModeCompatibility(requestedAccess: FileAccessMode, requestedLock: FileLockMode, existingAccess: FileAccessMode, existingLock: FileLockMode) : void`
 - `OpenFileManager.getOpenFile(fileName: String) : OpenFileEntry`
 - `OpenFileManager.registerOpenFile(fileName: String, entry: OpenFileEntry) : void`
 - `FileReader.readHeader(handle: FileHandle) : FileHeader`
 - `FileReader.readAllocationMetadata(handle: FileHandle, header: FileHeader) : AllocationMetadata`
 - `FileReader.readExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) : ExtentBitmap`
-- `DataFile.reconstruct(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) : DataFile`
+- `DataFile.Reconstruct(fileName: String, header: FileHeader, metadata: AllocationMetadata, currentSize: long, maximumSize: long?, autoExtendEnabled: bool) : DataFile`
 - `OpenFileEntry.create(handle: FileHandle, file: DataFile, accessMode: FileAccessMode, lockMode: FileLockMode) : OpenFileEntry`
 - `OpenFileEntry.getAccessMode() : FileAccessMode`
 - `OpenFileEntry.getLockMode() : FileLockMode`

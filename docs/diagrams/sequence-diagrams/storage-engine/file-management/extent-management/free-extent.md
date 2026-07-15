@@ -44,22 +44,23 @@ sequenceDiagram
     AM-->>EM: Allocated
     deactivate AM
 
-    EM->>AM: Get ExtentBitmap
-    AM-->>EM: extentBitmap
-
-    EM->>EB: MarkFree(extentId)
+    EM->>AM: MarkExtentFree(extentId)
+    activate AM
+    AM->>EB: MarkFree(extentId)
     activate EB
-    EB-->>EM: Success
+    EB-->>AM: Success
     deactivate EB
+    AM-->>EM: Success
+    deactivate AM
 
     EM->>AM: IncrementFreeExtentCount()
     activate AM
     AM-->>EM: Updated count
     deactivate AM
 
-    EM->>FW: WriteAllocationMetadata(dataFile, allocationMetadata)
+    EM->>FW: WriteAllocationMetadata(fileHandle, fileHeader, allocationMetadata)
     activate FW
-    note right of FW: Persists the updated extent bitmap<br/>and allocation counters.
+    note right of FW: Persists the updated bitmap<br/>and allocation counters.
     FW-->>EM: Success
     deactivate FW
 
@@ -77,11 +78,17 @@ sequenceDiagram
 
     actor PA as PageAllocator
     participant EM as ExtentManager
+    participant OE as OpenFileEntry
     participant DF as DataFile
     participant AM as AllocationMetadata
 
-    PA->>EM: FreeExtent(dataFile, extentId)
+    PA->>EM: FreeExtent(entry, extentId)
     activate EM
+
+    EM->>OE: Get DataFile
+    activate OE
+    OE-->>EM: dataFile
+    deactivate OE
 
     EM->>DF: Get AllocationMetadata
     DF-->>EM: allocationMetadata
@@ -105,11 +112,17 @@ sequenceDiagram
 
     actor PA as PageAllocator
     participant EM as ExtentManager
+    participant OE as OpenFileEntry
     participant DF as DataFile
     participant AM as AllocationMetadata
 
-    PA->>EM: FreeExtent(dataFile, extentId)
+    PA->>EM: FreeExtent(entry, extentId)
     activate EM
+
+    EM->>OE: Get DataFile
+    activate OE
+    OE-->>EM: dataFile
+    deactivate OE
 
     EM->>DF: Get AllocationMetadata
     DF-->>EM: allocationMetadata
@@ -133,15 +146,15 @@ sequenceDiagram
 
     actor PA as PageAllocator
     participant EM as ExtentManager
-    participant EU as ExtentUsageTracker
+    participant AM as AllocationMetadata
 
-    PA->>EM: FreeExtent(dataFile, extentId)
+    PA->>EM: FreeExtent(entry, extentId)
     activate EM
 
-    EM->>EU: IsExtentInUse(extentId)
-    activate EU
-    EU-->>EM: true
-    deactivate EU
+    EM->>AM: IsAllocated(extentId)
+    activate AM
+    AM-->>EM: true
+    deactivate AM
 
     EM-->>PA: throw ExtentInUseException
     deactivate EM
@@ -160,39 +173,49 @@ sequenceDiagram
     participant DF as DataFile
     participant AM as AllocationMetadata
     participant EB as ExtentBitmap
+    participant OE as OpenFileEntry
     participant FW as FileWriter
 
-    PA->>EM: FreeExtent(dataFile, extentId)
+    PA->>EM: FreeExtent(entry, extentId)
     activate EM
 
     EM->>DF: Get AllocationMetadata
     DF-->>EM: allocationMetadata
 
-    EM->>AM: Get ExtentBitmap
-    AM-->>EM: extentBitmap
-
-    EM->>EB: MarkFree(extentId)
+    EM->>AM: MarkExtentFree(extentId)
+    activate AM
+    AM->>EB: MarkFree(extentId)
     activate EB
-    EB-->>EM: Success
+    EB-->>AM: Success
     deactivate EB
+    AM-->>EM: Success
+    deactivate AM
 
-    EM->>AM: IncrementFreeExtentCount()
-    AM-->>EM: Updated count
+    EM->>OE: Get Handle
+    activate OE
+    OE-->>EM: fileHandle
+    deactivate OE
 
-    EM->>FW: WriteAllocationMetadata(dataFile, allocationMetadata)
+    EM->>DF: Get Header
+    activate DF
+    DF-->>EM: fileHeader
+    deactivate DF
+
+    EM->>FW: WriteAllocationMetadata(fileHandle, fileHeader, allocationMetadata)
     activate FW
+
     FW-->>EM: throw IOException
     deactivate FW
 
-    EM->>EB: MarkUsed(extentId)
+    EM->>AM: MarkExtentAllocated(extentId)
+    activate AM
+    AM->>EB: MarkUsed(extentId)
     activate EB
     note right of EB: Restores the in-memory bitmap<br/>after persistence failure.
-    EB-->>EM: Restored
+    EB-->>AM: Restored
     deactivate EB
-
-    EM->>AM: DecrementFreeExtentCount()
     AM-->>EM: Restored count
-
+    deactivate AM
     EM-->>PA: throw ExtentFreeException
     deactivate EM
 ```
@@ -205,7 +228,7 @@ sequenceDiagram
 
 ```text
 ExtentManager.FreeExtent(
-    dataFile: DataFile,
+    entry: OpenFileEntry,
     extentId: ExtentId
 ) : void
 
@@ -213,9 +236,17 @@ AllocationMetadata.ContainsExtent(
     extentId: ExtentId
 ) : bool
 
-AllocationMetadata.GetExtentState(
+AllocationMetadata.IsAllocated(
     extentId: ExtentId
-) : ExtentState
+) : bool
+
+AllocationMetadata.MarkExtentAllocated(
+    extentId: ExtentId
+) : void
+
+AllocationMetadata.MarkExtentFree(
+    extentId: ExtentId
+) : void
 
 AllocationMetadata.IncrementFreeExtentCount() : void
 
@@ -229,12 +260,9 @@ ExtentBitmap.MarkUsed(
     extentId: ExtentId
 ) : void
 
-ExtentUsageTracker.IsExtentInUse(
-    extentId: ExtentId
-) : bool
-
 FileWriter.WriteAllocationMetadata(
-    dataFile: DataFile,
+    handle: FileHandle,
+    header: FileHeader,
     metadata: AllocationMetadata
 ) : void
 ```

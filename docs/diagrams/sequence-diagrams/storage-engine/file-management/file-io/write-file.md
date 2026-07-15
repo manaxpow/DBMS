@@ -16,20 +16,20 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FW: writePage(openFileEntry, pageId, source)
+    BM->>FW: WritePage(openFileEntry, pageId, source)
     activate FW
     
     FW->>OE: get AccessMode
     OE-->>FW: accessMode
     
-    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: Validate AccessMode
     
     FW->>OE: DataFile
     activate OE
     OE-->>FW: dataFile
     deactivate OE
     
-    FW->>FW: validatePageId(pageId, dataFile)
+    note right of FW: Validate PageId against DataFile
     
     FW->>OE: get Handle
     OE-->>FW: fileHandle
@@ -39,14 +39,14 @@ sequenceDiagram
     DF-->>FW: fileHeader
     deactivate DF
     
-    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    note right of FW: Calculate physical page offset
     
-    FW->>FH: write(offset, pageSize, source)
+    FW->>FH: WriteAtOffset(offset, pageSize, source)
     activate FH
     FH-->>FW: bytesWritten
     deactivate FH
     
-    FW->>FW: validateBytesWritten(bytesWritten, pageSize)
+    note right of FW: Validate bytes written
     
     FW-->>BM: success
     deactivate FW
@@ -62,13 +62,13 @@ sequenceDiagram
     participant FW as FileWriter
     participant OE as OpenFileEntry
 
-    BM->>FW: writePage(openFileEntry, pageId, source)
+    BM->>FW: WritePage(openFileEntry, pageId, source)
     activate FW
     
     FW->>OE: get AccessMode
     OE-->>FW: accessMode
     
-    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: Validate AccessMode
     note right of FW: AccessMode is ReadOnly.
     FW-->>FW: throw ReadOnlyFileException
     
@@ -86,20 +86,20 @@ sequenceDiagram
     participant FW as FileWriter
     participant OE as OpenFileEntry
 
-    BM->>FW: writePage(openFileEntry, pageId, source)
+    BM->>FW: WritePage(openFileEntry, pageId, source)
     activate FW
     
     FW->>OE: get AccessMode
     OE-->>FW: accessMode
     
-    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: Validate AccessMode
     
     FW->>OE: DataFile
     activate OE
     OE-->>FW: dataFile
     deactivate OE
     
-    FW->>FW: validatePageId(pageId, dataFile)
+    note right of FW: Validate PageId against DataFile
     note right of FW: PageId is negative, exceeds total pages, or falls outside data region.
     FW-->>FW: throw InvalidPageIdException
     
@@ -119,20 +119,20 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FW: writePage(openFileEntry, pageId, source)
+    BM->>FW: WritePage(openFileEntry, pageId, source)
     activate FW
     
     FW->>OE: get AccessMode
     OE-->>FW: accessMode
     
-    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: Validate AccessMode
     
     FW->>OE: DataFile
     activate OE
     OE-->>FW: dataFile
     deactivate OE
     
-    FW->>FW: validatePageId(pageId, dataFile)
+    note right of FW: Validate PageId against DataFile
     
     FW->>OE: get Handle
     OE-->>FW: fileHandle
@@ -142,14 +142,14 @@ sequenceDiagram
     DF-->>FW: fileHeader
     deactivate DF
     
-    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    note right of FW: Calculate physical page offset
     
-    FW->>FH: write(offset, pageSize, source)
+    FW->>FH: WriteAtOffset(offset, pageSize, source)
     activate FH
     FH-->>FW: bytesWritten (bytesWritten < pageSize)
     deactivate FH
     
-    FW->>FW: validateBytesWritten(bytesWritten, pageSize)
+    note right of FW: Validate bytes written
     FW-->>FW: throw IncompletePageWriteException
     
     FW-->>BM: throw IncompletePageWriteException
@@ -168,20 +168,20 @@ sequenceDiagram
     participant DF as DataFile
     participant FH as FileHandle
 
-    BM->>FW: writePage(openFileEntry, pageId, source)
+    BM->>FW: WritePage(openFileEntry, pageId, source)
     activate FW
     
     FW->>OE: get AccessMode
     OE-->>FW: accessMode
     
-    FW->>FW: validateAccessMode(accessMode)
+    note right of FW: Validate AccessMode
     
     FW->>OE: DataFile
     activate OE
     OE-->>FW: dataFile
     deactivate OE
     
-    FW->>FW: validatePageId(pageId, dataFile)
+    note right of FW: Validate PageId against DataFile
     
     FW->>OE: get Handle
     OE-->>FW: fileHandle
@@ -191,9 +191,9 @@ sequenceDiagram
     DF-->>FW: fileHeader
     deactivate DF
     
-    FW->>FW: calculatePageOffset(pageId, fileHeader)
+    note right of FW: Calculate physical page offset
     
-    FW->>FH: write(offset, pageSize, source)
+    FW->>FH: WriteAtOffset(offset, pageSize, source)
     activate FH
     FH-->>FW: throw IOException
     deactivate FH
@@ -207,12 +207,8 @@ sequenceDiagram
 ## Discovered Candidates
 
 ### Method Candidates
-- `FileWriter.writePage(entry: OpenFileEntry, pageId: PageId, source: ByteBuffer) : void`
-- `FileWriter.validateAccessMode(accessMode: FileAccessMode) : void`
-- `FileWriter.validatePageId(pageId: PageId, file: DataFile) : void`
-- `FileWriter.calculatePageOffset(pageId: PageId, header: FileHeader) : long`
-- `FileWriter.validateBytesWritten(bytesWritten: int, expectedBytes: int) : void`
-- `FileHandle.write(offset: long, length: int, source: ByteBuffer) : int`
+- `FileWriter.WritePage(entry: OpenFileEntry, pageId: PageId, source: ReadOnlyMemory~byte~) : void`
+- `FileHandle.WriteAtOffset(offset: long, source: ReadOnlyMemory~byte~) : void`
 
 ### State Candidates
 - `PageId` type (representing the unique identifier of a database page).

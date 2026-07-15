@@ -56,9 +56,7 @@ classDiagram
 ```
 
 ### Relationship Explanation
-- **Interface Realization (`..|>`)**:
+- **Interface Realization (`..|>`):**
   - `ExtentManager` implements `IExtentManager` to isolate space allocation operations.
-  - `ExtentUsageTracker` implements `IExtentUsageTracker` to track page allocation statuses independently.
-- **Association (`-->`)**:
-  - `ExtentManager` references the `IExtentUsageTracker` interface to determine if extents can be safely released.
+- **Association (`-->`):**
   - `AllocatedExtent` references `ExtentId` and `DiskAddress` value objects.

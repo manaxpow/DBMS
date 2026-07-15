@@ -22,26 +22,27 @@ sequenceDiagram
     LM->>PFS: Exists(fileName)
     PFS-->>LM: false
 
+    note right of LM: Generate fileId<br/>extentSize = pagesPerExtent * pageSize<br/>totalExtentCount = (initialFileSize - headerSize) / extentSize
     create participant FH as FileHeader
-    LM->>FH: create(fileType, pageSize, formatVersion)
+    LM->>FH: Create(fileId, fileType, pageSize, extentSize, formatVersion)
     activate FH
     FH-->>LM: fileHeader
     deactivate FH
 
     create participant AM as AllocationMetadata
-    LM->>AM: create(initialFileSize, pageSize)
+    LM->>AM: Create(totalExtentCount)
     activate AM
     AM-->>LM: allocationMetadata
     deactivate AM
 
     create participant EB as ExtentBitmap
-    LM->>EB: create(allocationMetadata.totalExtents)
+    LM->>EB: Create(totalExtentCount)
     activate EB
     EB-->>LM: extentBitmap
     deactivate EB
 
     create participant DF as DataFile
-    LM->>DF: create(fileName, fileType, fileHeader, allocationMetadata, extentBitmap)
+    LM->>DF: Create(fileName, fileHeader, allocationMetadata, initialFileSize, maximumSize, autoExtendEnabled)
     activate DF
     DF-->>LM: dataFile
     deactivate DF
@@ -49,17 +50,17 @@ sequenceDiagram
     LM->>PFS: Create(fileName, initialFileSize)
     PFS-->>LM: fileHandle
 
-    LM->>FW: writeHeader(fileHandle, dataFile.header)
+    LM->>FW: WriteHeader(fileHandle, dataFile.Header)
     activate FW
     FW-->>LM: success
     deactivate FW
 
-    LM->>FW: writeAllocationMetadata(fileHandle, dataFile.allocationMetadata)
+    LM->>FW: WriteAllocationMetadata(fileHandle, dataFile.Header, dataFile.AllocationMetadata)
     activate FW
     FW-->>LM: success
     deactivate FW
 
-    LM->>FW: writeExtentBitmap(fileHandle, dataFile.extentBitmap)
+    LM->>FW: WriteExtentBitmap(fileHandle, dataFile.Header, dataFile.AllocationMetadata)
     activate FW
     FW-->>LM: success
     deactivate FW
@@ -108,26 +109,27 @@ sequenceDiagram
     LM->>PFS: Exists(fileName)
     PFS-->>LM: false
 
+    note right of LM: Generate fileId<br/>extentSize = pagesPerExtent * pageSize<br/>totalExtentCount = (initialFileSize - headerSize) / extentSize
     create participant FH as FileHeader
-    LM->>FH: create(fileType, pageSize, formatVersion)
+    LM->>FH: Create(fileId, fileType, pageSize, extentSize, formatVersion)
     activate FH
     FH-->>LM: fileHeader
     deactivate FH
 
     create participant AM as AllocationMetadata
-    LM->>AM: create(initialFileSize, pageSize)
+    LM->>AM: Create(totalExtentCount)
     activate AM
     AM-->>LM: allocationMetadata
     deactivate AM
 
     create participant EB as ExtentBitmap
-    LM->>EB: create(allocationMetadata.totalExtents)
+    LM->>EB: Create(totalExtentCount)
     activate EB
     EB-->>LM: extentBitmap
     deactivate EB
 
     create participant DF as DataFile
-    LM->>DF: create(fileName, fileType, fileHeader, allocationMetadata, extentBitmap)
+    LM->>DF: Create(fileName, fileHeader, allocationMetadata, initialFileSize, maximumSize, autoExtendEnabled)
     activate DF
     DF-->>LM: dataFile
     deactivate DF
@@ -140,7 +142,7 @@ sequenceDiagram
         LM->>PFS: Create(fileName, initialFileSize)
         PFS-->>LM: fileHandle
 
-        LM->>FW: writeHeader(fileHandle, dataFile.header)
+        LM->>FW: WriteHeader(fileHandle, dataFile.Header)
         activate FW
         FW-->>LM: failure
         deactivate FW
@@ -159,19 +161,18 @@ sequenceDiagram
 ## Discovered Candidates
 
 ### Method Candidates
-- `FileLifecycleManager.createFile(fileName: String, fileType: FileType, pageSize: int, initialFileSize: long) : DataFile`
+- `FileLifecycleManager.CreateFile(fileName: String, fileType: FileType, pageSize: int, initialFileSize: long) : DataFile`
 - `IPhysicalFileSystem.Exists(fileName: String) : boolean`
 - `IPhysicalFileSystem.Create(fileName: String, initialFileSize: long) : FileHandle`
 - `IPhysicalFileSystem.Close(handle: FileHandle) : void`
 - `IPhysicalFileSystem.Delete(fileName: String) : void`
-- `FileHeader.create(fileType: FileType, pageSize: int, formatVersion: int) : FileHeader`
-- `AllocationMetadata.create(initialFileSize: long, pageSize: int) : AllocationMetadata`
-- `ExtentBitmap.create(totalExtents: int) : ExtentBitmap`
-- `DataFile.create(fileName: String, fileType: FileType, header: FileHeader, metadata: AllocationMetadata, extentBitmap: ExtentBitmap) : DataFile`
-- `FileWriter.writeHeader(handle: FileHandle, header: FileHeader) : void`
-- `FileWriter.writeAllocationMetadata(handle: FileHandle, metadata: AllocationMetadata) : void`
-- `FileWriter.writeExtentBitmap(handle: FileHandle, bitmap: ExtentBitmap) : void`
-- `FileWriter.flush(handle: FileHandle) : void`
+- `FileHeader.Create(fileId: FileId, fileType: FileType, pageSize: int, extentSize: int, formatVersion: int) : FileHeader`
+- `AllocationMetadata.Create(totalExtentCount: int) : AllocationMetadata`
+- `ExtentBitmap.Create(totalExtents: int) : ExtentBitmap`
+- `DataFile.Create(fileName: String, header: FileHeader, metadata: AllocationMetadata, currentSize: long, maximumSize: long?, autoExtendEnabled: bool) : DataFile`
+- `FileWriter.WriteHeader(handle: FileHandle, header: FileHeader) : void`
+- `FileWriter.WriteAllocationMetadata(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) : void`
+- `FileWriter.WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) : void`
 
 ### State Candidates
 - `FileType` enum (e.g., Table, Log, Temporary)

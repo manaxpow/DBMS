@@ -53,6 +53,7 @@ classDiagram
     namespace FileIO {
         class IFileReader {
             <<interface>>
+            +ReadPage(entry: OpenFileEntry, pageId: PageId, destination: Memory~byte~) void
             +ReadAtOffset(entry: OpenFileEntry, offset: long, destination: Memory~byte~) int
             +ReadHeader(handle: FileHandle) FileHeader
             +ReadAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
@@ -60,6 +61,7 @@ classDiagram
         }
 
         class FileReader {
+            +ReadPage(entry: OpenFileEntry, pageId: PageId, destination: Memory~byte~) void
             +ReadAtOffset(entry: OpenFileEntry, offset: long, destination: Memory~byte~) int
             +ReadHeader(handle: FileHandle) FileHeader
             +ReadAllocationMetadata(handle: FileHandle, header: FileHeader) AllocationMetadata
@@ -71,17 +73,19 @@ classDiagram
 
         class IFileWriter {
             <<interface>>
+            +WritePage(entry: OpenFileEntry, pageId: PageId, source: ReadOnlyMemory~byte~) void
             +WriteAtOffset(entry: OpenFileEntry, offset: long, source: ReadOnlyMemory~byte~) void
             +WriteHeader(handle: FileHandle, header: FileHeader) void
             +WriteAllocationMetadata(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
-            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap) void
+            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
         }
 
         class FileWriter {
+            +WritePage(entry: OpenFileEntry, pageId: PageId, source: ReadOnlyMemory~byte~) void
             +WriteAtOffset(entry: OpenFileEntry, offset: long, source: ReadOnlyMemory~byte~) void
             +WriteHeader(handle: FileHandle, header: FileHeader) void
             +WriteAllocationMetadata(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
-            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata, bitmap: ExtentBitmap) void
+            +WriteExtentBitmap(handle: FileHandle, header: FileHeader, metadata: AllocationMetadata) void
 
             -ValidateAccessMode(accessMode: FileAccessMode) void
             -ValidateWriteRange(entry: OpenFileEntry, offset: long, length: int) void

@@ -27,8 +27,23 @@ sequenceDiagram
     participant EB as ExtentBitmap
     participant FW as FileWriter
 
-    PA->>EM: AllocateExtent(dataFile)
+    PA->>EM: AllocateExtent(openFileEntry)
     activate EM
+
+    EM->>OE: Get DataFile
+    activate OE
+    OE-->>EM: dataFile
+    deactivate OE
+
+    EM->>OE: Get Handle
+    activate OE
+    OE-->>EM: fileHandle
+    deactivate OE
+
+    EM->>DF: Get Header
+    activate DF
+    DF-->>EM: fileHeader
+    deactivate DF
 
     EM->>DF: Get AllocationMetadata
     DF-->>EM: allocationMetadata
@@ -44,22 +59,21 @@ sequenceDiagram
     AM-->>EM: extentId
     deactivate AM
 
-    EM->>EB: MarkUsed(extentId)
-    activate EB
-    EB-->>EM: Success
-    deactivate EB
-
-    EM->>AM: DecrementFreeExtentCount()
+    EM->>AM: MarkExtentAllocated(extentId)
     activate AM
-    AM-->>EM: Updated count
+    AM->>EB: MarkUsed(extentId)
+    activate EB
+    EB-->>AM: Success
+    deactivate EB
+    AM-->>EM: Success
     deactivate AM
 
-    EM->>AM: CalculateDiskAddress(extentId)
+    EM->>AM: CalculateFileOffset(extentId, fileHeader)
     activate AM
     AM-->>EM: diskAddress
     deactivate AM
 
-    EM->>FW: WriteAllocationMetadata(dataFile, allocationMetadata)
+    EM->>FW: WriteAllocationMetadata(fileHandle, fileHeader, allocationMetadata)
     activate FW
     note right of FW: Persists the updated bitmap<br/>and allocation counters.
     FW-->>EM: Success
@@ -116,10 +130,11 @@ sequenceDiagram
     FLM-->>EM: Success
     deactivate FLM
 
-    EM->>AM: AddExtent()
+    note right of EM: Calculate count to add (e.g., 1)
+    EM->>AM: AddExtents(1)
     activate AM
 
-    AM->>EB: AppendFreeExtent()
+    AM->>EB: AppendFreeExtents(1)
     activate EB
     EB-->>AM: newExtentId
     deactivate EB
@@ -127,22 +142,21 @@ sequenceDiagram
     AM-->>EM: newExtentId
     deactivate AM
 
-    EM->>EB: MarkUsed(newExtentId)
-    activate EB
-    EB-->>EM: Success
-    deactivate EB
-
-    EM->>AM: IncrementTotalExtentCount()
+    EM->>AM: MarkExtentAllocated(newExtentId)
     activate AM
-    AM-->>EM: Updated count
+    AM->>EB: MarkUsed(newExtentId)
+    activate EB
+    EB-->>AM: Success
+    deactivate EB
+    AM-->>EM: Success
     deactivate AM
 
-    EM->>AM: CalculateDiskAddress(newExtentId)
+    EM->>AM: CalculateFileOffset(newExtentId, fileHeader)
     activate AM
     AM-->>EM: diskAddress
     deactivate AM
 
-    EM->>FW: WriteAllocationMetadata(dataFile, allocationMetadata)
+    EM->>FW: WriteAllocationMetadata(fileHandle, fileHeader, allocationMetadata)
     activate FW
     FW-->>EM: Success
     deactivate FW
@@ -175,7 +189,7 @@ sequenceDiagram
     AM-->>EM: null
     deactivate AM
 
-    EM->>DF: IsAutoExtendEnabled()
+    EM->>DF: Get AutoExtendEnabled
     activate DF
     DF-->>EM: false
     deactivate DF
@@ -289,30 +303,28 @@ sequenceDiagram
     AM-->>EM: extentId
     deactivate AM
 
-    EM->>EB: MarkUsed(extentId)
-    activate EB
-    EB-->>EM: Success
-    deactivate EB
-
-    EM->>AM: DecrementFreeExtentCount()
+    EM->>AM: MarkExtentAllocated(extentId)
     activate AM
-    AM-->>EM: Updated count
+    AM->>EB: MarkUsed(extentId)
+    activate EB
+    EB-->>AM: Success
+    deactivate EB
+    AM-->>EM: Success
     deactivate AM
 
-    EM->>FW: WriteAllocationMetadata(dataFile, allocationMetadata)
+    EM->>FW: WriteAllocationMetadata(fileHandle, fileHeader, allocationMetadata)
     activate FW
 
     FW-->>EM: throw IOException
     deactivate FW
 
-    EM->>EB: MarkFree(extentId)
+    EM->>AM: MarkExtentFree(extentId)
+    activate AM
+    AM->>EB: MarkFree(extentId)
     activate EB
     note right of EB: Restores the in-memory bitmap<br/>after persistence failure.
-    EB-->>EM: Restored
+    EB-->>AM: Restored
     deactivate EB
-
-    EM->>AM: IncrementFreeExtentCount()
-    activate AM
     AM-->>EM: Restored count
     deactivate AM
 
@@ -328,26 +340,33 @@ sequenceDiagram
 
 ```text
 ExtentManager.AllocateExtent(
-    dataFile: DataFile
+    entry: OpenFileEntry
 ) : AllocatedExtent
 
 AllocationMetadata.FindFreeExtent() : ExtentId?
 
-AllocationMetadata.CalculateDiskAddress(
+AllocationMetadata.CalculateFileOffset(
+    extentId: ExtentId,
+    header: FileHeader
+) : FileOffset
+
+AllocationMetadata.AddExtents(
+    count: int
+) : void
+
+AllocationMetadata.MarkExtentAllocated(
     extentId: ExtentId
-) : DiskAddress
+) : void
 
-AllocationMetadata.AddExtent() : ExtentId
-
-AllocationMetadata.IncrementTotalExtentCount() : void
-
-AllocationMetadata.DecrementFreeExtentCount() : void
-
-AllocationMetadata.IncrementFreeExtentCount() : void
+AllocationMetadata.MarkExtentFree(
+    extentId: ExtentId
+) : void
 
 ExtentBitmap.FindFirstFree() : int?
 
-ExtentBitmap.AppendFreeExtent() : ExtentId
+ExtentBitmap.AppendFreeExtents(
+    count: int
+) : void
 
 ExtentBitmap.MarkUsed(
     extentId: ExtentId
@@ -358,12 +377,13 @@ ExtentBitmap.MarkFree(
 ) : void
 
 FileLifecycleManager.ResizeFile(
-    dataFile: DataFile,
+    entry: OpenFileEntry,
     newSize: long
 ) : void
 
 FileWriter.WriteAllocationMetadata(
-    dataFile: DataFile,
+    handle: FileHandle,
+    header: FileHeader,
     metadata: AllocationMetadata
 ) : void
 ```

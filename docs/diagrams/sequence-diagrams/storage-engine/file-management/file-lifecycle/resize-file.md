@@ -38,7 +38,7 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>DF: Get Size
+    FLM->>DF: Get CurrentSize
     DF-->>FLM: currentSize
 
     FLM->>FLM: Validate newSize > currentSize
@@ -49,7 +49,9 @@ sequenceDiagram
     FLM->>DF: Get AllocationMetadata
     DF-->>FLM: allocationMetadata
 
-    FLM->>AM: AddFreeSpace(currentSize, newSize)
+    note right of FLM: Calculate newExtentCount = newSize / extentSize<br/>count = newExtentCount - currentExtentCount
+
+    FLM->>AM: AddExtents(count)
     activate AM
     note right of AM: Registers newly added extents<br/>as available free space.
     AM-->>FLM: Updated metadata
@@ -95,7 +97,7 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>DF: Get Size
+    FLM->>DF: Get CurrentSize
     DF-->>FLM: currentSize
 
     FLM->>FLM: Validate newSize < currentSize
@@ -103,13 +105,15 @@ sequenceDiagram
     FLM->>DF: Get AllocationMetadata
     DF-->>FLM: allocationMetadata
 
-    FLM->>AM: CanTruncateTo(newSize)
+    note right of FLM: Calculate newExtentCount = newSize / extentSize
+
+    FLM->>AM: CanTruncateTo(newExtentCount)
     activate AM
     note right of AM: Verifies that no allocated extent<br/>exists beyond the new boundary.
     AM-->>FLM: true
     deactivate AM
 
-    FLM->>AM: RemoveFreeSpace(newSize, currentSize)
+    FLM->>AM: TruncateTo(newExtentCount)
     activate AM
     AM-->>FLM: Updated metadata
     deactivate AM
@@ -153,7 +157,7 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>DF: Get Size
+    FLM->>DF: Get CurrentSize
     DF-->>FLM: currentSize
 
     alt newSize == currentSize
@@ -186,13 +190,15 @@ sequenceDiagram
     FLM->>OE: Get DataFile
     OE-->>FLM: dataFile
 
-    FLM->>DF: Get Size
+    FLM->>DF: Get CurrentSize
     DF-->>FLM: currentSize
 
     FLM->>DF: Get AllocationMetadata
     DF-->>FLM: allocationMetadata
 
-    FLM->>AM: CanTruncateTo(newSize)
+    note right of FLM: Calculate newExtentCount = newSize / extentSize
+
+    FLM->>AM: CanTruncateTo(newExtentCount)
     activate AM
     AM-->>FLM: false
     deactivate AM
@@ -247,17 +253,15 @@ IPhysicalFileSystem.Resize(
 ) : void
 
 AllocationMetadata.CanTruncateTo(
-    newSize: long
+    newExtentCount: int
 ) : bool
 
-AllocationMetadata.AddFreeSpace(
-    previousSize: long,
-    newSize: long
+AllocationMetadata.AddExtents(
+    count: int
 ) : void
 
-AllocationMetadata.RemoveFreeSpace(
-    newSize: long,
-    previousSize: long
+AllocationMetadata.TruncateTo(
+    newExtentCount: int
 ) : void
 
 FileWriter.WriteAllocationMetadata(
@@ -269,7 +273,7 @@ FileWriter.WriteAllocationMetadata(
 ### Property Candidates
 
 ```text
-DataFile.Size : long
+DataFile.CurrentSize : long
 
 DataFile.AllocationMetadata : AllocationMetadata
 
@@ -295,7 +299,7 @@ AllocatedExtentTruncationException
 ### State Candidates
 
 ```text
-DataFile.Size
+DataFile.CurrentSize
 
 AllocationMetadata.TotalExtentCount
 

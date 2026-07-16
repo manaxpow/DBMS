@@ -4,10 +4,7 @@ Database management system
 
 ```mermaid
 flowchart LR
-    %% =========================
-    %% LEFT SIDE
-    %% =========================
-
+    %% Left side
     QP_SP[SQL Parser] --- QP[Query Processor]
     QP_SA[Semantic Analyzer] --- QP
     QP_LP[Logical Planner] --- QP

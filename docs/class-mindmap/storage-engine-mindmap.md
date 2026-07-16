@@ -4,47 +4,38 @@
 flowchart LR
     SE[Storage Engine]
 
-    %% Root
-    SE --> SERoot[StorageEngine]
+    %% Interfaces
+    SE --> INT[Interface]
+    INT --> IFLM[IFileLifecycleManager]
+    INT --> IPFS[IPhysicalFileSystem]
+    INT --> IBPM[IBufferPoolManager]
+    INT --> IPRP[IPageReplacementPolicy]
+    INT --> IRM[IRecordManager]
+    INT --> IIDX[IIndex]
 
-    %% File Management
-    SE --> FM[File Management]
-    FM --> IFLM[IFileLifecycleManager]
-    FM --> FLM[FileLifecycleManager]
-    FM --> IPFS[IPhysicalFileSystem]
-    FM --> PFS[PhysicalFileSystem]
+    %% Classes (Implementations)
+    SE --> CLS[Class]
+    CLS --> SERoot[StorageEngine]
+    CLS --> FLM[FileLifecycleManager]
+    CLS --> PFS[PhysicalFileSystem]
+    CLS --> BPM[BufferPoolManager]
+    CLS --> CRP[ClockReplacementPolicy]
+    CLS --> RMGR[RecordManager]
+    CLS --> BPTI[BPlusTreeIndex]
 
-    %% Buffer Management
-    SE --> BM[Buffer Management]
-    BM --> IBPM[IBufferPoolManager]
-    BM --> BPM[BufferPoolManager]
-    BM --> IPRP[IPageReplacementPolicy]
-    BM --> CRP[ClockReplacementPolicy]
-
-    %% Record Management
-    SE --> RM[Record Management]
-    RM --> IRM[IRecordManager]
-    RM --> RMGR[RecordManager]
-
-    %% Index Management
-    SE --> IM[Index Management]
-    IM --> IIDX[IIndex]
-    IM --> BPTI[BPlusTreeIndex]
-
-    %% Common Domain
-    SE --> CD[Common Domain]
-    CD --> FID[FileId]
-    CD --> FH[FileHandle]
-    CD --> DA[DiskAddress]
-    CD --> PID[PageId]
-    CD --> FRID[FrameId]
-    CD --> RID[RecordId]
-    CD --> IK[IndexKey]
-    CD --> RP[RecordPointer]
-    CD --> PAGE[Page]
-    CD --> REC[Record]
-    CD --> BPTN[BPlusTreeNode]
-    CD --> BPOOL[BufferPool]
-    CD --> RLC[RecordLayoutCalculator]
-    CD --> DF[DataFile]
+    %% Domain Models (Also in Class folder)
+    CLS --> FID[FileId]
+    CLS --> FH[FileHandle]
+    CLS --> DA[DiskAddress]
+    CLS --> PID[PageId]
+    CLS --> FRID[FrameId]
+    CLS --> RID[RecordId]
+    CLS --> IK[IndexKey]
+    CLS --> RP[RecordPointer]
+    CLS --> PAGE[Page]
+    CLS --> REC[Record]
+    CLS --> BPTN[BPlusTreeNode]
+    CLS --> BPOOL[BufferPool]
+    CLS --> RLC[RecordLayoutCalculator]
+    CLS --> DF[DataFile]
 ```

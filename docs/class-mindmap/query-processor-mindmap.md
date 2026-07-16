@@ -4,41 +4,32 @@
 flowchart LR
     QP[Query Processor]
 
-    %% Root
-    QP --> QPRoot[QueryProcessor]
+    %% Interfaces
+    QP --> INT[Interface]
+    INT --> ISP[ISqlParser]
+    INT --> ISA[ISemanticAnalyzer]
+    INT --> ILPB[ILogicalPlanBuilder]
+    INT --> IQO[IQueryOptimizer]
+    INT --> IPPB[IPhysicalPlanBuilder]
+    INT --> IQE[IQueryExecutor]
 
-    %% Parsing
-    QP --> PARS[Parsing]
-    PARS --> ISP[ISqlParser]
-    PARS --> SP[SqlParser]
+    %% Classes (Implementations)
+    QP --> CLS[Class]
+    CLS --> QPRoot[QueryProcessor]
+    CLS --> SP[SqlParser]
+    CLS --> SA[SemanticAnalyzer]
+    CLS --> LPB[LogicalPlanBuilder]
+    CLS --> QO[QueryOptimizer]
+    CLS --> PPB[PhysicalPlanBuilder]
+    CLS --> QE[QueryExecutor]
 
-    %% Analysis
-    QP --> ANA[Analysis]
-    ANA --> ISA[ISemanticAnalyzer]
-    ANA --> SA[SemanticAnalyzer]
-
-    %% Optimization
-    QP --> OPT[Optimization]
-    OPT --> ILPB[ILogicalPlanBuilder]
-    OPT --> LPB[LogicalPlanBuilder]
-    OPT --> IQO[IQueryOptimizer]
-    OPT --> QO[QueryOptimizer]
-
-    %% Execution
-    QP --> EXEC[Execution]
-    EXEC --> IPPB[IPhysicalPlanBuilder]
-    EXEC --> PPB[PhysicalPlanBuilder]
-    EXEC --> IQE[IQueryExecutor]
-    EXEC --> QE[QueryExecutor]
-
-    %% Common Domain
-    QP --> CD[Common Domain]
-    CD --> SS[SqlStatement]
-    CD --> AST[ASTNode]
-    CD --> BS[BoundStatement]
-    CD --> SC[SemanticContext]
-    CD --> LP[LogicalPlan]
-    CD --> PP[PhysicalPlan]
-    CD --> EC[ExecutionContext]
-    CD --> QR[QueryResult]
+    %% Domain Models (Also in Class folder)
+    CLS --> SS[SqlStatement]
+    CLS --> AST[ASTNode]
+    CLS --> BS[BoundStatement]
+    CLS --> SC[SemanticContext]
+    CLS --> LP[LogicalPlan]
+    CLS --> PP[PhysicalPlan]
+    CLS --> EC[ExecutionContext]
+    CLS --> QR[QueryResult]
 ```

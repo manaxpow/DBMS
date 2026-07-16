@@ -4,36 +4,33 @@
 flowchart LR
     TM[Transaction Management]
 
-    %% Management
-    TM --> MGT[Management]
-    MGT --> ITM[ITransactionManager]
-    MGT --> TMGR[TransactionManager]
+    %% Interfaces
+    TM --> INT[Interface]
+    INT --> ITM[ITransactionManager]
+    INT --> IIP[IIsolationPolicy]
+    INT --> ILM[ILockManager]
+    INT --> IDD[IDeadlockDetector]
+    INT --> ICC[IConcurrencyController]
 
-    %% Isolation
-    TM --> ISO[Isolation]
-    ISO --> IIP[IIsolationPolicy]
-    ISO --> RRP[RepeatableReadPolicy]
+    %% Enums
+    TM --> ENM[Enum]
+    ENM --> IL[IsolationLevel]
+    ENM --> TS[TransactionState]
+    ENM --> LM[LockMode]
+    ENM --> OA[OperationAccess]
 
-    %% Locking
-    TM --> LCK[Locking]
-    LCK --> ILM[ILockManager]
-    LCK --> LMGR[LockManager]
-    LCK --> IDD[IDeadlockDetector]
-    LCK --> DD[DeadlockDetector]
+    %% Classes (Implementations)
+    TM --> CLS[Class]
+    CLS --> TMRoot[TransactionManagement]
+    CLS --> TMGR[TransactionManager]
+    CLS --> RRP[RepeatableReadPolicy]
+    CLS --> LMGR[LockManager]
+    CLS --> DD[DeadlockDetector]
+    CLS --> CCM[ConcurrencyController]
 
-    %% Concurrency
-    TM --> CC[Concurrency]
-    CC --> ICC[IConcurrencyController]
-    CC --> CCM[ConcurrencyController]
-
-    %% Common Domain
-    TM --> CD[Common Domain]
-    CD --> IL[IsolationLevel]
-    CD --> TID[TransactionId]
-    CD --> TS[TransactionState]
-    CD --> TC[TransactionContext]
-    CD --> LR[LockResource]
-    CD --> LM[LockMode]
-    CD --> DC[DeadlockCycle]
-    CD --> OA[OperationAccess]
+    %% Domain Models (Also in Class folder)
+    CLS --> TID[TransactionId]
+    CLS --> TC[TransactionContext]
+    CLS --> LR[LockResource]
+    CLS --> DC[DeadlockCycle]
 ```

@@ -40,10 +40,13 @@ flowchart LR
     RM_RM[Recovery Manager] --- RM[Recovery Management]
     RM_LBR[Log-Based Recovery] --- RM
     RM_CM[Checkpoint Management] --- RM
-    RM_BR[Backup & Restore] --- RM
+    RM_BR[Backup and Restore] --- RM
     RM --- DBMS
 
-    %% Right side
+    %% =========================
+    %% RIGHT SIDE
+    %% =========================
+
     DBMS --- SecM[Security Management]
     SecM --- SecM_AuthN[Authentication]
     SecM --- SecM_AuthZ[Authorization]
@@ -82,7 +85,38 @@ flowchart LR
     DBMS --- SysM[System Management]
     SysM --- SysM_CM[Configuration Management]
     SysM --- SysM_SM[System Monitoring]
-    SysM --- SysM_IE[Import & Export]
+    SysM --- SysM_IE[Import and Export]
+
+    %% =========================
+    %% STYLES
+    %% =========================
+
+    %% Root node
+    classDef dbmsRoot fill:#dbeafe,stroke:#1d4ed8,stroke-width:5px,color:#111827,font-weight:bold,font-size:20px;
+
+    %% Three important Layer 1 subsystems
+    classDef importantLayerOne fill:#fbbf24,stroke:#b45309,stroke-width:4px,color:#111827,font-weight:bold,font-size:18px;
+
+    %% Two selected Layer 2 components inside each important Layer 1
+    classDef importantLayerTwo fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#111827,font-weight:bold;
+
+    %% =========================
+    %% APPLY STYLES
+    %% =========================
+
+    class DBMS dbmsRoot;
+
+    %% Only three important Layer 1 nodes
+    class QP,SE,TM importantLayerOne;
+
+    %% Query Processor: two important Layer 2 components
+    class QP_QO,QP_QE importantLayerTwo;
+
+    %% Storage Engine: two important Layer 2 components
+    class SE_PM,SE_BM importantLayerTwo;
+
+    %% Transaction Management: two important Layer 2 components
+    class TM_TM,TM_LM importantLayerTwo;
 ```
 
 ## Feature Class Diagrams
@@ -180,7 +214,7 @@ classDiagram
     StorageEngine *-- IBufferPoolManager
     StorageEngine *-- IRecordManager
     StorageEngine *-- IIndex
-    
+
     BufferPoolManager --> IPhysicalFileSystem : Uses
     BufferPoolManager --> IPageReplacementPolicy : Uses
     RecordManager --> IBufferPoolManager : Uses
@@ -188,6 +222,7 @@ classDiagram
 ```
 
 ### 2. Query Processor
+
 ```mermaid
 classDiagram
     direction TB
@@ -271,6 +306,7 @@ classDiagram
 ```
 
 ### 3. Transaction Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -348,6 +384,7 @@ classDiagram
 ```
 
 ### 4. Logging Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -412,6 +449,7 @@ classDiagram
 ```
 
 ### 5. Recovery Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -489,6 +527,7 @@ classDiagram
 ```
 
 ### 6. Security Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -555,6 +594,7 @@ classDiagram
 ```
 
 ### 7. Database Manager
+
 ```mermaid
 classDiagram
     direction TB
@@ -623,6 +663,7 @@ classDiagram
 ```
 
 ### 8. Database Object Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -671,6 +712,42 @@ classDiagram
         +CompileView() void
     }
 
+    class IConstraintManager {
+        <<interface>>
+        +AddConstraint(TableId tableId, ConstraintDefinition def) ConstraintId
+        +DropConstraint(ConstraintId constraintId) void
+    }
+    class ConstraintManager {
+        +ValidateConstraints() void
+    }
+
+    class ITriggerManager {
+        <<interface>>
+        +CreateTrigger(TableId tableId, TriggerDefinition def) TriggerId
+        +DropTrigger(TriggerId triggerId) void
+    }
+    class TriggerManager {
+        +ExecuteTriggers() void
+    }
+
+    class IStoredProcedureManager {
+        <<interface>>
+        +CreateProcedure(SchemaId schemaId, StoredProcedureDefinition def) StoredProcedureId
+        +DropProcedure(StoredProcedureId procedureId) void
+    }
+    class StoredProcedureManager {
+        +CompileProcedure() void
+    }
+
+    class IFunctionManager {
+        <<interface>>
+        +CreateFunction(SchemaId schemaId, FunctionDefinition def) FunctionId
+        +DropFunction(FunctionId functionId) void
+    }
+    class FunctionManager {
+        +EvaluateFunction() void
+    }
+
     class ISystemCatalog {
         <<interface>>
         +GetTableDefinition(TableId tableId) TableDefinition
@@ -686,12 +763,20 @@ classDiagram
     ITableManager <|-- TableManager
     IIndexDefinitionManager <|-- IndexDefinitionManager
     IViewManager <|-- ViewManager
+    IConstraintManager <|-- ConstraintManager
+    ITriggerManager <|-- TriggerManager
+    IStoredProcedureManager <|-- StoredProcedureManager
+    IFunctionManager <|-- FunctionManager
     ISystemCatalog <|-- SystemCatalog
 
     DatabaseObjectManagement *-- ISchemaManager
     DatabaseObjectManagement *-- ITableManager
     DatabaseObjectManagement *-- IIndexDefinitionManager
     DatabaseObjectManagement *-- IViewManager
+    DatabaseObjectManagement *-- IConstraintManager
+    DatabaseObjectManagement *-- ITriggerManager
+    DatabaseObjectManagement *-- IStoredProcedureManager
+    DatabaseObjectManagement *-- IFunctionManager
     DatabaseObjectManagement *-- ISystemCatalog
 
     SchemaManager --> ISystemCatalog : Uses
@@ -701,6 +786,7 @@ classDiagram
 ```
 
 ### 9. Performance Management
+
 ```mermaid
 classDiagram
     direction TB
@@ -769,6 +855,7 @@ classDiagram
 ```
 
 ### 10. System Management
+
 ```mermaid
 classDiagram
     direction TB

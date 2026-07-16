@@ -3,79 +3,48 @@
 Database management system
 
 ```mermaid
-flowchart LR
-    %% Left side
-    QP_SP[SQLParser] --- DS[DatabaseServer]
-    QP_Lex[Lexer] --- QP_SP
-    QP_AST[AST] --- QP_SP
-
-    QP_QO[QueryOptimizer] --- DS
-    QP_LP[LogicalPlan] --- QP_QO
-    QP_PP[PhysicalPlan] --- QP_QO
-
-    QP_QE[QueryExecutor] --- DS
-
-    SE[StorageEngine] --- DS
-    SE_FM[FileManager] --- SE
-    SE_BP[BufferPool] --- SE
-    SE_Pg[Page] --- SE_BP
-
-    TM[TransactionManager] --- DS
-    TM_Tx[Transaction] --- TM
-    TM_LM[LockManager] --- TM
-    TM_MVCC[MVCCManager] --- TM
-
-    RM[RecoveryManager] --- DS
-    RM_WAL[WALManager] --- RM
-    RM_BM[BackupManager] --- RM
-
-    %% Right side
-    DS --- DM[DatabaseManager]
-    DM --- DB[Database]
-    DB --- Sch[Schema]
-    Sch --- Tbl[Table]
-    Tbl --- Col[Column]
-    Tbl --- Rw[Row]
-    Tbl --- Cst[Constraint]
-    Tbl --- FK[ForeignKey]
-    Tbl --- Idx[Index]
-    Tbl --- Ptn[Partition]
-    Sch --- Vw[View]
-    Sch --- SP[StoredProcedure]
-
-    DS --- CM[CatalogManager]
-    CM --- StatM[StatisticsManager]
-
-    DS --- SecM[SecurityManager]
-    SecM --- Usr[User]
-    SecM --- Rl[Role]
-    SecM --- Prm[Permission]
-
-    DS --- RepM[ReplicationManager]
-    RepM --- CN[ClusterNode]
-
-    DS --- MonM[MonitoringManager]
-
-    %% =========================
-    %% STYLES
-    %% =========================
-
-    %% Root node
-    classDef dbmsRoot fill:#dbeafe,stroke:#1d4ed8,stroke-width:5px,color:#111827,font-weight:bold,font-size:20px;
-
-    %% Layer 1 subsystems
-    classDef importantLayerOne fill:#fbbf24,stroke:#b45309,stroke-width:4px,color:#111827,font-weight:bold,font-size:18px;
-
-    %% Layer 2 components
-    classDef importantLayerTwo fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#111827,font-weight:bold;
-
-    %% =========================
-    %% APPLY STYLES
-    %% =========================
-
-    class DS dbmsRoot;
-    class QP_SP,QP_QO,QP_QE,SE,TM,RM,DM,CM,SecM,RepM,MonM importantLayerOne;
-    class QP_Lex,QP_AST,QP_LP,QP_PP,SE_FM,SE_BP,SE_Pg,TM_Tx,TM_LM,TM_MVCC,RM_WAL,RM_BM,DB,Sch,Tbl,Col,Rw,Cst,FK,Idx,Ptn,Vw,SP,StatM,Usr,Rl,Prm,CN importantLayerTwo;
+mindmap
+  root((DatabaseServer))
+    StorageEngine
+      FileManager
+      BufferPool
+        Page
+    QueryProcessor
+      SQLParser
+        Lexer
+        AST
+      QueryOptimizer
+        LogicalPlan
+        PhysicalPlan
+      QueryExecutor
+    TransactionManager
+      Transaction
+      LockManager
+      MVCCManager
+    RecoveryManager
+      WALManager
+      BackupManager
+    DatabaseManager
+      Database
+        Schema
+          Table
+            Column
+            Row
+            Constraint
+            ForeignKey
+            Index
+            Partition
+          View
+          StoredProcedure
+      CatalogManager
+      StatisticsManager
+    SecurityManager
+      User
+      Role
+      Permission
+    ReplicationManager
+      ClusterNode
+    MonitoringManager
 ```
 
 ## Feature Class Diagrams
@@ -305,302 +274,225 @@ classDiagram
 
 ## Unit Tests Architecture
 
+### 1. Database Manager Unit Tests
+
 ```mermaid
-flowchart TB
+mindmap
+  root((Database Manager))
+    DatabaseServer
+      Start_WhenConfigurationIsValid_ShouldStart
+      Stop_WhenServerIsRunning_ShouldStop
+      Start_WhenPortIsUnavailable_ShouldThrow
+    DatabaseManager
+      CreateDatabase_WhenNameIsValid_ShouldCreateDatabase
+      CreateDatabase_WhenNameAlreadyExists_ShouldThrow
+      DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase
+    Database
+      Open_WhenDatabaseIsClosed_ShouldOpenDatabase
+      Close_WhenDatabaseIsOpen_ShouldCloseDatabase
+      AddSchema_WhenNameAlreadyExists_ShouldThrow
+    CatalogManager
+      Register_WhenObjectIsValid_ShouldAddToCatalog
+      Register_WhenObjectAlreadyExists_ShouldThrow
+      Find_WhenObjectDoesNotExist_ShouldReturnNull
+    StatisticsManager
+      UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics
+      EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate
+      EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback
+```
 
-    %% =====================================================
-    %% DATABASE OBJECTS AND CATALOG
-    %% =====================================================
+### 2. Database Objects Unit Tests
 
-    subgraph DATABASE_LAYER["Database Objects & Catalog"]
-        direction TB
+```mermaid
+mindmap
+  root((Database Objects))
+    Schema
+      AddTable_WhenTableIsValid_ShouldRegisterTable
+      AddTable_WhenNameAlreadyExists_ShouldThrow
+      RemoveTable_WhenTableExists_ShouldRemoveTable
+    Table
+      InsertRow_WhenRowIsValid_ShouldInsertRow
+      InsertRow_WhenSchemaDoesNotMatch_ShouldThrow
+      AddColumn_WhenNameAlreadyExists_ShouldThrow
+    Column
+      Create_WhenDefinitionIsValid_ShouldCreateColumn
+      Create_WhenNameIsInvalid_ShouldThrow
+      ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse
+    Row
+      GetValue_WhenColumnExists_ShouldReturnValue
+      SetValue_WhenValueIsValid_ShouldUpdateValue
+      SetValue_WhenTypeDoesNotMatch_ShouldThrow
+    Constraint
+      Validate_WhenValueSatisfiesConstraint_ShouldSucceed
+      Validate_WhenValueViolatesConstraint_ShouldFail
+      Apply_WhenConstraintIsDisabled_ShouldSkipValidation
+    ForeignKey
+      Validate_WhenParentRecordExists_ShouldSucceed
+      Validate_WhenParentRecordDoesNotExist_ShouldFail
+      DeleteParent_WhenRestricted_ShouldRejectDeletion
+    Index
+      Insert_WhenKeyIsValid_ShouldAddEntry
+      Search_WhenKeyExists_ShouldReturnRecordPointer
+      Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
+    Partition
+      RouteRow_WhenKeyMatchesRange_ShouldReturnPartition
+      RouteRow_WhenKeyIsOutsideRange_ShouldFail
+      AddRange_WhenRangesOverlap_ShouldThrow
+    View
+      Create_WhenQueryIsValid_ShouldCreateView
+      Resolve_WhenDependenciesExist_ShouldReturnDefinition
+      Resolve_WhenDependencyIsMissing_ShouldThrow
+    StoredProcedure
+      Execute_WhenParametersAreValid_ShouldReturnResult
+      Execute_WhenRequiredParameterIsMissing_ShouldThrow
+      Execute_WhenTransactionFails_ShouldPropagateFailure
+```
 
-        DBS["DatabaseServer"]
-        DBS_TEST["Start_WhenConfigurationIsValid_ShouldStart<br/>
-        Stop_WhenServerIsRunning_ShouldStop<br/>
-        Start_WhenPortIsUnavailable_ShouldThrow"]
-        DBS --> DBS_TEST
+### 3. Transaction Management Unit Tests
 
-        DBM["DatabaseManager"]
-        DBM_TEST["CreateDatabase_WhenNameIsValid_ShouldCreateDatabase<br/>
-        CreateDatabase_WhenNameAlreadyExists_ShouldThrow<br/>
-        DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase"]
-        DBM --> DBM_TEST
+```mermaid
+mindmap
+  root((Transaction Management))
+    Transaction
+      Begin_WhenTransactionIsNew_ShouldBecomeActive
+      Commit_WhenTransactionIsActive_ShouldCommit
+      Rollback_WhenTransactionIsActive_ShouldRollback
+    TransactionManager
+      BeginTransaction_ShouldReturnActiveTransaction
+      Commit_WhenTransactionExists_ShouldCommitTransaction
+      Commit_WhenTransactionDoesNotExist_ShouldThrow
+    LockManager
+      Acquire_WhenLocksAreCompatible_ShouldGrantLock
+      Acquire_WhenLocksConflict_ShouldRejectOrWait
+      Release_WhenLockExists_ShouldRemoveLock
+    MVCCManager
+      CreateVersion_WhenRowChanges_ShouldCreateNewVersion
+      ReadVersion_WhenVersionIsVisible_ShouldReturnVersion
+      Cleanup_WhenVersionIsObsolete_ShouldRemoveVersion
+```
 
-        DB["Database"]
-        DB_TEST["Open_WhenDatabaseIsClosed_ShouldOpenDatabase<br/>
-        Close_WhenDatabaseIsOpen_ShouldCloseDatabase<br/>
-        AddSchema_WhenNameAlreadyExists_ShouldThrow"]
-        DB --> DB_TEST
+### 4. Storage Engine Unit Tests
 
-        SCH["Schema"]
-        SCH_TEST["AddTable_WhenTableIsValid_ShouldRegisterTable<br/>
-        AddTable_WhenNameAlreadyExists_ShouldThrow<br/>
-        RemoveTable_WhenTableExists_ShouldRemoveTable"]
-        SCH --> SCH_TEST
+```mermaid
+mindmap
+  root((Storage Engine))
+    BufferPool
+      FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame
+      FetchPage_WhenSpaceIsAvailable_ShouldLoadPage
+      FetchPage_WhenAllFramesArePinned_ShouldThrow
+    Page
+      InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord
+      InsertRecord_WhenSpaceIsInsufficient_ShouldFail
+      DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory
+    StorageEngine
+      Initialize_WhenConfigurationIsValid_ShouldInitializeComponents
+      ReadPage_ShouldDelegateToBufferPool
+      Shutdown_ShouldFlushDirtyPagesAndCloseFiles
+    FileManager
+      CreateFile_WhenPathIsValid_ShouldCreateFile
+      OpenFile_WhenFileExists_ShouldReturnHandle
+      DeleteFile_WhenFileIsInUse_ShouldThrow
+```
 
-        TBL["Table"]
-        TBL_TEST["InsertRow_WhenRowIsValid_ShouldInsertRow<br/>
-        InsertRow_WhenSchemaDoesNotMatch_ShouldThrow<br/>
-        AddColumn_WhenNameAlreadyExists_ShouldThrow"]
-        TBL --> TBL_TEST
+### 5. Recovery Management Unit Tests
 
-        COL["Column"]
-        COL_TEST["Create_WhenDefinitionIsValid_ShouldCreateColumn<br/>
-        Create_WhenNameIsInvalid_ShouldThrow<br/>
-        ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse"]
-        COL --> COL_TEST
+```mermaid
+mindmap
+  root((Recovery Management))
+    WALManager
+      Append_WhenRecordIsValid_ShouldAssignLSN
+      Flush_WhenTargetLSNExists_ShouldPersistRecords
+      Append_WhenSequenceIsInvalid_ShouldThrow
+    RecoveryManager
+      Recover_ShouldRedoCommittedTransactions
+      Recover_ShouldUndoUncommittedTransactions
+      Recover_WhenCheckpointExists_ShouldStartFromCheckpoint
+    BackupManager
+      CreateBackup_WhenDatabaseIsOnline_ShouldCreateBackup
+      Restore_WhenBackupIsValid_ShouldRestoreDatabase
+      CreateBackup_WhenWriteFails_ShouldCleanPartialBackup
+```
 
-        ROW["Row"]
-        ROW_TEST["GetValue_WhenColumnExists_ShouldReturnValue<br/>
-        SetValue_WhenValueIsValid_ShouldUpdateValue<br/>
-        SetValue_WhenTypeDoesNotMatch_ShouldThrow"]
-        ROW --> ROW_TEST
+### 6. Query Processor Unit Tests
 
-        CON["Constraint"]
-        CON_TEST["Validate_WhenValueSatisfiesConstraint_ShouldSucceed<br/>
-        Validate_WhenValueViolatesConstraint_ShouldFail<br/>
-        Apply_WhenConstraintIsDisabled_ShouldSkipValidation"]
-        CON --> CON_TEST
+```mermaid
+mindmap
+  root((Query Processor))
+    Lexer
+      Tokenize_WhenSQLIsValid_ShouldReturnTokens
+      Tokenize_WhenInputContainsWhitespace_ShouldIgnoreWhitespace
+      Tokenize_WhenTokenIsInvalid_ShouldThrow
+    SQLParser
+      Parse_WhenSelectStatementIsValid_ShouldReturnAST
+      Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError
+      Parse_WhenTokensAreEmpty_ShouldRejectInput
+    AST
+      Accept_WhenVisitorIsProvided_ShouldDispatchVisitor
+      Build_WhenChildrenAreValid_ShouldPreserveTreeStructure
+      Build_WhenRequiredNodeIsMissing_ShouldFail
+    QueryOptimizer
+      Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan
+      Optimize_ShouldPreserveLogicalSemantics
+      Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan
+    LogicalPlan
+      AddOperator_WhenOperatorIsValid_ShouldUpdatePlan
+      Validate_WhenOperatorInputsMatch_ShouldSucceed
+      Validate_WhenSchemaDoesNotMatch_ShouldFail
+    PhysicalPlan
+      Build_WhenLogicalPlanIsValid_ShouldCreatePhysicalOperators
+      CalculateCost_ShouldReturnEstimatedExecutionCost
+      Validate_WhenOperatorIsUnsupported_ShouldFail
+    QueryExecutor
+      Execute_WhenPlanIsValid_ShouldReturnRows
+      Execute_WhenStorageFails_ShouldPropagateFailure
+      Execute_WhenTransactionFails_ShouldRollback
+```
 
-        FK["ForeignKey"]
-        FK_TEST["Validate_WhenParentRecordExists_ShouldSucceed<br/>
-        Validate_WhenParentRecordDoesNotExist_ShouldFail<br/>
-        DeleteParent_WhenRestricted_ShouldRejectDeletion"]
-        FK --> FK_TEST
+### 7. Security Management Unit Tests
 
-        IDX["Index"]
-        IDX_TEST["Insert_WhenKeyIsValid_ShouldAddEntry<br/>
-        Search_WhenKeyExists_ShouldReturnRecordPointer<br/>
-        Insert_WhenUniqueKeyAlreadyExists_ShouldThrow"]
-        IDX --> IDX_TEST
+```mermaid
+mindmap
+  root((Security Management))
+    SecurityManager
+      Authenticate_WhenCredentialsAreValid_ShouldReturnUser
+      Authenticate_WhenCredentialsAreInvalid_ShouldFail
+      Authorize_WhenPermissionIsMissing_ShouldDenyAccess
+    User
+      AssignRole_WhenRoleIsValid_ShouldAddRole
+      AssignRole_WhenRoleAlreadyAssigned_ShouldNotDuplicate
+      Disable_WhenUserIsActive_ShouldDisableUser
+    Role
+      AddPermission_WhenPermissionIsValid_ShouldAddPermission
+      AddPermission_WhenPermissionExists_ShouldNotDuplicate
+      RemovePermission_WhenPermissionExists_ShouldRemovePermission
+    Permission
+      Allows_WhenActionAndResourceMatch_ShouldReturnTrue
+      Allows_WhenActionDoesNotMatch_ShouldReturnFalse
+      Allows_WhenScopeDoesNotMatch_ShouldReturnFalse
+```
 
-        PART["Partition"]
-        PART_TEST["RouteRow_WhenKeyMatchesRange_ShouldReturnPartition<br/>
-        RouteRow_WhenKeyIsOutsideRange_ShouldFail<br/>
-        AddRange_WhenRangesOverlap_ShouldThrow"]
-        PART --> PART_TEST
+### 8. Replication & Cluster Unit Tests
 
-        VIEW["View"]
-        VIEW_TEST["Create_WhenQueryIsValid_ShouldCreateView<br/>
-        Resolve_WhenDependenciesExist_ShouldReturnDefinition<br/>
-        Resolve_WhenDependencyIsMissing_ShouldThrow"]
-        VIEW --> VIEW_TEST
+```mermaid
+mindmap
+  root((Replication & Cluster))
+    ReplicationManager
+      Replicate_WhenFollowerIsAvailable_ShouldSendLogRecords
+      Replicate_WhenFollowerFails_ShouldRetry
+      Commit_WhenQuorumIsNotReached_ShouldFail
+    ClusterNode
+      ReceiveHeartbeat_ShouldUpdateLastSeenTime
+      MarkUnavailable_WhenHeartbeatExpires_ShouldChangeState
+      Create_WhenEndpointIsInvalid_ShouldThrow
+```
 
-        SP["StoredProcedure"]
-        SP_TEST["Execute_WhenParametersAreValid_ShouldReturnResult<br/>
-        Execute_WhenRequiredParameterIsMissing_ShouldThrow<br/>
-        Execute_WhenTransactionFails_ShouldPropagateFailure"]
-        SP --> SP_TEST
+### 9. Monitoring Unit Tests
 
-        CAT["CatalogManager"]
-        CAT_TEST["Register_WhenObjectIsValid_ShouldAddToCatalog<br/>
-        Register_WhenObjectAlreadyExists_ShouldThrow<br/>
-        Find_WhenObjectDoesNotExist_ShouldReturnNull"]
-        CAT --> CAT_TEST
-
-        STAT["StatisticsManager"]
-        STAT_TEST["UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics<br/>
-        EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate<br/>
-        EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback"]
-        STAT --> STAT_TEST
-    end
-
-    %% =====================================================
-    %% TRANSACTION AND STORAGE
-    %% =====================================================
-
-    subgraph STORAGE_LAYER["Transaction & Storage"]
-        direction TB
-
-        TX["Transaction"]
-        TX_TEST["Begin_WhenTransactionIsNew_ShouldBecomeActive<br/>
-        Commit_WhenTransactionIsActive_ShouldCommit<br/>
-        Rollback_WhenTransactionIsActive_ShouldRollback"]
-        TX --> TX_TEST
-
-        TXM["TransactionManager"]
-        TXM_TEST["BeginTransaction_ShouldReturnActiveTransaction<br/>
-        Commit_WhenTransactionExists_ShouldCommitTransaction<br/>
-        Commit_WhenTransactionDoesNotExist_ShouldThrow"]
-        TXM --> TXM_TEST
-
-        LOCK["LockManager"]
-        LOCK_TEST["Acquire_WhenLocksAreCompatible_ShouldGrantLock<br/>
-        Acquire_WhenLocksConflict_ShouldRejectOrWait<br/>
-        Release_WhenLockExists_ShouldRemoveLock"]
-        LOCK --> LOCK_TEST
-
-        MVCC["MVCCManager"]
-        MVCC_TEST["CreateVersion_WhenRowChanges_ShouldCreateNewVersion<br/>
-        ReadVersion_WhenVersionIsVisible_ShouldReturnVersion<br/>
-        Cleanup_WhenVersionIsObsolete_ShouldRemoveVersion"]
-        MVCC --> MVCC_TEST
-
-        BP["BufferPool"]
-        BP_TEST["FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame<br/>
-        FetchPage_WhenSpaceIsAvailable_ShouldLoadPage<br/>
-        FetchPage_WhenAllFramesArePinned_ShouldThrow"]
-        BP --> BP_TEST
-
-        PAGE["Page"]
-        PAGE_TEST["InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord<br/>
-        InsertRecord_WhenSpaceIsInsufficient_ShouldFail<br/>
-        DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory"]
-        PAGE --> PAGE_TEST
-
-        SE["StorageEngine"]
-        SE_TEST["Initialize_WhenConfigurationIsValid_ShouldInitializeComponents<br/>
-        ReadPage_ShouldDelegateToBufferPool<br/>
-        Shutdown_ShouldFlushDirtyPagesAndCloseFiles"]
-        SE --> SE_TEST
-
-        FM["FileManager"]
-        FM_TEST["CreateFile_WhenPathIsValid_ShouldCreateFile<br/>
-        OpenFile_WhenFileExists_ShouldReturnHandle<br/>
-        DeleteFile_WhenFileIsInUse_ShouldThrow"]
-        FM --> FM_TEST
-
-        WAL["WALManager"]
-        WAL_TEST["Append_WhenRecordIsValid_ShouldAssignLSN<br/>
-        Flush_WhenTargetLSNExists_ShouldPersistRecords<br/>
-        Append_WhenSequenceIsInvalid_ShouldThrow"]
-        WAL --> WAL_TEST
-
-        REC["RecoveryManager"]
-        REC_TEST["Recover_ShouldRedoCommittedTransactions<br/>
-        Recover_ShouldUndoUncommittedTransactions<br/>
-        Recover_WhenCheckpointExists_ShouldStartFromCheckpoint"]
-        REC --> REC_TEST
-    end
-
-    %% =====================================================
-    %% QUERY PROCESSING
-    %% =====================================================
-
-    subgraph QUERY_LAYER["Query Processing"]
-        direction TB
-
-        LEX["Lexer"]
-        LEX_TEST["Tokenize_WhenSQLIsValid_ShouldReturnTokens<br/>
-        Tokenize_WhenInputContainsWhitespace_ShouldIgnoreWhitespace<br/>
-        Tokenize_WhenTokenIsInvalid_ShouldThrow"]
-        LEX --> LEX_TEST
-
-        PARSER["SQLParser"]
-        PARSER_TEST["Parse_WhenSelectStatementIsValid_ShouldReturnAST<br/>
-        Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError<br/>
-        Parse_WhenTokensAreEmpty_ShouldRejectInput"]
-        PARSER --> PARSER_TEST
-
-        AST_NODE["AST"]
-        AST_TEST["Accept_WhenVisitorIsProvided_ShouldDispatchVisitor<br/>
-        Build_WhenChildrenAreValid_ShouldPreserveTreeStructure<br/>
-        Build_WhenRequiredNodeIsMissing_ShouldFail"]
-        AST_NODE --> AST_TEST
-
-        QO["QueryOptimizer"]
-        QO_TEST["Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan<br/>
-        Optimize_ShouldPreserveLogicalSemantics<br/>
-        Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan"]
-        QO --> QO_TEST
-
-        LP["LogicalPlan"]
-        LP_TEST["AddOperator_WhenOperatorIsValid_ShouldUpdatePlan<br/>
-        Validate_WhenOperatorInputsMatch_ShouldSucceed<br/>
-        Validate_WhenSchemaDoesNotMatch_ShouldFail"]
-        LP --> LP_TEST
-
-        PP["PhysicalPlan"]
-        PP_TEST["Build_WhenLogicalPlanIsValid_ShouldCreatePhysicalOperators<br/>
-        CalculateCost_ShouldReturnEstimatedExecutionCost<br/>
-        Validate_WhenOperatorIsUnsupported_ShouldFail"]
-        PP --> PP_TEST
-
-        QE["QueryExecutor"]
-        QE_TEST["Execute_WhenPlanIsValid_ShouldReturnRows<br/>
-        Execute_WhenStorageFails_ShouldPropagateFailure<br/>
-        Execute_WhenTransactionFails_ShouldRollback"]
-        QE --> QE_TEST
-    end
-
-    %% =====================================================
-    %% SECURITY
-    %% =====================================================
-
-    subgraph SECURITY_LAYER["Security"]
-        direction TB
-
-        SM["SecurityManager"]
-        SM_TEST["Authenticate_WhenCredentialsAreValid_ShouldReturnUser<br/>
-        Authenticate_WhenCredentialsAreInvalid_ShouldFail<br/>
-        Authorize_WhenPermissionIsMissing_ShouldDenyAccess"]
-        SM --> SM_TEST
-
-        USER["User"]
-        USER_TEST["AssignRole_WhenRoleIsValid_ShouldAddRole<br/>
-        AssignRole_WhenRoleAlreadyAssigned_ShouldNotDuplicate<br/>
-        Disable_WhenUserIsActive_ShouldDisableUser"]
-        USER --> USER_TEST
-
-        ROLE["Role"]
-        ROLE_TEST["AddPermission_WhenPermissionIsValid_ShouldAddPermission<br/>
-        AddPermission_WhenPermissionExists_ShouldNotDuplicate<br/>
-        RemovePermission_WhenPermissionExists_ShouldRemovePermission"]
-        ROLE --> ROLE_TEST
-
-        PERM["Permission"]
-        PERM_TEST["Allows_WhenActionAndResourceMatch_ShouldReturnTrue<br/>
-        Allows_WhenActionDoesNotMatch_ShouldReturnFalse<br/>
-        Allows_WhenScopeDoesNotMatch_ShouldReturnFalse"]
-        PERM --> PERM_TEST
-    end
-
-    %% =====================================================
-    %% DISTRIBUTED SYSTEM AND ADMINISTRATION
-    %% =====================================================
-
-    subgraph ADMIN_LAYER["Replication, Cluster & Administration"]
-        direction TB
-
-        REPL["ReplicationManager"]
-        REPL_TEST["Replicate_WhenFollowerIsAvailable_ShouldSendLogRecords<br/>
-        Replicate_WhenFollowerFails_ShouldRetry<br/>
-        Commit_WhenQuorumIsNotReached_ShouldFail"]
-        REPL --> REPL_TEST
-
-        NODE["ClusterNode"]
-        NODE_TEST["ReceiveHeartbeat_ShouldUpdateLastSeenTime<br/>
-        MarkUnavailable_WhenHeartbeatExpires_ShouldChangeState<br/>
-        Create_WhenEndpointIsInvalid_ShouldThrow"]
-        NODE --> NODE_TEST
-
-        BACKUP["BackupManager"]
-        BACKUP_TEST["CreateBackup_WhenDatabaseIsOnline_ShouldCreateBackup<br/>
-        Restore_WhenBackupIsValid_ShouldRestoreDatabase<br/>
-        CreateBackup_WhenWriteFails_ShouldCleanPartialBackup"]
-        BACKUP --> BACKUP_TEST
-
-        MON["MonitoringManager"]
-        MON_TEST["CollectMetrics_WhenSourcesAreAvailable_ShouldReturnMetrics<br/>
-        Evaluate_WhenThresholdIsExceeded_ShouldRaiseAlert<br/>
-        CollectMetrics_WhenSourceFails_ShouldRecordFailure"]
-        MON --> MON_TEST
-    end
-
-    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
-    classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
-
-    class DBS,DBM,DB,SCH,TBL,COL,ROW,CON,FK,IDX,PART,VIEW,SP,CAT,STAT classNode
-    class TX,TXM,LOCK,MVCC,BP,PAGE,SE,FM,WAL,REC classNode
-    class LEX,PARSER,AST_NODE,QO,LP,PP,QE classNode
-    class SM,USER,ROLE,PERM classNode
-    class REPL,NODE,BACKUP,MON classNode
-
-    class DBS_TEST,DBM_TEST,DB_TEST,SCH_TEST,TBL_TEST,COL_TEST,ROW_TEST testNode
-    class CON_TEST,FK_TEST,IDX_TEST,PART_TEST,VIEW_TEST,SP_TEST,CAT_TEST,STAT_TEST testNode
-    class TX_TEST,TXM_TEST,LOCK_TEST,MVCC_TEST,BP_TEST,PAGE_TEST,SE_TEST,FM_TEST,WAL_TEST,REC_TEST testNode
-    class LEX_TEST,PARSER_TEST,AST_TEST,QO_TEST,LP_TEST,PP_TEST,QE_TEST testNode
-    class SM_TEST,USER_TEST,ROLE_TEST,PERM_TEST testNode
-    class REPL_TEST,NODE_TEST,BACKUP_TEST,MON_TEST testNode
+```mermaid
+mindmap
+  root((Monitoring))
+    MonitoringManager
+      CollectMetrics_WhenSourcesAreAvailable_ShouldReturnMetrics
+      Evaluate_WhenThresholdIsExceeded_ShouldRaiseAlert
+      CollectMetrics_WhenSourceFails_ShouldRecordFailure
 ```

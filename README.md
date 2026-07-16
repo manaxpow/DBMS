@@ -84,340 +84,486 @@ flowchart LR
     SysM --- SysM_IE[Import & Export]
 ```
 
-## Architecture Class Diagram
+## Feature Class Diagrams
 
+### 1. Storage Engine
 ```mermaid
 classDiagram
-    class DatabaseManagementSystem {
-        <<System>>
-    }
-    class QueryProcessor {
-        <<Component>>
-    }
-    class StorageEngine {
-        <<Component>>
-    }
-    class TransactionManagement {
-        <<Component>>
-    }
-    class LoggingManagement {
-        <<Component>>
-    }
-    class RecoveryManagement {
-        <<Component>>
-    }
-    class SecurityManagement {
-        <<Component>>
-    }
-    class DatabaseManager {
-        <<Component>>
-    }
-    class DatabaseObjectManagement {
-        <<Component>>
-    }
-    class PerformanceManagement {
-        <<Component>>
-    }
-    class SystemManagement {
-        <<Component>>
-    }
+    direction LR
 
-    DatabaseManagementSystem *-- QueryProcessor
-    DatabaseManagementSystem *-- StorageEngine
-    DatabaseManagementSystem *-- TransactionManagement
-    DatabaseManagementSystem *-- LoggingManagement
-    DatabaseManagementSystem *-- RecoveryManagement
-    DatabaseManagementSystem *-- SecurityManagement
-    DatabaseManagementSystem *-- DatabaseManager
-    DatabaseManagementSystem *-- DatabaseObjectManagement
-    DatabaseManagementSystem *-- PerformanceManagement
-    DatabaseManagementSystem *-- SystemManagement
+    class IFileLifecycleManager {
+        <<interface>>
+        +CreateFile(string path) FileId
+        +DeleteFile(FileId fileId) void
+        +OpenFile(FileId fileId) FileHandle
+        +CloseFile(FileHandle handle) void
+    }
+    class FileLifecycleManager
+
+    class IPhysicalFileSystem {
+        <<interface>>
+        +ReadBlock(DiskAddress address, byte[] buffer) void
+        +WriteBlock(DiskAddress address, byte[] buffer) void
+    }
+    class PhysicalFileSystem
+
+    class IBufferPoolManager {
+        <<interface>>
+        +FetchPage(PageId pageId) Page
+        +UnpinPage(PageId pageId, bool isDirty) void
+        +FlushPage(PageId pageId) void
+        +NewPage(FileId fileId) Page
+        +DeletePage(PageId pageId) void
+    }
+    class BufferPoolManager
+
+    class IPageReplacementPolicy {
+        <<interface>>
+        +Pin(FrameId frameId) void
+        +Unpin(FrameId frameId) void
+        +Victim() FrameId
+    }
+    class ClockReplacementPolicy
+
+    class IRecordManager {
+        <<interface>>
+        +InsertRecord(Record record) RecordId
+        +GetRecord(RecordId recordId) Record
+        +UpdateRecord(RecordId recordId, Record record) void
+        +DeleteRecord(RecordId recordId) void
+    }
+    class RecordManager
+
+    class IIndex {
+        <<interface>>
+        +Insert(IndexKey key, RecordPointer ptr) void
+        +Delete(IndexKey key) void
+        +Search(IndexKey key) RecordPointer
+    }
+    class BPlusTreeIndex
+
+    IFileLifecycleManager <|-- FileLifecycleManager
+    IPhysicalFileSystem <|-- PhysicalFileSystem
+    IBufferPoolManager <|-- BufferPoolManager
+    IPageReplacementPolicy <|-- ClockReplacementPolicy
+    IRecordManager <|-- RecordManager
+    IIndex <|-- BPlusTreeIndex
+
+    BufferPoolManager --> IPageReplacementPolicy
 ```
 
-## Component Level Flowcharts
-
-### 1. Query Processor Flowchart
-
+### 2. Query Processor
 ```mermaid
-flowchart TD
-    QP[QueryProcessor]
-    
-    QP_Parse[ParseSQL]
-    QP_Analyze[AnalyzeSemantics]
-    QP_Plan[CreateLogicalPlan]
-    QP_Opt[OptimizeQuery]
-    QP_Exec[ExecuteQuery]
+classDiagram
+    direction LR
 
-    QP --> QP_Parse
-    QP --> QP_Analyze
-    QP --> QP_Plan
-    QP --> QP_Opt
-    QP --> QP_Exec
+    class ISqlParser {
+        <<interface>>
+        +Parse(string sql) SqlStatement
+    }
+    class SqlParser
 
-    QP_Parse_Test1([ParseSQL_ValidSyntax_ReturnsAST])
-    QP_Parse_Test2([ParseSQL_InvalidSyntax_ThrowsException])
-    QP_Parse --> QP_Parse_Test1
-    QP_Parse --> QP_Parse_Test2
+    class ISemanticAnalyzer {
+        <<interface>>
+        +Analyze(SqlStatement statement, SemanticContext ctx) BoundStatement
+    }
+    class SemanticAnalyzer
 
-    QP_Analyze_Test1([AnalyzeSemantics_ValidObjects_Passes])
-    QP_Analyze_Test2([AnalyzeSemantics_MissingTable_ThrowsException])
-    QP_Analyze --> QP_Analyze_Test1
-    QP_Analyze --> QP_Analyze_Test2
+    class ILogicalPlanBuilder {
+        <<interface>>
+        +Build(BoundStatement statement) LogicalPlan
+    }
+    class LogicalPlanBuilder
 
-    QP_Plan_Test1([CreateLogicalPlan_ValidAST_ReturnsPlan])
-    QP_Plan --> QP_Plan_Test1
+    class IQueryOptimizer {
+        <<interface>>
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+    class QueryOptimizer
 
-    QP_Opt_Test1([OptimizeQuery_GivenPlan_ReturnsOptimizedPlan])
-    QP_Opt --> QP_Opt_Test1
+    class IPhysicalPlanBuilder {
+        <<interface>>
+        +Build(LogicalPlan logicalPlan) PhysicalPlan
+    }
+    class PhysicalPlanBuilder
 
-    QP_Exec_Test1([ExecuteQuery_ValidPlan_ReturnsResult])
-    QP_Exec --> QP_Exec_Test1
+    class IQueryExecutor {
+        <<interface>>
+        +Execute(PhysicalPlan plan, ExecutionContext ctx) QueryResult
+    }
+    class QueryExecutor
+
+    ISqlParser <|-- SqlParser
+    ISemanticAnalyzer <|-- SemanticAnalyzer
+    ILogicalPlanBuilder <|-- LogicalPlanBuilder
+    IQueryOptimizer <|-- QueryOptimizer
+    IPhysicalPlanBuilder <|-- PhysicalPlanBuilder
+    IQueryExecutor <|-- QueryExecutor
+
+    QueryExecutor --> PhysicalPlanBuilder
+    QueryOptimizer --> LogicalPlanBuilder
 ```
 
-### 2. Storage Engine Flowchart
-
+### 3. Transaction Management
 ```mermaid
-flowchart TD
-    SE[StorageEngine]
+classDiagram
+    direction LR
 
-    SE_CreateFile[CreateDataFile]
-    SE_OpenFile[OpenDataFile]
-    SE_ReadPage[ReadPageData]
-    SE_WritePage[WritePageData]
-    SE_AllocExtent[AllocateExtent]
+    class ITransactionManager {
+        <<interface>>
+        +BeginTransaction(IsolationLevel level) TransactionId
+        +CommitTransaction(TransactionId txId) void
+        +RollbackTransaction(TransactionId txId) void
+        +GetTransactionState(TransactionId txId) TransactionState
+    }
+    class TransactionManager
 
-    SE --> SE_CreateFile
-    SE --> SE_OpenFile
-    SE --> SE_ReadPage
-    SE --> SE_WritePage
-    SE --> SE_AllocExtent
+    class IIsolationPolicy {
+        <<interface>>
+        +EnforceReadRules(TransactionId txId, LockResource res) void
+        +EnforceWriteRules(TransactionId txId, LockResource res) void
+    }
+    class RepeatableReadPolicy
 
-    SE_CreateFile_Test1([CreateDataFile_ValidParams_Success])
-    SE_CreateFile_Test2([CreateDataFile_AlreadyExists_Throws])
-    SE_CreateFile --> SE_CreateFile_Test1
-    SE_CreateFile --> SE_CreateFile_Test2
+    class ILockManager {
+        <<interface>>
+        +AcquireLock(TransactionId txId, LockResource res, LockMode mode) bool
+        +ReleaseLock(TransactionId txId, LockResource res) void
+        +UpgradeLock(TransactionId txId, LockResource res, LockMode newMode) bool
+    }
+    class LockManager
 
-    SE_OpenFile_Test1([OpenDataFile_ExistingFile_Success])
-    SE_OpenFile_Test2([OpenDataFile_NotFound_Throws])
-    SE_OpenFile --> SE_OpenFile_Test1
-    SE_OpenFile --> SE_OpenFile_Test2
+    class IDeadlockDetector {
+        <<interface>>
+        +DetectDeadlock() DeadlockCycle
+        +ResolveDeadlock(DeadlockCycle cycle) TransactionId
+    }
+    class DeadlockDetector
 
-    SE_ReadPage_Test1([ReadPageData_ValidId_ReturnsData])
-    SE_ReadPage_Test2([ReadPageData_InvalidId_Throws])
-    SE_ReadPage --> SE_ReadPage_Test1
-    SE_ReadPage --> SE_ReadPage_Test2
+    class IConcurrencyController {
+        <<interface>>
+        +CheckAccess(TransactionId txId, OperationAccess access) bool
+    }
+    class ConcurrencyController
 
-    SE_WritePage_Test1([WritePageData_ValidId_Success])
-    SE_WritePage --> SE_WritePage_Test1
+    ITransactionManager <|-- TransactionManager
+    IIsolationPolicy <|-- RepeatableReadPolicy
+    ILockManager <|-- LockManager
+    IDeadlockDetector <|-- DeadlockDetector
+    IConcurrencyController <|-- ConcurrencyController
 
-    SE_AllocExtent_Test1([AllocateExtent_HasSpace_ReturnsExtent])
-    SE_AllocExtent --> SE_AllocExtent_Test1
+    TransactionManager --> ILockManager
+    LockManager --> IDeadlockDetector
 ```
 
-### 3. Transaction Management Flowchart
-
+### 4. Logging Management
 ```mermaid
-flowchart TD
-    TM[TransactionManagement]
+classDiagram
+    direction LR
 
-    TM_Begin[BeginTransaction]
-    TM_Commit[CommitTransaction]
-    TM_Roll[RollbackTransaction]
-    TM_Lock[AcquireLock]
+    class ILogManager {
+        <<interface>>
+        +AppendLog(LogRecord record) LogSequenceNumber
+        +FlushToLSN(LogSequenceNumber lsn) void
+        +GetLogRecord(LogSequenceNumber lsn) LogRecord
+    }
+    class LogManager
 
-    TM --> TM_Begin
-    TM --> TM_Commit
-    TM --> TM_Roll
-    TM --> TM_Lock
+    class IWALProtocol {
+        <<interface>>
+        +EnsureWAL(LogSequenceNumber pageLsn) void
+    }
+    class WALProtocol
 
-    TM_Begin_Test1([BeginTransaction_ReturnsNewId])
-    TM_Begin --> TM_Begin_Test1
+    class ILogBufferManager {
+        <<interface>>
+        +WriteToBuffer(LogRecord record) void
+        +FlushBuffer() void
+    }
+    class LogBufferManager
 
-    TM_Commit_Test1([CommitTransaction_ActiveTx_SavesChanges])
-    TM_Commit_Test2([CommitTransaction_InactiveTx_Throws])
-    TM_Commit --> TM_Commit_Test1
-    TM_Commit --> TM_Commit_Test2
+    class ILogWriter {
+        <<interface>>
+        +WriteBlock(LogBlock block) void
+        +Sync() void
+    }
+    class LogWriter
 
-    TM_Roll_Test1([RollbackTransaction_ActiveTx_RevertsChanges])
-    TM_Roll --> TM_Roll_Test1
+    ILogManager <|-- LogManager
+    IWALProtocol <|-- WALProtocol
+    ILogBufferManager <|-- LogBufferManager
+    ILogWriter <|-- LogWriter
 
-    TM_Lock_Test1([AcquireLock_ResourceFree_GrantsLock])
-    TM_Lock_Test2([AcquireLock_ResourceBusy_WaitsOrTimesOut])
-    TM_Lock --> TM_Lock_Test1
-    TM_Lock --> TM_Lock_Test2
+    LogManager --> IWALProtocol
+    LogManager --> ILogBufferManager
+    LogBufferManager --> ILogWriter
 ```
 
-### 4. Logging Management Flowchart
-
+### 5. Recovery Management
 ```mermaid
-flowchart TD
-    LM[LoggingManagement]
+classDiagram
+    direction LR
 
-    LM_Write[WriteLogRecord]
-    LM_Flush[FlushLogBuffer]
-    LM_Check[PerformCheckpoint]
+    class IRecoveryManager {
+        <<interface>>
+        +RecoverDatabase() void
+        +UndoTransaction(TransactionId txId) void
+    }
+    class RecoveryManager
 
-    LM --> LM_Write
-    LM --> LM_Flush
-    LM --> LM_Check
+    class ILogBasedRecovery {
+        <<interface>>
+        +PerformAnalysis() RecoveryAnalysisPhase
+        +PerformRedo() void
+        +PerformUndo() void
+    }
+    class AriesRecoveryAlgorithm
 
-    LM_Write_Test1([WriteLogRecord_ValidData_AppendsToBuffer])
-    LM_Write --> LM_Write_Test1
+    class ICheckpointCoordinator {
+        <<interface>>
+        +CreateCheckpoint() CheckpointId
+        +GetLatestCheckpoint() CheckpointMetadata
+    }
+    class CheckpointCoordinator
 
-    LM_Flush_Test1([FlushLogBuffer_HasData_WritesToDisk])
-    LM_Flush --> LM_Flush_Test1
+    class IBackupManager {
+        <<interface>>
+        +CreateFullBackup(string destination) BackupId
+        +CreateIncrementalBackup(string destination) BackupId
+    }
+    class BackupManager
 
-    LM_Check_Test1([PerformCheckpoint_SavesState_Success])
-    LM_Check --> LM_Check_Test1
+    class IRestoreManager {
+        <<interface>>
+        +RestoreFromBackup(BackupId backupId) void
+    }
+    class RestoreManager
+
+    IRecoveryManager <|-- RecoveryManager
+    ILogBasedRecovery <|-- AriesRecoveryAlgorithm
+    ICheckpointCoordinator <|-- CheckpointCoordinator
+    IBackupManager <|-- BackupManager
+    IRestoreManager <|-- RestoreManager
+
+    RecoveryManager --> ILogBasedRecovery
+    RecoveryManager --> ICheckpointCoordinator
 ```
 
-### 5. Recovery Management Flowchart
-
+### 6. Security Management
 ```mermaid
-flowchart TD
-    RM[RecoveryManagement]
+classDiagram
+    direction LR
 
-    RM_Recover[RecoverFromLog]
-    RM_Undo[UndoTransaction]
-    RM_Redo[RedoTransaction]
+    class IAuthenticationManager {
+        <<interface>>
+        +Authenticate(Credential cred) AuthenticationResult
+        +CreateLoginSession(UserId userId) SessionId
+    }
+    class AuthenticationManager
 
-    RM --> RM_Recover
-    RM --> RM_Undo
-    RM --> RM_Redo
+    class IAuthorizationManager {
+        <<interface>>
+        +CheckPermission(UserId userId, SecuredResource res, Privilege priv) bool
+        +GrantPermission(UserId userId, SecuredResource res, Privilege priv) void
+    }
+    class AuthorizationManager
 
-    RM_Recover_Test1([RecoverFromLog_ValidLog_RestoresState])
-    RM_Recover_Test2([RecoverFromLog_CorruptedLog_ThrowsException])
-    RM_Recover --> RM_Recover_Test1
-    RM_Recover --> RM_Recover_Test2
+    class IPrincipalManager {
+        <<interface>>
+        +CreateUser(string username, string password) UserId
+        +AssignRole(UserId userId, RoleId roleId) void
+    }
+    class PrincipalManager
 
-    RM_Undo_Test1([UndoTransaction_ActiveTx_RevertsActions])
-    RM_Undo --> RM_Undo_Test1
+    class IConnectionManager {
+        <<interface>>
+        +OpenConnection(ConnectionContext ctx) ConnectionId
+        +CloseConnection(ConnectionId connId) void
+        +GetActiveConnections() List~ConnectionId~
+    }
+    class ConnectionManager
 
-    RM_Redo_Test1([RedoTransaction_CommittedTx_ReappliesActions])
-    RM_Redo --> RM_Redo_Test1
+    IAuthenticationManager <|-- AuthenticationManager
+    IAuthorizationManager <|-- AuthorizationManager
+    IPrincipalManager <|-- PrincipalManager
+    IConnectionManager <|-- ConnectionManager
 ```
 
-### 6. Security Management Flowchart
-
+### 7. Database Manager
 ```mermaid
-flowchart TD
-    SecM[SecurityManagement]
+classDiagram
+    direction LR
 
-    SecM_Auth[AuthenticateUser]
-    SecM_Authz[AuthorizeAction]
-    SecM_Audit[LogAuditTrail]
+    class IDatabaseRegistry {
+        <<interface>>
+        +RegisterDatabase(DatabaseDescriptor desc) void
+        +UnregisterDatabase(DatabaseId dbId) void
+        +GetDatabase(DatabaseId dbId) DatabaseDescriptor
+    }
+    class DatabaseRegistry
 
-    SecM --> SecM_Auth
-    SecM --> SecM_Authz
-    SecM --> SecM_Audit
+    class IDatabaseLifecycleManager {
+        <<interface>>
+        +CreateDatabase(string name) DatabaseId
+        +DropDatabase(DatabaseId dbId) void
+        +StartDatabase(DatabaseId dbId) void
+        +StopDatabase(DatabaseId dbId) void
+    }
+    class DatabaseLifecycleManager
 
-    SecM_Auth_Test1([AuthenticateUser_ValidCreds_ReturnsToken])
-    SecM_Auth_Test2([AuthenticateUser_InvalidCreds_Throws])
-    SecM_Auth --> SecM_Auth_Test1
-    SecM_Auth --> SecM_Auth_Test2
+    class IDatabaseMetadataManager {
+        <<interface>>
+        +GetMetadata(DatabaseId dbId) DatabaseMetadata
+        +UpdateMetadata(DatabaseId dbId, DatabaseMetadata meta) void
+    }
+    class DatabaseMetadataManager
 
-    SecM_Authz_Test1([AuthorizeAction_HasPermission_ReturnsTrue])
-    SecM_Authz_Test2([AuthorizeAction_NoPermission_ReturnsFalse])
-    SecM_Authz --> SecM_Authz_Test1
-    SecM_Authz --> SecM_Authz_Test2
+    class IDatabaseConfigurationManager {
+        <<interface>>
+        +LoadConfiguration(DatabaseId dbId) DatabaseConfiguration
+        +SaveConfiguration(DatabaseId dbId, DatabaseConfiguration config) void
+    }
+    class DatabaseConfigurationManager
 
-    SecM_Audit_Test1([LogAuditTrail_ActionLogged_Success])
-    SecM_Audit --> SecM_Audit_Test1
+    IDatabaseRegistry <|-- DatabaseRegistry
+    IDatabaseLifecycleManager <|-- DatabaseLifecycleManager
+    IDatabaseMetadataManager <|-- DatabaseMetadataManager
+    IDatabaseConfigurationManager <|-- DatabaseConfigurationManager
+
+    DatabaseLifecycleManager --> IDatabaseRegistry
 ```
 
-### 7. Database Manager Flowchart
-
+### 8. Database Object Management
 ```mermaid
-flowchart TD
-    DM[DatabaseManager]
+classDiagram
+    direction LR
 
-    DM_Create[CreateDatabase]
-    DM_Drop[DropDatabase]
-    DM_Start[StartDatabase]
-    DM_Stop[StopDatabase]
+    class ISchemaManager {
+        <<interface>>
+        +CreateSchema(string name, UserId ownerId) SchemaId
+        +DropSchema(SchemaId schemaId) void
+    }
+    class SchemaManager
 
-    DM --> DM_Create
-    DM --> DM_Drop
-    DM --> DM_Start
-    DM --> DM_Stop
+    class ITableManager {
+        <<interface>>
+        +CreateTable(SchemaId schemaId, TableDefinition def) TableId
+        +DropTable(TableId tableId) void
+        +AlterTable(TableId tableId, TableDefinition newDef) void
+    }
+    class TableManager
 
-    DM_Create_Test1([CreateDatabase_ValidName_Success])
-    DM_Create_Test2([CreateDatabase_Exists_Throws])
-    DM_Create --> DM_Create_Test1
-    DM_Create --> DM_Create_Test2
+    class IIndexDefinitionManager {
+        <<interface>>
+        +CreateIndex(TableId tableId, IndexDefinition def) IndexId
+        +DropIndex(IndexId indexId) void
+    }
+    class IndexDefinitionManager
 
-    DM_Drop_Test1([DropDatabase_Existing_Success])
-    DM_Drop --> DM_Drop_Test1
+    class IViewManager {
+        <<interface>>
+        +CreateView(SchemaId schemaId, ViewDefinition def) ViewId
+        +DropView(ViewId viewId) void
+    }
+    class ViewManager
 
-    DM_Start_Test1([StartDatabase_StoppedDb_Success])
-    DM_Start --> DM_Start_Test1
+    class ISystemCatalog {
+        <<interface>>
+        +GetTableDefinition(TableId tableId) TableDefinition
+        +GetIndexDefinition(IndexId indexId) IndexDefinition
+        +InvalidateCache(CatalogObjectId id) void
+    }
+    class SystemCatalog
 
-    DM_Stop_Test1([StopDatabase_RunningDb_Success])
-    DM_Stop --> DM_Stop_Test1
+    ISchemaManager <|-- SchemaManager
+    ITableManager <|-- TableManager
+    IIndexDefinitionManager <|-- IndexDefinitionManager
+    IViewManager <|-- ViewManager
+    ISystemCatalog <|-- SystemCatalog
+
+    TableManager --> ISystemCatalog
+    IndexDefinitionManager --> ISystemCatalog
 ```
 
-### 8. Database Object Management Flowchart
-
+### 9. Performance Management
 ```mermaid
-flowchart TD
-    DOM[DatabaseObjectManagement]
+classDiagram
+    direction LR
 
-    DOM_CreateTable[CreateTable]
-    DOM_DropTable[DropTable]
-    DOM_CreateIndex[CreateIndex]
+    class IPerformanceMonitor {
+        <<interface>>
+        +StartMonitoring() void
+        +StopMonitoring() void
+        +GetSnapshot() PerformanceSnapshot
+    }
+    class PerformanceMonitor
 
-    DOM --> DOM_CreateTable
-    DOM --> DOM_DropTable
-    DOM --> DOM_CreateIndex
+    class IQueryStatisticsCollector {
+        <<interface>>
+        +RecordQueryExecution(QueryExecutionStatistics stats) void
+        +GetSlowQueries(TimeSpan threshold) List~QueryExecutionStatistics~
+    }
+    class QueryStatisticsCollector
 
-    DOM_CreateTable_Test1([CreateTable_ValidSchema_Success])
-    DOM_CreateTable_Test2([CreateTable_InvalidSchema_ThrowsException])
-    DOM_CreateTable --> DOM_CreateTable_Test1
-    DOM_CreateTable --> DOM_CreateTable_Test2
+    class IResourceMonitor {
+        <<interface>>
+        +GetCpuUsage() double
+        +GetMemoryUsage() double
+        +GetDiskIO() StorageStatistics
+    }
+    class ResourceMonitor
 
-    DOM_DropTable_Test1([DropTable_ExistingTable_Success])
-    DOM_DropTable --> DOM_DropTable_Test1
+    class IPerformanceAdvisor {
+        <<interface>>
+        +AnalyzeWorkload() List~PerformanceRecommendation~
+        +SuggestIndexes() List~MissingIndexRecommendationRule~
+    }
+    class PerformanceAdvisor
 
-    DOM_CreateIndex_Test1([CreateIndex_ValidColumns_Success])
-    DOM_CreateIndex --> DOM_CreateIndex_Test1
+    IPerformanceMonitor <|-- PerformanceMonitor
+    IQueryStatisticsCollector <|-- QueryStatisticsCollector
+    IResourceMonitor <|-- ResourceMonitor
+    IPerformanceAdvisor <|-- PerformanceAdvisor
+
+    PerformanceMonitor --> IResourceMonitor
+    PerformanceAdvisor --> IQueryStatisticsCollector
 ```
 
-### 9. Performance Management Flowchart
-
+### 10. System Management
 ```mermaid
-flowchart TD
-    PM[PerformanceManagement]
+classDiagram
+    direction LR
 
-    PM_Collect[CollectMetrics]
-    PM_Analyze[AnalyzeQueryStats]
+    class ISystemConfigurationManager {
+        <<interface>>
+        +GetSetting(string key) ConfigurationValue
+        +UpdateSetting(string key, ConfigurationValue val) void
+        +LoadGlobalConfig() ConfigurationSnapshot
+    }
+    class SystemConfigurationManager
 
-    PM --> PM_Collect
-    PM --> PM_Analyze
+    class ISystemHealthMonitor {
+        <<interface>>
+        +PerformHealthCheck() SystemHealthReport
+        +RegisterHealthCheck(IHealthCheck check) void
+    }
+    class SystemHealthMonitor
 
-    PM_Collect_Test1([CollectMetrics_UpdatesStats_Success])
-    PM_Collect --> PM_Collect_Test1
+    class IImportManager {
+        <<interface>>
+        +ImportData(ImportRequest request) ImportResult
+        +ValidateImportPlan(ImportPlan plan) bool
+    }
+    class ImportManager
 
-    PM_Analyze_Test1([AnalyzeQueryStats_ReturnsReport_Success])
-    PM_Analyze --> PM_Analyze_Test1
-```
+    class IExportManager {
+        <<interface>>
+        +ExportData(ExportRequest request) ExportResult
+    }
+    class ExportManager
 
-### 10. System Management Flowchart
-
-```mermaid
-flowchart TD
-    SysM[SystemManagement]
-
-    SysM_Update[UpdateConfig]
-    SysM_Export[ExportData]
-
-    SysM --> SysM_Update
-    SysM --> SysM_Export
-
-    SysM_Update_Test1([UpdateConfig_ValidConfig_AppliesChanges])
-    SysM_Update_Test2([UpdateConfig_InvalidConfig_ThrowsException])
-    SysM_Update --> SysM_Update_Test1
-    SysM_Update --> SysM_Update_Test2
-
-    SysM_Export_Test1([ExportData_ValidPath_CreatesFile])
-    SysM_Export --> SysM_Export_Test1
+    ISystemConfigurationManager <|-- SystemConfigurationManager
+    ISystemHealthMonitor <|-- SystemHealthMonitor
+    IImportManager <|-- ImportManager
+    IExportManager <|-- ExportManager
 ```

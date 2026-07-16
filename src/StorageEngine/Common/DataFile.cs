@@ -7,7 +7,4 @@ public class DataFile
     public string FilePath { get; set; }
     public long FileSize { get; set; }
     
-    // Additional metadata or structures can go here
-    // public FileHeader Header { get; set; }
-    // public List<Extent> Extents { get; set; }
 }

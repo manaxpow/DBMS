@@ -2,7 +2,7 @@ using System;
 
 public class SqlParser : ISqlParser
 {
-    private object _lexer; 
+    private object _lexer;
 
     public SqlStatement Parse(string sql)
     {

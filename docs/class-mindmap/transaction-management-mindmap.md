@@ -4,75 +4,36 @@
 flowchart LR
     TM[Transaction Management]
 
-    TM --> TL[Transaction Lifecycle]
-    TM --> ISO[Isolation Management]
-    TM --> LM[Lock Management]
-    TM --> DM[Deadlock Management]
-    TM --> CC[Concurrency Control]
-    TM --> TE[Transaction Exceptions]
+    %% Management
+    TM --> MGT[Management]
+    MGT --> ITM[ITransactionManager]
+    MGT --> TMGR[TransactionManager]
 
-    %% Transaction Lifecycle
-    TL --> ITM[ITransactionManager]
-    TL --> TMGR[TransactionManager]
-    TL --> TF[TransactionFactory]
-    TL --> TR[TransactionRegistry]
-    TL --> TX[Transaction]
-    TL --> TC[TransactionContext]
-    TL --> TID[TransactionId]
-    TL --> TS[TransactionState]
-    TL --> TO[TransactionOptions]
-
-    %% Isolation Management
+    %% Isolation
+    TM --> ISO[Isolation]
     ISO --> IIP[IIsolationPolicy]
-    ISO --> RUIP[ReadUncommittedPolicy]
-    ISO --> RCIP[ReadCommittedPolicy]
-    ISO --> RRIP[RepeatableReadPolicy]
-    ISO --> SIP[SerializablePolicy]
-    ISO --> IL[IsolationLevel]
-    ISO --> IPR[IsolationPolicyResolver]
-    ISO --> IRV[IsolationRuleValidator]
+    ISO --> RRP[RepeatableReadPolicy]
 
-    %% Lock Management
-    LM --> ILM[ILockManager]
-    LM --> LMGR[LockManager]
-    LM --> LT[LockTable]
-    LM --> LTE[LockTableEntry]
-    LM --> LRQ[LockRequestQueue]
-    LM --> LR[LockRequest]
-    LM --> GL[GrantedLock]
-    LM --> LO[LockOwner]
-    LM --> LRES[LockResource]
-    LM --> LRID[LockResourceId]
-    LM --> LMODE[LockMode]
-    LM --> LCM[LockCompatibilityMatrix]
-    LM --> LGP[LockGrantPolicy]
-    LM --> LW[LockWaiter]
-    LM --> LTP[LockTimeoutPolicy]
+    %% Locking
+    TM --> LCK[Locking]
+    LCK --> ILM[ILockManager]
+    LCK --> LMGR[LockManager]
+    LCK --> IDD[IDeadlockDetector]
+    LCK --> DD[DeadlockDetector]
 
-    %% Deadlock Management
-    DM --> IDD[IDeadlockDetector]
-    DM --> DD[DeadlockDetector]
-    DM --> WFG[WaitForGraph]
-    DM --> WFGN[WaitForGraphNode]
-    DM --> WFGE[WaitForGraphEdge]
-    DM --> WFGB[WaitForGraphBuilder]
-    DM --> DC[DeadlockCycle]
-    DM --> IDVS[IDeadlockVictimSelector]
-    DM --> YTVS[YoungestTransactionVictimSelector]
-    DM --> DR[DeadlockResolver]
-    DM --> DDS[DeadlockDetectionScheduler]
-
-    %% Concurrency Control
+    %% Concurrency
+    TM --> CC[Concurrency]
     CC --> ICC[IConcurrencyController]
-    CC --> CCTRL[ConcurrencyController]
-    CC --> OAA[OperationAccessAnalyzer]
-    CC --> RLR[RequiredLockResolver]
-    CC --> CCTX[ConcurrencyContext]
+    CC --> CCM[ConcurrencyController]
 
-    %% Exceptions
-    TE --> TNFE[TransactionNotFoundException]
-    TE --> ITSE[InvalidTransactionStateException]
-    TE --> LCE[LockConflictException]
-    TE --> LTE2[LockTimeoutException]
-    TE --> DVE[DeadlockVictimException]
+    %% Common Domain
+    TM --> CD[Common Domain]
+    CD --> IL[IsolationLevel]
+    CD --> TID[TransactionId]
+    CD --> TS[TransactionState]
+    CD --> TC[TransactionContext]
+    CD --> LR[LockResource]
+    CD --> LM[LockMode]
+    CD --> DC[DeadlockCycle]
+    CD --> OA[OperationAccess]
 ```

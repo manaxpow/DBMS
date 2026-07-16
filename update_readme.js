@@ -1,196 +1,9 @@
-# DBMS 2 layer
+const fs = require('fs');
 
-Database management system
-
-```mermaid
-flowchart TB
-    %% Left side
-    QP_SP[SQL Parser] --- QP[Query Processor]
-    QP_SA[Semantic Analyzer] --- QP
-    QP_LP[Logical Planner] --- QP
-    QP_QO[Query Optimizer] --- QP
-    QP_QE[Query Executor] --- QP
-    QP --- DBMS[Database Management System]
-
-    SE_FM[File Management] --- SE[Storage Engine]
-    SE_PM[Page Management] --- SE
-    SE_BM[Buffer Management] --- SE
-    SE_RM[Record Management] --- SE
-    SE_IM[Index Management] --- SE
-    SE --- DBMS
-
-    TM_TM[Transaction Manager] --- TM[Transaction Management]
-    TM_IM[Isolation Management] --- TM
-    TM_LM[Lock Management] --- TM
-    TM_DM[Deadlock Management] --- TM
-    TM_CC[Concurrency Controller] --- TM
-    TM --- DBMS
-
-    LM_LM[Log Manager] --- LM[Logging Management]
-    LM_WAL[WAL Protocol] --- LM
-    LM_LRM[Log Record Manager] --- LM
-    LM_LSNM[Log Sequence Number Manager] --- LM
-    LM_LBM[Log Buffer Manager] --- LM
-    LM_LW[Log Writer] --- LM
-    LM_LBlkM[Log Block Manager] --- LM
-    LM_LFM[Log File Manager] --- LM
-    LM_LCC[Log Checkpoint Coordinator] --- LM
-    LM --- DBMS
-
-    RM_RM[Recovery Manager] --- RM[Recovery Management]
-    RM_LBR[Log-Based Recovery] --- RM
-    RM_CM[Checkpoint Management] --- RM
-    RM_BR[Backup & Restore] --- RM
-    RM --- DBMS
-
-    %% Right side
-    DBMS --- SecM[Security Management]
-    SecM --- SecM_AuthN[Authentication]
-    SecM --- SecM_AuthZ[Authorization]
-    SecM --- SecM_EM[Encryption Management]
-    SecM --- SecM_CM[Connection Management]
-    SecM --- SecM_Aud[Auditing]
-    SecM --- SecM_PM[Principal Management]
-
-    DBMS --- DM[Database Manager]
-    DM --- DM_DR[Database Registry]
-    DM --- DM_DL[Database Lifecycle]
-    DM --- DM_DM[Database Metadata]
-    DM --- DM_DC[Database Configuration]
-    DM --- DM_DS[Database State]
-    DM --- DM_DFM[Database File Mapping]
-    DM --- DM_DIG[Database ID Generator]
-
-    DBMS --- DOM[Database Object Management]
-    DOM --- DOM_SM[Schema Manager]
-    DOM --- DOM_TM[Table Manager]
-    DOM --- DOM_IM[Index Manager]
-    DOM --- DOM_VM[View Manager]
-    DOM --- DOM_SPM[Stored Procedure Manager]
-    DOM --- DOM_FM[Function Manager]
-    DOM --- DOM_TrM[Trigger Manager]
-    DOM --- DOM_SC[System Catalog]
-
-    DBMS --- PM[Performance Management]
-    PM --- PM_PM[Performance Monitor]
-    PM --- PM_QS[Query Statistics]
-    PM --- PM_RM[Resource Monitor]
-    PM --- PM_CM[Cache Monitor]
-    PM --- PM_SM[Storage Monitor]
-    PM --- PM_PA[Performance Advisor]
-
-    DBMS --- SysM[System Management]
-    SysM --- SysM_CM[Configuration Management]
-    SysM --- SysM_SM[System Monitoring]
-    SysM --- SysM_IE[Import & Export]
-```
-
-## Feature Class Diagrams
-
-### 1. Storage Engine
-
-```mermaid
+const newContent = `### 2. Query Processor
+\`\`\`mermaid
 classDiagram
-    direction TB
-
-    class StorageEngine {
-        +Initialize() void
-        +Shutdown() void
-    }
-
-    class IFileLifecycleManager {
-        <<interface>>
-        +CreateFile(string path) FileId
-        +DeleteFile(FileId fileId) void
-        +OpenFile(FileId fileId) FileHandle
-        +CloseFile(FileHandle handle) void
-    }
-    class FileLifecycleManager {
-        -Dictionary~FileId, string~ filePaths
-        +InitializeStorage() void
-    }
-
-    class IPhysicalFileSystem {
-        <<interface>>
-        +ReadBlock(DiskAddress address, byte[] buffer) void
-        +WriteBlock(DiskAddress address, byte[] buffer) void
-    }
-    class PhysicalFileSystem {
-        -FileStream diskStream
-        +SeekToAddress(DiskAddress addr) void
-    }
-
-    class IBufferPoolManager {
-        <<interface>>
-        +FetchPage(PageId pageId) Page
-        +UnpinPage(PageId pageId, bool isDirty) void
-        +FlushPage(PageId pageId) void
-        +NewPage(FileId fileId) Page
-        +DeletePage(PageId pageId) void
-    }
-    class BufferPoolManager {
-        -BufferPool pool
-        +FindFreeFrame() FrameId
-    }
-
-    class IPageReplacementPolicy {
-        <<interface>>
-        +Pin(FrameId frameId) void
-        +Unpin(FrameId frameId) void
-        +Victim() FrameId
-    }
-    class ClockReplacementPolicy {
-        -List~FrameId~ clockHand
-        +AdvanceClock() void
-    }
-
-    class IRecordManager {
-        <<interface>>
-        +InsertRecord(Record record) RecordId
-        +GetRecord(RecordId recordId) Record
-        +UpdateRecord(RecordId recordId, Record record) void
-        +DeleteRecord(RecordId recordId) void
-    }
-    class RecordManager {
-        -RecordLayoutCalculator layout
-        +CompactPage(Page page) void
-    }
-
-    class IIndex {
-        <<interface>>
-        +Insert(IndexKey key, RecordPointer ptr) void
-        +Delete(IndexKey key) void
-        +Search(IndexKey key) RecordPointer
-    }
-    class BPlusTreeIndex {
-        -BPlusTreeNode root
-        +SplitNode(BPlusTreeNode node) void
-        +MergeNode(BPlusTreeNode node) void
-    }
-
-    IFileLifecycleManager <|-- FileLifecycleManager
-    IPhysicalFileSystem <|-- PhysicalFileSystem
-    IBufferPoolManager <|-- BufferPoolManager
-    IPageReplacementPolicy <|-- ClockReplacementPolicy
-    IRecordManager <|-- RecordManager
-    IIndex <|-- BPlusTreeIndex
-
-    %% Structural Relationships
-    StorageEngine *-- IFileLifecycleManager
-    StorageEngine *-- IBufferPoolManager
-    StorageEngine *-- IRecordManager
-    StorageEngine *-- IIndex
-    
-    BufferPoolManager --> IPhysicalFileSystem : Uses
-    BufferPoolManager --> IPageReplacementPolicy : Uses
-    RecordManager --> IBufferPoolManager : Uses
-    BPlusTreeIndex --> IBufferPoolManager : Uses
-```
-
-### 2. Query Processor
-```mermaid
-classDiagram
-    direction TB
+    direction LR
 
     class QueryProcessor {
         +Initialize() void
@@ -268,12 +81,12 @@ classDiagram
     QueryOptimizer --> ILogicalPlanBuilder : Uses
     PhysicalPlanBuilder --> IQueryOptimizer : Uses
     QueryExecutor --> IPhysicalPlanBuilder : Uses
-```
+\`\`\`
 
 ### 3. Transaction Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class TransactionManagement {
         +Initialize() void
@@ -345,12 +158,12 @@ classDiagram
     TransactionManager --> IIsolationPolicy : Uses
     LockManager --> IDeadlockDetector : Triggers
     ConcurrencyController --> ILockManager : Uses
-```
+\`\`\`
 
 ### 4. Logging Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class LoggingManagement {
         +Initialize() void
@@ -409,12 +222,12 @@ classDiagram
     LogManager --> IWALProtocol : Uses
     LogManager --> ILogBufferManager : Uses
     LogBufferManager --> ILogWriter : Uses
-```
+\`\`\`
 
 ### 5. Recovery Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class RecoveryManagement {
         +Initialize() void
@@ -486,12 +299,12 @@ classDiagram
     RecoveryManager --> ILogBasedRecovery : Uses
     RecoveryManager --> ICheckpointCoordinator : Uses
     RestoreManager --> ILogBasedRecovery : Uses
-```
+\`\`\`
 
 ### 6. Security Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class SecurityManagement {
         +Initialize() void
@@ -552,12 +365,12 @@ classDiagram
     AuthenticationManager --> IPrincipalManager : Uses
     AuthorizationManager --> IPrincipalManager : Uses
     ConnectionManager --> IAuthenticationManager : Uses
-```
+\`\`\`
 
 ### 7. Database Manager
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class DatabaseManagerSystem {
         +Initialize() void
@@ -620,12 +433,12 @@ classDiagram
     DatabaseLifecycleManager --> IDatabaseRegistry : Uses
     DatabaseLifecycleManager --> IDatabaseMetadataManager : Uses
     DatabaseLifecycleManager --> IDatabaseConfigurationManager : Uses
-```
+\`\`\`
 
 ### 8. Database Object Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class DatabaseObjectManagement {
         +Initialize() void
@@ -698,12 +511,12 @@ classDiagram
     TableManager --> ISystemCatalog : Uses
     IndexDefinitionManager --> ISystemCatalog : Uses
     ViewManager --> ISystemCatalog : Uses
-```
+\`\`\`
 
 ### 9. Performance Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class PerformanceManagement {
         +Initialize() void
@@ -766,12 +579,12 @@ classDiagram
     PerformanceMonitor --> IResourceMonitor : Uses
     PerformanceAdvisor --> IQueryStatisticsCollector : Uses
     PerformanceAdvisor --> IPerformanceMonitor : Uses
-```
+\`\`\`
 
 ### 10. System Management
-```mermaid
+\`\`\`mermaid
 classDiagram
-    direction TB
+    direction LR
 
     class SystemManagement {
         +Initialize() void
@@ -830,4 +643,19 @@ classDiagram
 
     SystemHealthMonitor --> ISystemConfigurationManager : Uses
     ImportManager --> ISystemConfigurationManager : Uses
-```
+\`\`\`
+`;
+
+const readmePath = 'README.md';
+let content = fs.readFileSync(readmePath, 'utf8');
+
+const marker = '### 2. Query Processor';
+const idx = content.indexOf(marker);
+
+if (idx !== -1) {
+    content = content.substring(0, idx) + newContent;
+    fs.writeFileSync(readmePath, content, 'utf8');
+    console.log('Successfully updated README.md');
+} else {
+    console.error('Marker not found in README.md');
+}

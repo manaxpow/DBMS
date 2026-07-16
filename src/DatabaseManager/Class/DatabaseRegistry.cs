@@ -2,7 +2,6 @@ using System;
 
 public class DatabaseRegistry : IDatabaseRegistry
 {
-    private object _lookup; 
 
     public void RegisterDatabase(DatabaseDescriptor desc)
     {

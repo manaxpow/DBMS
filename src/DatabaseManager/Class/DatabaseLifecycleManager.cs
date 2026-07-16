@@ -2,7 +2,6 @@ using System;
 
 public class DatabaseLifecycleManager : IDatabaseLifecycleManager
 {
-    private object _bootstrapper; 
     private IDatabaseRegistry _registry;
     private IDatabaseMetadataManager _metadataManager;
     private IDatabaseConfigurationManager _configurationManager;

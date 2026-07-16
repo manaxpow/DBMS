@@ -715,6 +715,42 @@ classDiagram
         +CompileView() void
     }
 
+    class IConstraintManager {
+        <<interface>>
+        +AddConstraint(TableId tableId, ConstraintDefinition def) ConstraintId
+        +DropConstraint(ConstraintId constraintId) void
+    }
+    class ConstraintManager {
+        +ValidateConstraints() void
+    }
+
+    class ITriggerManager {
+        <<interface>>
+        +CreateTrigger(TableId tableId, TriggerDefinition def) TriggerId
+        +DropTrigger(TriggerId triggerId) void
+    }
+    class TriggerManager {
+        +ExecuteTriggers() void
+    }
+
+    class IStoredProcedureManager {
+        <<interface>>
+        +CreateProcedure(SchemaId schemaId, StoredProcedureDefinition def) StoredProcedureId
+        +DropProcedure(StoredProcedureId procedureId) void
+    }
+    class StoredProcedureManager {
+        +CompileProcedure() void
+    }
+
+    class IFunctionManager {
+        <<interface>>
+        +CreateFunction(SchemaId schemaId, FunctionDefinition def) FunctionId
+        +DropFunction(FunctionId functionId) void
+    }
+    class FunctionManager {
+        +EvaluateFunction() void
+    }
+
     class ISystemCatalog {
         <<interface>>
         +GetTableDefinition(TableId tableId) TableDefinition
@@ -730,12 +766,20 @@ classDiagram
     ITableManager <|-- TableManager
     IIndexDefinitionManager <|-- IndexDefinitionManager
     IViewManager <|-- ViewManager
+    IConstraintManager <|-- ConstraintManager
+    ITriggerManager <|-- TriggerManager
+    IStoredProcedureManager <|-- StoredProcedureManager
+    IFunctionManager <|-- FunctionManager
     ISystemCatalog <|-- SystemCatalog
 
     DatabaseObjectManagement *-- ISchemaManager
     DatabaseObjectManagement *-- ITableManager
     DatabaseObjectManagement *-- IIndexDefinitionManager
     DatabaseObjectManagement *-- IViewManager
+    DatabaseObjectManagement *-- IConstraintManager
+    DatabaseObjectManagement *-- ITriggerManager
+    DatabaseObjectManagement *-- IStoredProcedureManager
+    DatabaseObjectManagement *-- IFunctionManager
     DatabaseObjectManagement *-- ISystemCatalog
 
     SchemaManager --> ISystemCatalog : Uses

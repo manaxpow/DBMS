@@ -2,7 +2,6 @@ using System;
 
 public class DatabaseMetadataManager : IDatabaseMetadataManager
 {
-    private object _repo;
 
     public DatabaseMetadata GetMetadata(DatabaseId dbId)
     {

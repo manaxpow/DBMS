@@ -2,7 +2,6 @@ using System;
 
 public class DatabaseConfigurationManager : IDatabaseConfigurationManager
 {
-    private object _loader;
 
     public DatabaseConfiguration LoadConfiguration(DatabaseId dbId)
     {

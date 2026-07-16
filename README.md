@@ -69,9 +69,6 @@ flowchart LR
     DOM --- DOM_TM[Table Manager]
     DOM --- DOM_IM[Index Manager]
     DOM --- DOM_VM[View Manager]
-    DOM --- DOM_SPM[Stored Procedure Manager]
-    DOM --- DOM_FM[Function Manager]
-    DOM --- DOM_TrM[Trigger Manager]
     DOM --- DOM_SC[System Catalog]
 
     DBMS --- PM[Performance Management]
@@ -80,12 +77,10 @@ flowchart LR
     PM --- PM_RM[Resource Monitor]
     PM --- PM_CM[Cache Monitor]
     PM --- PM_SM[Storage Monitor]
-    PM --- PM_PA[Performance Advisor]
 
     DBMS --- SysM[System Management]
     SysM --- SysM_CM[Configuration Management]
     SysM --- SysM_SM[System Monitoring]
-    SysM --- SysM_IE[Import and Export]
 
     %% =========================
     %% STYLES
@@ -721,32 +716,8 @@ classDiagram
         +ValidateConstraints() void
     }
 
-    class ITriggerManager {
-        <<interface>>
-        +CreateTrigger(TableId tableId, TriggerDefinition def) TriggerId
-        +DropTrigger(TriggerId triggerId) void
-    }
-    class TriggerManager {
-        +ExecuteTriggers() void
-    }
 
-    class IStoredProcedureManager {
-        <<interface>>
-        +CreateProcedure(SchemaId schemaId, StoredProcedureDefinition def) StoredProcedureId
-        +DropProcedure(StoredProcedureId procedureId) void
-    }
-    class StoredProcedureManager {
-        +CompileProcedure() void
-    }
 
-    class IFunctionManager {
-        <<interface>>
-        +CreateFunction(SchemaId schemaId, FunctionDefinition def) FunctionId
-        +DropFunction(FunctionId functionId) void
-    }
-    class FunctionManager {
-        +EvaluateFunction() void
-    }
 
     class ISystemCatalog {
         <<interface>>
@@ -764,9 +735,6 @@ classDiagram
     IIndexDefinitionManager <|-- IndexDefinitionManager
     IViewManager <|-- ViewManager
     IConstraintManager <|-- ConstraintManager
-    ITriggerManager <|-- TriggerManager
-    IStoredProcedureManager <|-- StoredProcedureManager
-    IFunctionManager <|-- FunctionManager
     ISystemCatalog <|-- SystemCatalog
 
     DatabaseObjectManagement *-- ISchemaManager
@@ -774,9 +742,6 @@ classDiagram
     DatabaseObjectManagement *-- IIndexDefinitionManager
     DatabaseObjectManagement *-- IViewManager
     DatabaseObjectManagement *-- IConstraintManager
-    DatabaseObjectManagement *-- ITriggerManager
-    DatabaseObjectManagement *-- IStoredProcedureManager
-    DatabaseObjectManagement *-- IFunctionManager
     DatabaseObjectManagement *-- ISystemCatalog
 
     SchemaManager --> ISystemCatalog : Uses
@@ -829,29 +794,16 @@ classDiagram
         +SampleResources() void
     }
 
-    class IPerformanceAdvisor {
-        <<interface>>
-        +AnalyzeWorkload() List~PerformanceRecommendation~
-        +SuggestIndexes() List~MissingIndexRecommendationRule~
-    }
-    class PerformanceAdvisor {
-        -RecommendationEngine engine
-        +EvaluateRules() void
-    }
 
     IPerformanceMonitor <|-- PerformanceMonitor
     IQueryStatisticsCollector <|-- QueryStatisticsCollector
     IResourceMonitor <|-- ResourceMonitor
-    IPerformanceAdvisor <|-- PerformanceAdvisor
 
     PerformanceManagement *-- IPerformanceMonitor
     PerformanceManagement *-- IQueryStatisticsCollector
     PerformanceManagement *-- IResourceMonitor
-    PerformanceManagement *-- IPerformanceAdvisor
 
     PerformanceMonitor --> IResourceMonitor : Uses
-    PerformanceAdvisor --> IQueryStatisticsCollector : Uses
-    PerformanceAdvisor --> IPerformanceMonitor : Uses
 ```
 
 ### 10. System Management
@@ -886,35 +838,13 @@ classDiagram
         +EvaluateStatus() void
     }
 
-    class IImportManager {
-        <<interface>>
-        +ImportData(ImportRequest request) ImportResult
-        +ValidateImportPlan(ImportPlan plan) bool
-    }
-    class ImportManager {
-        -ImportPlanner planner
-        +ParseFormat() void
-    }
 
-    class IExportManager {
-        <<interface>>
-        +ExportData(ExportRequest request) ExportResult
-    }
-    class ExportManager {
-        -ExportPlanner planner
-        +FormatOutput() void
-    }
 
     ISystemConfigurationManager <|-- SystemConfigurationManager
     ISystemHealthMonitor <|-- SystemHealthMonitor
-    IImportManager <|-- ImportManager
-    IExportManager <|-- ExportManager
 
     SystemManagement *-- ISystemConfigurationManager
     SystemManagement *-- ISystemHealthMonitor
-    SystemManagement *-- IImportManager
-    SystemManagement *-- IExportManager
 
     SystemHealthMonitor --> ISystemConfigurationManager : Uses
-    ImportManager --> ISystemConfigurationManager : Uses
 ```

@@ -848,3 +848,361 @@ classDiagram
 
     SystemHealthMonitor --> ISystemConfigurationManager : Uses
 ```
+
+
+## Unit Tests Architecture
+
+### 1. Storage Engine Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem1["Storage Engine"]
+
+    Class_1_1["StorageEngine"]
+    Test_1_1["StorageEngineTests"]
+    Subsystem1 --> Class_1_1
+    Class_1_1 -.-> Test_1_1
+
+    Class_1_2["FileLifecycleManager"]
+    Test_1_2["FileLifecycleManagerTests"]
+    Subsystem1 --> Class_1_2
+    Class_1_2 -.-> Test_1_2
+
+    Class_1_3["PhysicalFileSystem"]
+    Test_1_3["PhysicalFileSystemTests"]
+    Subsystem1 --> Class_1_3
+    Class_1_3 -.-> Test_1_3
+
+    Class_1_4["BufferPoolManager"]
+    Test_1_4["BufferPoolManagerTests"]
+    Subsystem1 --> Class_1_4
+    Class_1_4 -.-> Test_1_4
+
+    Class_1_5["ClockReplacementPolicy"]
+    Test_1_5["ClockReplacementPolicyTests"]
+    Subsystem1 --> Class_1_5
+    Class_1_5 -.-> Test_1_5
+
+    Class_1_6["RecordManager"]
+    Test_1_6["RecordManagerTests"]
+    Subsystem1 --> Class_1_6
+    Class_1_6 -.-> Test_1_6
+
+    Class_1_7["BPlusTreeIndex"]
+    Test_1_7["BPlusTreeIndexTests"]
+    Subsystem1 --> Class_1_7
+    Class_1_7 -.-> Test_1_7
+
+```
+
+### 2. Query Processor Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem2["Query Processor"]
+
+    Class_2_1["QueryProcessor"]
+    Test_2_1["QueryProcessorTests"]
+    Subsystem2 --> Class_2_1
+    Class_2_1 -.-> Test_2_1
+
+    Class_2_2["SqlParser"]
+    Test_2_2["SqlParserTests"]
+    Subsystem2 --> Class_2_2
+    Class_2_2 -.-> Test_2_2
+
+    Class_2_3["SemanticAnalyzer"]
+    Test_2_3["SemanticAnalyzerTests"]
+    Subsystem2 --> Class_2_3
+    Class_2_3 -.-> Test_2_3
+
+    Class_2_4["LogicalPlanBuilder"]
+    Test_2_4["LogicalPlanBuilderTests"]
+    Subsystem2 --> Class_2_4
+    Class_2_4 -.-> Test_2_4
+
+    Class_2_5["QueryOptimizer"]
+    Test_2_5["QueryOptimizerTests"]
+    Subsystem2 --> Class_2_5
+    Class_2_5 -.-> Test_2_5
+
+    Class_2_6["PhysicalPlanBuilder"]
+    Test_2_6["PhysicalPlanBuilderTests"]
+    Subsystem2 --> Class_2_6
+    Class_2_6 -.-> Test_2_6
+
+    Class_2_7["QueryExecutor"]
+    Test_2_7["QueryExecutorTests"]
+    Subsystem2 --> Class_2_7
+    Class_2_7 -.-> Test_2_7
+
+```
+
+### 3. Transaction Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem3["Transaction Management"]
+
+    Class_3_1["TransactionManagement"]
+    Test_3_1["TransactionManagementTests"]
+    Subsystem3 --> Class_3_1
+    Class_3_1 -.-> Test_3_1
+
+    Class_3_2["TransactionManager"]
+    Test_3_2["TransactionManagerTests"]
+    Subsystem3 --> Class_3_2
+    Class_3_2 -.-> Test_3_2
+
+    Class_3_3["RepeatableReadPolicy"]
+    Test_3_3["RepeatableReadPolicyTests"]
+    Subsystem3 --> Class_3_3
+    Class_3_3 -.-> Test_3_3
+
+    Class_3_4["LockManager"]
+    Test_3_4["LockManagerTests"]
+    Subsystem3 --> Class_3_4
+    Class_3_4 -.-> Test_3_4
+
+    Class_3_5["DeadlockDetector"]
+    Test_3_5["DeadlockDetectorTests"]
+    Subsystem3 --> Class_3_5
+    Class_3_5 -.-> Test_3_5
+
+    Class_3_6["ConcurrencyController"]
+    Test_3_6["ConcurrencyControllerTests"]
+    Subsystem3 --> Class_3_6
+    Class_3_6 -.-> Test_3_6
+
+```
+
+### 4. Logging Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem4["Logging Management"]
+
+    Class_4_1["LoggingManagement"]
+    Test_4_1["LoggingManagementTests"]
+    Subsystem4 --> Class_4_1
+    Class_4_1 -.-> Test_4_1
+
+    Class_4_2["LogManager"]
+    Test_4_2["LogManagerTests"]
+    Subsystem4 --> Class_4_2
+    Class_4_2 -.-> Test_4_2
+
+    Class_4_3["WALProtocol"]
+    Test_4_3["WALProtocolTests"]
+    Subsystem4 --> Class_4_3
+    Class_4_3 -.-> Test_4_3
+
+    Class_4_4["LogBufferManager"]
+    Test_4_4["LogBufferManagerTests"]
+    Subsystem4 --> Class_4_4
+    Class_4_4 -.-> Test_4_4
+
+    Class_4_5["LogWriter"]
+    Test_4_5["LogWriterTests"]
+    Subsystem4 --> Class_4_5
+    Class_4_5 -.-> Test_4_5
+
+```
+
+### 5. Recovery Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem5["Recovery Management"]
+
+    Class_5_1["RecoveryManagement"]
+    Test_5_1["RecoveryManagementTests"]
+    Subsystem5 --> Class_5_1
+    Class_5_1 -.-> Test_5_1
+
+    Class_5_2["RecoveryManager"]
+    Test_5_2["RecoveryManagerTests"]
+    Subsystem5 --> Class_5_2
+    Class_5_2 -.-> Test_5_2
+
+    Class_5_3["AriesRecoveryAlgorithm"]
+    Test_5_3["AriesRecoveryAlgorithmTests"]
+    Subsystem5 --> Class_5_3
+    Class_5_3 -.-> Test_5_3
+
+    Class_5_4["CheckpointCoordinator"]
+    Test_5_4["CheckpointCoordinatorTests"]
+    Subsystem5 --> Class_5_4
+    Class_5_4 -.-> Test_5_4
+
+    Class_5_5["BackupManager"]
+    Test_5_5["BackupManagerTests"]
+    Subsystem5 --> Class_5_5
+    Class_5_5 -.-> Test_5_5
+
+    Class_5_6["RestoreManager"]
+    Test_5_6["RestoreManagerTests"]
+    Subsystem5 --> Class_5_6
+    Class_5_6 -.-> Test_5_6
+
+```
+
+### 6. Security Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem6["Security Management"]
+
+    Class_6_1["SecurityManagement"]
+    Test_6_1["SecurityManagementTests"]
+    Subsystem6 --> Class_6_1
+    Class_6_1 -.-> Test_6_1
+
+    Class_6_2["AuthenticationManager"]
+    Test_6_2["AuthenticationManagerTests"]
+    Subsystem6 --> Class_6_2
+    Class_6_2 -.-> Test_6_2
+
+    Class_6_3["AuthorizationManager"]
+    Test_6_3["AuthorizationManagerTests"]
+    Subsystem6 --> Class_6_3
+    Class_6_3 -.-> Test_6_3
+
+    Class_6_4["PrincipalManager"]
+    Test_6_4["PrincipalManagerTests"]
+    Subsystem6 --> Class_6_4
+    Class_6_4 -.-> Test_6_4
+
+    Class_6_5["ConnectionManager"]
+    Test_6_5["ConnectionManagerTests"]
+    Subsystem6 --> Class_6_5
+    Class_6_5 -.-> Test_6_5
+
+```
+
+### 7. Database Manager Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem7["Database Manager"]
+
+    Class_7_1["DatabaseManagerSystem"]
+    Test_7_1["DatabaseManagerSystemTests"]
+    Subsystem7 --> Class_7_1
+    Class_7_1 -.-> Test_7_1
+
+    Class_7_2["DatabaseRegistry"]
+    Test_7_2["DatabaseRegistryTests"]
+    Subsystem7 --> Class_7_2
+    Class_7_2 -.-> Test_7_2
+
+    Class_7_3["DatabaseLifecycleManager"]
+    Test_7_3["DatabaseLifecycleManagerTests"]
+    Subsystem7 --> Class_7_3
+    Class_7_3 -.-> Test_7_3
+
+    Class_7_4["DatabaseMetadataManager"]
+    Test_7_4["DatabaseMetadataManagerTests"]
+    Subsystem7 --> Class_7_4
+    Class_7_4 -.-> Test_7_4
+
+    Class_7_5["DatabaseConfigurationManager"]
+    Test_7_5["DatabaseConfigurationManagerTests"]
+    Subsystem7 --> Class_7_5
+    Class_7_5 -.-> Test_7_5
+
+```
+
+### 8. Database Object Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem8["Database Object Management"]
+
+    Class_8_1["DatabaseObjectManagement"]
+    Test_8_1["DatabaseObjectManagementTests"]
+    Subsystem8 --> Class_8_1
+    Class_8_1 -.-> Test_8_1
+
+    Class_8_2["SchemaManager"]
+    Test_8_2["SchemaManagerTests"]
+    Subsystem8 --> Class_8_2
+    Class_8_2 -.-> Test_8_2
+
+    Class_8_3["TableManager"]
+    Test_8_3["TableManagerTests"]
+    Subsystem8 --> Class_8_3
+    Class_8_3 -.-> Test_8_3
+
+    Class_8_4["IndexDefinitionManager"]
+    Test_8_4["IndexDefinitionManagerTests"]
+    Subsystem8 --> Class_8_4
+    Class_8_4 -.-> Test_8_4
+
+    Class_8_5["ViewManager"]
+    Test_8_5["ViewManagerTests"]
+    Subsystem8 --> Class_8_5
+    Class_8_5 -.-> Test_8_5
+
+    Class_8_6["ConstraintManager"]
+    Test_8_6["ConstraintManagerTests"]
+    Subsystem8 --> Class_8_6
+    Class_8_6 -.-> Test_8_6
+
+    Class_8_7["SystemCatalog"]
+    Test_8_7["SystemCatalogTests"]
+    Subsystem8 --> Class_8_7
+    Class_8_7 -.-> Test_8_7
+
+```
+
+### 9. Performance Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem9["Performance Management"]
+
+    Class_9_1["PerformanceManagement"]
+    Test_9_1["PerformanceManagementTests"]
+    Subsystem9 --> Class_9_1
+    Class_9_1 -.-> Test_9_1
+
+    Class_9_2["PerformanceMonitor"]
+    Test_9_2["PerformanceMonitorTests"]
+    Subsystem9 --> Class_9_2
+    Class_9_2 -.-> Test_9_2
+
+    Class_9_3["QueryStatisticsCollector"]
+    Test_9_3["QueryStatisticsCollectorTests"]
+    Subsystem9 --> Class_9_3
+    Class_9_3 -.-> Test_9_3
+
+    Class_9_4["ResourceMonitor"]
+    Test_9_4["ResourceMonitorTests"]
+    Subsystem9 --> Class_9_4
+    Class_9_4 -.-> Test_9_4
+
+```
+
+### 10. System Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem10["System Management"]
+
+    Class_10_1["SystemManagement"]
+    Test_10_1["SystemManagementTests"]
+    Subsystem10 --> Class_10_1
+    Class_10_1 -.-> Test_10_1
+
+    Class_10_2["SystemConfigurationManager"]
+    Test_10_2["SystemConfigurationManagerTests"]
+    Subsystem10 --> Class_10_2
+    Class_10_2 -.-> Test_10_2
+
+    Class_10_3["SystemHealthMonitor"]
+    Test_10_3["SystemHealthMonitorTests"]
+    Subsystem10 --> Class_10_3
+    Class_10_3 -.-> Test_10_3
+
+```

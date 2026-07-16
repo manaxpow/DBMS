@@ -3,7 +3,7 @@
 Database management system
 
 ```mermaid
-flowchart TB
+flowchart LR
     %% Left side
     QP_SP[SQL Parser] --- QP[Query Processor]
     QP_SA[Semantic Analyzer] --- QP

@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class View
 {
-    public class View
+    public string Query { get; set; }
+
+    public void Create(string query)
     {
-        public string Query { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void Create(string query)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Resolve()
-        {
-            throw new NotImplementedException();
-        }
+    public void Resolve()
+    {
+        throw new NotImplementedException();
     }
 }

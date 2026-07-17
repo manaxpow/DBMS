@@ -1,12 +1,9 @@
 using System;
 
-namespace DBMS.QueryProcessor
+public class QueryExecutor
 {
-    public class QueryExecutor
+    public void Execute(PhysicalPlan plan)
     {
-        public void Execute(PhysicalPlan plan)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

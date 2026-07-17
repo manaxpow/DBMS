@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.ReplicationCluster
+public class ReplicationManager
 {
-    public class ReplicationManager
+    public void Sync()
     {
-        public void Sync()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Replicate()
-        {
-            throw new NotImplementedException();
-        }
+    public void Replicate()
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Commit()
-        {
-            throw new NotImplementedException();
-        }
+    public void Commit()
+    {
+        throw new NotImplementedException();
     }
 }

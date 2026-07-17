@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class ForeignKey : Constraint
 {
-    public class ForeignKey : Constraint
+    public string RefTable { get; set; }
+
+    public new void Validate(object value)
     {
-        public string RefTable { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public new void Validate(object value)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeleteParent()
-        {
-            throw new NotImplementedException();
-        }
+    public void DeleteParent()
+    {
+        throw new NotImplementedException();
     }
 }

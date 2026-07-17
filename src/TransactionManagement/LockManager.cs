@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.TransactionManagement
+public class LockManager
 {
-    public class LockManager
+    public void AcquireLock()
     {
-        public void AcquireLock()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Acquire()
-        {
-            throw new NotImplementedException();
-        }
+    public void Acquire()
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Release()
-        {
-            throw new NotImplementedException();
-        }
+    public void Release()
+    {
+        throw new NotImplementedException();
     }
 }

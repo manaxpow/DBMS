@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class Schema
 {
-    public class Schema
+    public string Name { get; set; }
+
+    public void AddTable(Table table)
     {
-        public string Name { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void AddTable(Table table)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveTable(Table table)
-        {
-            throw new NotImplementedException();
-        }
+    public void RemoveTable(Table table)
+    {
+        throw new NotImplementedException();
     }
 }

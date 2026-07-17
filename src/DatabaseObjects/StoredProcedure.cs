@@ -1,12 +1,9 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class StoredProcedure
 {
-    public class StoredProcedure
+    public void Execute(object[] parameters)
     {
-        public void Execute(object[] parameters)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

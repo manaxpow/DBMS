@@ -1,22 +1,67 @@
 using System;
+using System.Collections.Generic;
 
-namespace DBMS.StorageEngine
+
+
+public class Page
 {
-    public class Page
+    public PageId PageId { get; set; }
+    public int FreeSpace { get; set; }
+    public byte[] Data { get; set; }
+    public List<Slot> SlotDirectory { get; set; }
+
+    public object InsertRecord(object record)
     {
-        public byte[] Read()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void InsertRecord()
-        {
-            throw new NotImplementedException();
-        }
+    public void DeleteRecord(object slotId)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void DeleteRecord()
-        {
-            throw new NotImplementedException();
-        }
+    private int CalculateRequiredSpace(object record)
+    {
+        throw new NotImplementedException();
+    }
+
+    private bool HasAvailableSpace(int requiredSpace)
+    {
+        throw new NotImplementedException();
+    }
+
+    private int WriteRecordData(object record)
+    {
+        throw new NotImplementedException();
+    }
+
+    private object AddSlot(int recordOffset, int recordLength)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void UpdateFreeSpaceMetadata()
+    {
+        throw new NotImplementedException();
+    }
+
+    private object FindSlot(object slotId)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void MarkRecordDeleted(object slot)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void RemoveOrInvalidateSlot(object slotId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object Read()
+    {
+        throw new NotImplementedException();
     }
 }

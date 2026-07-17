@@ -1,17 +1,14 @@
 using System;
 
-namespace DBMS.TransactionManagement
+public class TransactionManager
 {
-    public class TransactionManager
+    public Transaction BeginTransaction()
     {
-        public Transaction BeginTransaction()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Commit(Transaction transaction)
-        {
-            throw new NotImplementedException();
-        }
+    public void Commit(Transaction transaction)
+    {
+        throw new NotImplementedException();
     }
 }

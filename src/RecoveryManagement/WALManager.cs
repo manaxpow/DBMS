@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.RecoveryManagement
+public class WALManager
 {
-    public class WALManager
+    public void WriteLog()
     {
-        public void WriteLog()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Append(object record)
-        {
-            throw new NotImplementedException();
-        }
+    public void Append(object record)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Flush()
-        {
-            throw new NotImplementedException();
-        }
+    public void Flush()
+    {
+        throw new NotImplementedException();
     }
 }

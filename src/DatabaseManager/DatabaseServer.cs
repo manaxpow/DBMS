@@ -1,17 +1,14 @@
 using System;
 
-namespace DBMS.DatabaseManager
+public class DatabaseServer
 {
-    public class DatabaseServer
+    public void Start()
     {
-        public void Start()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Stop()
-        {
-            throw new NotImplementedException();
-        }
+    public void Stop()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.DatabaseManager
+public class CatalogManager
 {
-    public class CatalogManager
+    public void GetMetadata()
     {
-        public void GetMetadata()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Register(object obj)
-        {
-            throw new NotImplementedException();
-        }
+    public void Register(object obj)
+    {
+        throw new NotImplementedException();
+    }
 
-        public object Find(string name)
-        {
-            throw new NotImplementedException();
-        }
+    public object Find(string name)
+    {
+        throw new NotImplementedException();
     }
 }

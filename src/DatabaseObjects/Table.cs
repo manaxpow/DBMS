@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class Table
 {
-    public class Table
+    public string Name { get; set; }
+
+    public void InsertRow(Row row)
     {
-        public string Name { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void InsertRow(Row row)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddColumn(Column column)
-        {
-            throw new NotImplementedException();
-        }
+    public void AddColumn(Column column)
+    {
+        throw new NotImplementedException();
     }
 }

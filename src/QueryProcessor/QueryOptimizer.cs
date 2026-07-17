@@ -1,12 +1,9 @@
 using System;
 
-namespace DBMS.QueryProcessor
+public class QueryOptimizer
 {
-    public class QueryOptimizer
+    public PhysicalPlan Optimize(LogicalPlan plan)
     {
-        public PhysicalPlan Optimize(LogicalPlan plan)
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

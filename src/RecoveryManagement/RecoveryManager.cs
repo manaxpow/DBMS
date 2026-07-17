@@ -1,12 +1,9 @@
 using System;
 
-namespace DBMS.RecoveryManagement
+public class RecoveryManager
 {
-    public class RecoveryManager
+    public void Recover()
     {
-        public void Recover()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
     }
 }

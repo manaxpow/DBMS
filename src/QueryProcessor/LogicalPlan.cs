@@ -1,17 +1,14 @@
 using System;
 
-namespace DBMS.QueryProcessor
+public class LogicalPlan
 {
-    public class LogicalPlan
+    public void AddOperator()
     {
-        public void AddOperator()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Validate()
-        {
-            throw new NotImplementedException();
-        }
+    public void Validate()
+    {
+        throw new NotImplementedException();
     }
 }

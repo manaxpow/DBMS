@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.SecurityManagement
+public class Role
 {
-    public class Role
+    public string RoleName { get; set; }
+
+    public void AddPermission(Permission permission)
     {
-        public string RoleName { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void AddPermission(Permission permission)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemovePermission(Permission permission)
-        {
-            throw new NotImplementedException();
-        }
+    public void RemovePermission(Permission permission)
+    {
+        throw new NotImplementedException();
     }
 }

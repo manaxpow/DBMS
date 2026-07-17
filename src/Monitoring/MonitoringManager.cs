@@ -1,17 +1,14 @@
 using System;
 
-namespace DBMS.Monitoring
+public class MonitoringManager
 {
-    public class MonitoringManager
+    public void CollectMetrics()
     {
-        public void CollectMetrics()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Evaluate()
-        {
-            throw new NotImplementedException();
-        }
+    public void Evaluate()
+    {
+        throw new NotImplementedException();
     }
 }

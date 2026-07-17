@@ -2,6 +2,7 @@
 
 Database management system
 
+
 ```mermaid
 flowchart LR
     %% Left side
@@ -78,6 +79,64 @@ flowchart LR
     class QP_Lex,QP_AST,QP_LP,QP_PP,SE_FM,SE_BP,SE_Pg,TM_Tx,TM_LM,TM_MVCC,RM_WAL,RM_BM,DB,Sch,Tbl,Col,Rw,Cst,FK,Idx,Ptn,Vw,SP,StatM,Usr,Rl,Prm,CN importantLayerTwo;
 ```
 
+```mermaid
+classDiagram
+    direction TB
+    class DatabaseServer
+
+    %% Left side
+    DatabaseServer *-- SQLParser
+    SQLParser *-- Lexer
+    SQLParser *-- AST
+
+    DatabaseServer *-- QueryOptimizer
+    QueryOptimizer *-- LogicalPlan
+    QueryOptimizer *-- PhysicalPlan
+
+    DatabaseServer *-- QueryExecutor
+
+    DatabaseServer *-- StorageEngine
+    StorageEngine *-- FileManager
+    StorageEngine ..> EngineState : uses
+    StorageEngine *-- BufferPool
+    BufferPool *-- Page
+
+    DatabaseServer *-- TransactionManager
+    TransactionManager *-- Transaction
+    TransactionManager *-- LockManager
+    TransactionManager *-- MVCCManager
+
+    DatabaseServer *-- RecoveryManager
+    RecoveryManager *-- WALManager
+    RecoveryManager *-- BackupManager
+
+    %% Right side
+    DatabaseServer *-- DatabaseManager
+    DatabaseManager *-- Database
+    Database *-- Schema
+    Schema *-- Table
+    Table *-- Column
+    Table *-- Row
+    Table *-- Constraint
+    Table *-- ForeignKey
+    Table *-- Index
+    Table *-- Partition
+    Schema *-- View
+    Schema *-- StoredProcedure
+
+    DatabaseServer *-- CatalogManager
+    CatalogManager *-- StatisticsManager
+
+    DatabaseServer *-- SecurityManager
+    SecurityManager *-- User
+    SecurityManager *-- Role
+    SecurityManager *-- Permission
+
+    DatabaseServer *-- ReplicationManager
+    ReplicationManager *-- ClusterNode
+
+    DatabaseServer *-- MonitoringManager
+```
 ## Feature Class Diagrams
 
 ### 1. Storage Engine
@@ -85,21 +144,84 @@ flowchart LR
 ```mermaid
 classDiagram
     direction TB
-    class StorageEngine {
-        +Initialize() void
-    }
+
     class BufferPool {
-        +GetPage() Page
+        +int Capacity
+        +Dictionary~int, Frame~ PageTable
+        +FetchPage(object pageId) object
+        -FindBufferedFrame(object pageId) object
+        -FindAvailableFrame() object
+        -FindUnpinnedVictim() object
+        -Pin(object frame) void
+        -LoadPage(object frame, object pageData) void
+        -RegisterPage(object pageId, object frame) void
+        +FlushDirtyPages() void
+        +Clear() void
     }
+
     class Page {
-        +Read() byte[]
+        +int PageId
+        +int FreeSpace
+        +byte[] Data
+        +List~Slot~ SlotDirectory
+        +InsertRecord(object record) object
+        +DeleteRecord(object slotId) void
+        -CalculateRequiredSpace(object record) int
+        -HasAvailableSpace(int requiredSpace) bool
+        -WriteRecordData(object record) int
+        -AddSlot(int recordOffset, int recordLength) object
+        -UpdateFreeSpaceMetadata() void
+        -FindSlot(object slotId) object
+        -MarkRecordDeleted(object slot) void
+        -RemoveOrInvalidateSlot(object slotId) void
+        +Read() object
     }
+
+    
+    class EngineState {
+        <<enumeration>>
+        Uninitialized
+        Initialized
+        Stopped
+    }
+
+    class StorageEngine {
+        +EngineState State
+        +Initialize(object configuration) void
+        -ValidateConfiguration(object configuration) bool
+        -SetState(object state) void
+        +ReadPage(object pageId) object
+        +Shutdown() void
+    }
+
     class FileManager {
-        +OpenFile() void
+        +string RootDirectory
+        +Dictionary~string, FileHandle~ OpenFiles
+        +Initialize(object fileSettings) void
+        +CreateFile(string path) object
+        +OpenFile(string path) object
+        +DeleteFile(string path) void
+        +ReadPage(object pageId) object
+        +CloseAllFiles() void
+        -IsFileOpen(string path) bool
+        -RegisterOpenFile(string path, object fileHandle) void
     }
+
+    class PhysicalFileSystem {
+        +Exists(string path) bool
+        +Create(string path) object
+        +Open(string path) object
+    }
+
+    StorageEngine ..> EngineState : uses
     StorageEngine *-- BufferPool
     StorageEngine *-- FileManager
     BufferPool *-- Page
+    FileManager *-- Page
+
+    BufferPool --> FileManager : loads page
+    StorageEngine --> Page : reads page
+    FileManager --> PhysicalFileSystem : accesses files
 ```
 
 ### 2. Query Processor

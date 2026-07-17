@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class Index
 {
-    public class Index
+    public void Scan()
     {
-        public void Scan()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void Insert(object key)
-        {
-            throw new NotImplementedException();
-        }
+    public void Insert(object key)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Search(object key)
-        {
-            throw new NotImplementedException();
-        }
+    public void Search(object key)
+    {
+        throw new NotImplementedException();
     }
 }

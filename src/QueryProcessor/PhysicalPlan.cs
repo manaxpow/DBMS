@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.QueryProcessor
+public class PhysicalPlan
 {
-    public class PhysicalPlan
+    public void Build()
     {
-        public void Build()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void CalculateCost()
-        {
-            throw new NotImplementedException();
-        }
+    public void CalculateCost()
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Validate()
-        {
-            throw new NotImplementedException();
-        }
+    public void Validate()
+    {
+        throw new NotImplementedException();
     }
 }

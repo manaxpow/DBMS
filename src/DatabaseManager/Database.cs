@@ -1,24 +1,21 @@
 using System;
 
-namespace DBMS.DatabaseManager
+public class Database
 {
-    public class Database
+    public string Name { get; set; }
+
+    public void Open()
     {
-        public string Name { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void Open()
-        {
-            throw new NotImplementedException();
-        }
+    public void Close()
+    {
+        throw new NotImplementedException();
+    }
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddSchema(string schemaName)
-        {
-            throw new NotImplementedException();
-        }
+    public void AddSchema(string schemaName)
+    {
+        throw new NotImplementedException();
     }
 }

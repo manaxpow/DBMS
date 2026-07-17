@@ -1,22 +1,19 @@
 using System;
 
-namespace DBMS.DatabaseManager
+public class StatisticsManager
 {
-    public class StatisticsManager
+    public void UpdateStats()
     {
-        public void UpdateStats()
-        {
-            throw new NotImplementedException();
-        }
+        throw new NotImplementedException();
+    }
 
-        public void UpdateStatistics()
-        {
-            throw new NotImplementedException();
-        }
+    public void UpdateStatistics()
+    {
+        throw new NotImplementedException();
+    }
 
-        public double EstimateSelectivity()
-        {
-            throw new NotImplementedException();
-        }
+    public double EstimateSelectivity()
+    {
+        throw new NotImplementedException();
     }
 }

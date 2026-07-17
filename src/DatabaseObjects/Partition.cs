@@ -1,19 +1,16 @@
 using System;
 
-namespace DBMS.DatabaseObjects
+public class Partition
 {
-    public class Partition
+    public string Range { get; set; }
+
+    public void RouteRow(Row row)
     {
-        public string Range { get; set; }
+        throw new NotImplementedException();
+    }
 
-        public void RouteRow(Row row)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void AddRange(string range)
-        {
-            throw new NotImplementedException();
-        }
+    public void AddRange(string range)
+    {
+        throw new NotImplementedException();
     }
 }

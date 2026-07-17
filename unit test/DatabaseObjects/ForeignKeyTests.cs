@@ -1,6 +1,5 @@
 using System;
 using Xunit;
-using DBMS.DatabaseObjects;
 
 public class ForeignKeyTests
 {

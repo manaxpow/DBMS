@@ -1,4 +1,1 @@
-public class PageId
-{
-
-}
+public record PageId(int Value);

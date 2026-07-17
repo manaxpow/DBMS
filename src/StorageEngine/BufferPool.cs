@@ -6,9 +6,16 @@ using System.Collections.Generic;
 public class BufferPool
 {
     public int Capacity { get; set; }
-    public Dictionary<int, Frame> PageTable { get; set; }
-    private IFileManager _iFIleManager;
-    public object FetchPage(object pageId)
+    public Dictionary<PageId, Frame> PageTable { get; set; }
+    private readonly IFileManager _fileManager;
+    public BufferPool(int capacity, IFileManager fileManager)
+    {
+        Capacity = capacity;
+        _fileManager = fileManager;
+        PageTable = new Dictionary<PageId, Frame>();
+    }
+
+    public Frame FetchPage(PageId pageId)
     {
         throw new NotImplementedException();
     }
@@ -33,6 +40,14 @@ public class BufferPool
         throw new NotImplementedException();
     }
 
+    private Frame? ExistingFrame(PageId pageId)
+    {
+        if (PageTable.TryGetValue(pageId, out var frame))
+        {
+            return frame;
+        }
+        return null;
+    }
     private object FindUnpinnedVictim()
     {
         throw new NotImplementedException();
@@ -49,6 +64,16 @@ public class BufferPool
     }
 
     private void RegisterPage(object pageId, object frame)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Flush(PageId pageId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Evict(object frame)
     {
         throw new NotImplementedException();
     }

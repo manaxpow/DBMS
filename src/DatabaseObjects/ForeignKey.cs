@@ -4,12 +4,12 @@ public class ForeignKey : Constraint
 {
     public string RefTable { get; set; }
 
-    public new void Validate(object value)
+    public new bool Validate(object parentKey)
     {
         throw new NotImplementedException();
     }
 
-    public void DeleteParent()
+    public void ValidateParentDeletion(object parentKey)
     {
         throw new NotImplementedException();
     }

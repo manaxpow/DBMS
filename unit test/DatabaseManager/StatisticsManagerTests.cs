@@ -1,6 +1,5 @@
 using System;
 using Xunit;
-using DBMS.DatabaseManager;
 
 public class StatisticsManagerTests
 {

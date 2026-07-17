@@ -17,6 +17,8 @@ classDiagram
         -LoadPage(object frame, object pageData) void
         -RegisterPage(object pageId, object frame) void
         +FlushDirtyPages() void
+        +Flush(object pageId) void
+        +Evict(object frame) void
         +Clear() void
     }
 
@@ -26,6 +28,7 @@ classDiagram
         +byte[] Data
         +List~Slot~ SlotDirectory
         +InsertRecord(object record) object
+        +UpdateRecord(object record) void
         +DeleteRecord(object slotId) void
         -CalculateRequiredSpace(object record) int
         -HasAvailableSpace(int requiredSpace) bool
@@ -52,6 +55,7 @@ classDiagram
         -ValidateConfiguration(object configuration) bool
         -SetState(object state) void
         +ReadPage(object pageId) object
+        +WritePage(object pageId, object data) void
         +Shutdown() void
     }
 
@@ -61,6 +65,7 @@ classDiagram
         +Initialize(object fileSettings) void
         +CreateFile(string path) object
         +OpenFile(string path) object
+        +CloseFile(string path) void
         +DeleteFile(string path) void
         +ReadPage(object pageId) object
         +CloseAllFiles() void
@@ -443,6 +448,133 @@ sequenceDiagram
     FM-->>FM: true
 
     FM-->>Test: throws FileInUseException
+
+    deactivate FM
+```
+
+---
+
+# 6. Additional Operations Unit Tests
+
+## 6.1 Flush_WhenPageIsDirty_ShouldWriteToDisk
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+    participant FM as FileManager
+
+    Test->>BP: Flush(pageId)
+    activate BP
+
+    BP->>BP: FindBufferedFrame(pageId)
+    BP-->>BP: dirtyFrame
+
+    BP->>FM: WritePage(pageId, dirtyFrame.Data)
+    activate FM
+    FM-->>BP: success
+    deactivate FM
+
+    BP->>BP: MarkFrameAsClean(dirtyFrame)
+    BP-->>Test: success
+
+    deactivate BP
+```
+
+## 6.2 Evict_WhenFrameIsUnpinned_ShouldFreeSpace
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+
+    Test->>BP: Evict(frame)
+    activate BP
+
+    BP->>BP: CheckIfPinned(frame)
+    BP-->>BP: false
+
+    BP->>BP: FlushIfDirty(frame)
+    BP->>BP: RemoveFromPageTable(frame.PageId)
+    BP->>BP: MarkFrameAsAvailable(frame)
+
+    BP-->>Test: success
+
+    deactivate BP
+```
+
+## 6.3 UpdateRecord_WhenSpaceIsSufficient_ShouldModifyRecord
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as PageTests
+    participant Page
+
+    Test->>Page: UpdateRecord(record)
+    activate Page
+
+    Page->>Page: FindSlot(record.SlotId)
+    Page-->>Page: slot
+
+    Page->>Page: WriteRecordData(record)
+    Page->>Page: UpdateSlotMetadata(slot)
+
+    Page-->>Test: success
+
+    deactivate Page
+```
+
+## 6.4 WritePage_ShouldMarkPageAsDirty
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as StorageEngineTests
+    participant SE as StorageEngine
+    participant BP as BufferPool
+
+    Test->>SE: WritePage(pageId, data)
+    activate SE
+
+    SE->>BP: FetchPage(pageId)
+    activate BP
+    BP-->>SE: frame
+    deactivate BP
+
+    SE->>SE: UpdateFrameData(frame, data)
+    SE->>SE: MarkFrameAsDirty(frame)
+
+    SE-->>Test: success
+
+    deactivate SE
+```
+
+## 6.5 CloseFile_WhenFileIsOpen_ShouldReleaseHandle
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as FileManagerTests
+    participant FM as FileManager
+
+    Test->>FM: CloseFile(path)
+    activate FM
+
+    FM->>FM: IsFileOpen(path)
+    FM-->>FM: true
+
+    FM->>FM: ReleaseFileHandle(path)
+    FM->>FM: RemoveFromOpenFiles(path)
+
+    FM-->>Test: success
 
     deactivate FM
 ```

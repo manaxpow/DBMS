@@ -1,6 +1,5 @@
 using System;
 using Xunit;
-using DBMS.DatabaseObjects;
 
 public class ViewTests
 {
@@ -21,5 +20,4 @@ public class ViewTests
     {
         throw new NotImplementedException();
     }
-
 }

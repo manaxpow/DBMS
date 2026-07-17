@@ -26,6 +26,11 @@ public class StorageEngine
         throw new NotImplementedException();
     }
 
+    public void WritePage(object pageId, object data)
+    {
+        throw new NotImplementedException();
+    }
+
     public void Shutdown()
     {
         throw new NotImplementedException();

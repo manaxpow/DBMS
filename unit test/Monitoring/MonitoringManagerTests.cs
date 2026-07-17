@@ -1,6 +1,5 @@
 using System;
 using Xunit;
-using DBMS.Monitoring;
 
 public class MonitoringManagerTests
 {

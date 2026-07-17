@@ -23,6 +23,11 @@ public class FileManager : IFileManager
         throw new NotImplementedException();
     }
 
+    public void CloseFile(string path)
+    {
+        throw new NotImplementedException();
+    }
+
     public void DeleteFile(string path)
     {
         throw new NotImplementedException();

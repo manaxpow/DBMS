@@ -2,17 +2,19 @@ using System;
 
 public class Index
 {
-    public void Scan()
+    public bool IsUnique { get; set; }
+
+    public void Insert(object key, object recordPointer)
     {
         throw new NotImplementedException();
     }
 
-    public void Insert(object key)
+    public object Search(object key)
     {
         throw new NotImplementedException();
     }
 
-    public void Search(object key)
+    public void Delete(object key)
     {
         throw new NotImplementedException();
     }

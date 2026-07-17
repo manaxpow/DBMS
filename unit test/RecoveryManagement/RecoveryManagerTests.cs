@@ -1,6 +1,5 @@
 using System;
 using Xunit;
-using DBMS.RecoveryManagement;
 
 public class RecoveryManagerTests
 {

@@ -2,17 +2,19 @@ using System;
 
 public class Constraint
 {
-    public bool Check()
+    public bool IsEnabled { get; set; }
+
+    public bool Check(object value)
     {
         throw new NotImplementedException();
     }
 
-    public void Validate(object value)
+    public bool Validate(object value)
     {
         throw new NotImplementedException();
     }
 
-    public void Apply()
+    public void Apply(object value)
     {
         throw new NotImplementedException();
     }

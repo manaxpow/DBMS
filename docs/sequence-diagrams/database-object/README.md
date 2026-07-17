@@ -5,49 +5,133 @@
 ```mermaid
 classDiagram
     direction TB
+
+    class Database {
+        +string Name
+        +DropSchema(string schemaName) void
+        +AlterSchema(string schemaName, object newSchema) void
+    }
+
     class Schema {
         +string Name
+        +AddTable(Table table) void
+        +RemoveTable(string tableName) void
+        +DropTable(string tableName) void
+        +AlterTable(string tableName, Table newTable) void
+        +GetTable(string tableName) Table
+        +ContainsTable(string tableName) bool
+        +ContainsObject(string objectName) bool
+        +ResolveObject(string objectName) object
     }
+
     class Table {
         +string Name
+        +AddColumn(Column column) void
+        +DropColumn(string columnName) void
+        +AlterColumn(string columnName, Column newColumn) void
+        +InsertRow(Row row) void
+        +DeleteRow(Row row) void
+        +ContainsColumn(string columnName) bool
+        +ContainsRow(Row row) bool
+        +GetColumn(string columnName) Column
+        +GetColumnIndex(Column column) int
+        +GetPrimaryIndex() Index
+        +GetForeignKeyIndex() Index
     }
+
     class Column {
         +string Name
         +string Type
-    }
-    class Row {
-        +object[] Values
-    }
-    class Constraint {
-        +Check() bool
-    }
-    class ForeignKey {
-        +string RefTable
-    }
-    class Index {
-        +Scan() void
-    }
-    class Partition {
-        +string Range
-    }
-    class View {
-        +string Query
-    }
-    class StoredProcedure {
-        +Execute() void
+        +Create(string name, string type) Column
+        +ValidateValue(object value) bool
     }
 
+    class Row {
+        +object[] Values
+        +GetValue(string columnName) object
+        +SetValue(string columnName, object value) void
+    }
+
+    class Constraint {
+        +bool IsEnabled
+        +Check(object value) bool
+        +Validate(object value) bool
+        +Apply(object value) void
+    }
+
+    class ForeignKey {
+        +string RefTable
+        +Validate(object parentKey) bool
+        +ValidateParentDeletion(object parentKey) void
+    }
+
+    class Index {
+        +bool IsUnique
+        +Insert(object key, object recordPointer) void
+        +Search(object key) object
+        +Delete(object key) void
+    }
+
+    class Partition {
+        +string Range
+        +RouteRow(Row row, string partitionKey) Partition
+        +AddRange(string range) void
+        +Contains(object key) bool
+    }
+
+    class View {
+        +string Name
+        +string Query
+        +Create(string name, string query, Schema schema) View
+        +AlterView(string newQuery) void
+        +DropView() void
+        +Resolve(Schema schema) object
+    }
+
+    class StoredProcedure {
+        +Execute(object parameters) object
+        +ValidateParameters(object parameters) bool
+        +AlterProcedure(object newBody) void
+        +DropProcedure() void
+    }
+
+    class TransactionManager {
+        +BeginTransaction() object
+        +Commit(object transaction) void
+        +Rollback(object transaction) void
+    }
+
+    class ProcedureBody {
+        +Execute(object parameters, object transaction) object
+    }
+
+    Database *-- Schema
     Schema *-- Table
     Schema *-- View
     Schema *-- StoredProcedure
+
     Table *-- Column
     Table *-- Row
     Table *-- Constraint
-    Constraint <|-- ForeignKey
     Table *-- Index
     Table *-- Partition
-```
 
+    Constraint <|-- ForeignKey
+
+    Row --> Table : resolves column
+    Row --> Column : validates value
+
+    ForeignKey --> Schema : resolves parent table
+    ForeignKey --> Table : obtains index
+    ForeignKey --> Index : searches reference
+
+    Partition --> Row : reads partition key
+
+    View --> Schema : resolves dependencies
+
+    StoredProcedure --> TransactionManager : controls transaction
+    StoredProcedure --> ProcedureBody : executes body
+```
 # 2. Schema Unit Tests
 
 ## 2.1 AddTable_WhenTableIsValid_ShouldRegisterTable
@@ -856,120 +940,234 @@ sequenceDiagram
 
 ---
 
-# 12. Reduced Production Class Diagram
+# 12. Database Unit Tests
 
-This diagram contains only production components that actively participate in at least one sequence diagram.
+## 12.1 DropSchema_WhenSchemaExists_ShouldRemoveSchema
 
 ```mermaid
-classDiagram
-    direction TB
+sequenceDiagram
+    autonumber
 
-    class Schema {
-        +string Name
-        +AddTable(Table table) void
-        +RemoveTable(string tableName) void
-        +GetTable(string tableName) Table
-        +ContainsTable(string tableName) bool
-        +ContainsObject(string objectName) bool
-        +ResolveObject(string objectName) object
-    }
+    participant Test as DatabaseTests
+    participant Database
 
-    class Table {
-        +string Name
-        +AddColumn(Column column) void
-        +InsertRow(Row row) void
-        +ContainsColumn(string columnName) bool
-        +ContainsRow(Row row) bool
-        +GetColumn(string columnName) Column
-        +GetColumnIndex(Column column) int
-        +GetPrimaryIndex() Index
-        +GetForeignKeyIndex() Index
-    }
+    Test->>Database: DropSchema(schemaName)
+    activate Database
 
-    class Column {
-        +string Name
-        +string Type
-        +Create(string name, string type) Column
-        +ValidateValue(object value) bool
-    }
+    Database->>Database: RemoveSchemaMetadata(schemaName)
+    Database-->>Test: success
 
-    class Row {
-        +object[] Values
-        +GetValue(string columnName) object
-        +SetValue(string columnName, object value) void
-    }
+    deactivate Database
+```
 
-    class Constraint {
-        +bool IsEnabled
-        +Check(object value) bool
-        +Validate(object value) bool
-        +Apply(object value) void
-    }
+## 12.2 AlterSchema_WhenSchemaExists_ShouldUpdateSchema
 
-    class ForeignKey {
-        +string RefTable
-        +Validate(object parentKey) bool
-        +ValidateParentDeletion(object parentKey) void
-    }
+```mermaid
+sequenceDiagram
+    autonumber
 
-    class Index {
-        +bool IsUnique
-        +Insert(object key, object recordPointer) void
-        +Search(object key) object
-    }
+    participant Test as DatabaseTests
+    participant Database
 
-    class Partition {
-        +string Range
-        +RouteRow(Row row, string partitionKey) Partition
-        +AddRange(string range) void
-        +Contains(object key) bool
-    }
+    Test->>Database: AlterSchema(schemaName, newSchema)
+    activate Database
 
-    class View {
-        +string Name
-        +string Query
-        +Create(string name, string query, Schema schema) View
-        +Resolve(Schema schema) object
-    }
+    Database->>Database: ValidateSchemaModifications(newSchema)
+    Database->>Database: ApplySchemaChanges(newSchema)
+    Database-->>Test: success
 
-    class StoredProcedure {
-        +Execute(object parameters) object
-        +ValidateParameters(object parameters) bool
-    }
+    deactivate Database
+```
 
-    class TransactionManager {
-        +BeginTransaction() object
-        +Commit(object transaction) void
-        +Rollback(object transaction) void
-    }
+---
 
-    class ProcedureBody {
-        +Execute(object parameters, object transaction) object
-    }
+# 13. Drop and Alter Unit Tests (Objects)
 
-    Schema *-- Table
-    Schema *-- View
-    Schema *-- StoredProcedure
+## 13.1 DropTable_WhenTableExists_ShouldRemoveTable
 
-    Table *-- Column
-    Table *-- Row
-    Table *-- Constraint
-    Table *-- Index
-    Table *-- Partition
+```mermaid
+sequenceDiagram
+    autonumber
 
-    Constraint <|-- ForeignKey
+    participant Test as SchemaTests
+    participant Schema
 
-    Row --> Table : resolves column
-    Row --> Column : validates value
+    Test->>Schema: DropTable(tableName)
+    activate Schema
 
-    ForeignKey --> Schema : resolves parent table
-    ForeignKey --> Table : obtains index
-    ForeignKey --> Index : searches reference
+    Schema->>Schema: RemoveTable(tableName)
+    Schema-->>Test: success
 
-    Partition --> Row : reads partition key
+    deactivate Schema
+```
 
-    View --> Schema : resolves dependencies
+## 13.2 AlterTable_WhenTableExists_ShouldUpdateTable
 
-    StoredProcedure --> TransactionManager : controls transaction
-    StoredProcedure --> ProcedureBody : executes body
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as SchemaTests
+    participant Schema
+
+    Test->>Schema: AlterTable(tableName, newTable)
+    activate Schema
+
+    Schema->>Schema: ValidateTableModifications(newTable)
+    Schema->>Schema: ApplyTableChanges(newTable)
+    Schema-->>Test: success
+
+    deactivate Schema
+```
+
+## 13.3 DeleteRow_WhenRowExists_ShouldRemoveRow
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as TableTests
+    participant Table
+
+    Test->>Table: DeleteRow(row)
+    activate Table
+
+    Table->>Table: ContainsRow(row)
+    Table->>Table: RemoveRowData(row)
+    Table-->>Test: success
+
+    deactivate Table
+```
+
+## 13.4 DropColumn_WhenColumnExists_ShouldRemoveColumn
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as TableTests
+    participant Table
+
+    Test->>Table: DropColumn(columnName)
+    activate Table
+
+    Table->>Table: ContainsColumn(columnName)
+    Table->>Table: RemoveColumnMetadata(columnName)
+    Table-->>Test: success
+
+    deactivate Table
+```
+
+## 13.5 AlterColumn_WhenColumnExists_ShouldUpdateDefinition
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as TableTests
+    participant Table
+
+    Test->>Table: AlterColumn(columnName, newColumn)
+    activate Table
+
+    Table->>Table: ContainsColumn(columnName)
+    Table->>Table: ValidateColumnTypeChanges(newColumn)
+    Table->>Table: ApplyColumnChanges(newColumn)
+    Table-->>Test: success
+
+    deactivate Table
+```
+
+## 13.6 Index_Delete_WhenKeyExists_ShouldRemoveEntry
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as IndexTests
+    participant Index
+
+    Test->>Index: Delete(key)
+    activate Index
+
+    Index->>Index: Search(key)
+    Index->>Index: RemoveEntry(key)
+    Index-->>Test: success
+
+    deactivate Index
+```
+
+## 13.7 AlterView_WhenQueryIsValid_ShouldUpdateDefinition
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as ViewTests
+    participant View
+
+    Test->>View: AlterView(newQuery)
+    activate View
+
+    View->>View: ValidateQuerySyntax(newQuery)
+    View->>View: ExtractDependencies(newQuery)
+    View->>View: UpdateQuery(newQuery)
+    View-->>Test: success
+
+    deactivate View
+```
+
+## 13.8 DropView_WhenViewExists_ShouldRemoveView
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as ViewTests
+    participant View
+
+    Test->>View: DropView()
+    activate View
+
+    View->>View: CleanupDependencies()
+    View-->>Test: success
+
+    deactivate View
+```
+
+## 13.9 AlterProcedure_WhenBodyIsValid_ShouldUpdateProcedure
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as StoredProcedureTests
+    participant Procedure as StoredProcedure
+
+    Test->>Procedure: AlterProcedure(newBody)
+    activate Procedure
+
+    Procedure->>Procedure: ValidateProcedureBody(newBody)
+    Procedure->>Procedure: UpdateProcedureBody(newBody)
+    Procedure-->>Test: success
+
+    deactivate Procedure
+```
+
+## 13.10 DropProcedure_WhenProcedureExists_ShouldRemoveProcedure
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as StoredProcedureTests
+    participant Procedure as StoredProcedure
+
+    Test->>Procedure: DropProcedure()
+    activate Procedure
+
+    Procedure->>Procedure: CleanupProcedureContext()
+    Procedure-->>Test: success
+
+    deactivate Procedure
 ```

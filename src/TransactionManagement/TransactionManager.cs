@@ -11,4 +11,9 @@ public class TransactionManager
     {
         throw new NotImplementedException();
     }
+
+    public void Rollback(Transaction transaction)
+    {
+        throw new NotImplementedException();
+    }
 }

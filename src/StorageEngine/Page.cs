@@ -10,7 +10,19 @@ public class Page
     public byte[] Data { get; set; }
     public List<Slot> SlotDirectory { get; set; }
 
+    public Page(PageId pageId, byte[] data)
+    {
+        PageId = pageId;
+        Data = data;
+        FreeSpace = data.Length;
+        SlotDirectory = new List<Slot>();
+    }
     public object InsertRecord(object record)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateRecord(object record)
     {
         throw new NotImplementedException();
     }

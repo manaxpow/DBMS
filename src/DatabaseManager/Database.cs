@@ -18,4 +18,14 @@ public class Database
     {
         throw new NotImplementedException();
     }
+
+    public void DropSchema(string schemaName)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void AlterSchema(string schemaName, object newSchema)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -3,48 +3,79 @@
 Database management system
 
 ```mermaid
-mindmap
-  root((DatabaseServer))
-    StorageEngine
-      FileManager
-      BufferPool
-        Page
-    QueryProcessor
-      SQLParser
-        Lexer
-        AST
-      QueryOptimizer
-        LogicalPlan
-        PhysicalPlan
-      QueryExecutor
-    TransactionManager
-      Transaction
-      LockManager
-      MVCCManager
-    RecoveryManager
-      WALManager
-      BackupManager
-    DatabaseManager
-      Database
-        Schema
-          Table
-            Column
-            Row
-            Constraint
-            ForeignKey
-            Index
-            Partition
-          View
-          StoredProcedure
-      CatalogManager
-      StatisticsManager
-    SecurityManager
-      User
-      Role
-      Permission
-    ReplicationManager
-      ClusterNode
-    MonitoringManager
+flowchart LR
+    %% Left side
+    QP_SP[SQLParser] --- DS[DatabaseServer]
+    QP_Lex[Lexer] --- QP_SP
+    QP_AST[AST] --- QP_SP
+
+    QP_QO[QueryOptimizer] --- DS
+    QP_LP[LogicalPlan] --- QP_QO
+    QP_PP[PhysicalPlan] --- QP_QO
+
+    QP_QE[QueryExecutor] --- DS
+
+    SE[StorageEngine] --- DS
+    SE_FM[FileManager] --- SE
+    SE_BP[BufferPool] --- SE
+    SE_Pg[Page] --- SE_BP
+
+    TM[TransactionManager] --- DS
+    TM_Tx[Transaction] --- TM
+    TM_LM[LockManager] --- TM
+    TM_MVCC[MVCCManager] --- TM
+
+    RM[RecoveryManager] --- DS
+    RM_WAL[WALManager] --- RM
+    RM_BM[BackupManager] --- RM
+
+    %% Right side
+    DS --- DM[DatabaseManager]
+    DM --- DB[Database]
+    DB --- Sch[Schema]
+    Sch --- Tbl[Table]
+    Tbl --- Col[Column]
+    Tbl --- Rw[Row]
+    Tbl --- Cst[Constraint]
+    Tbl --- FK[ForeignKey]
+    Tbl --- Idx[Index]
+    Tbl --- Ptn[Partition]
+    Sch --- Vw[View]
+    Sch --- SP[StoredProcedure]
+
+    DS --- CM[CatalogManager]
+    CM --- StatM[StatisticsManager]
+
+    DS --- SecM[SecurityManager]
+    SecM --- Usr[User]
+    SecM --- Rl[Role]
+    SecM --- Prm[Permission]
+
+    DS --- RepM[ReplicationManager]
+    RepM --- CN[ClusterNode]
+
+    DS --- MonM[MonitoringManager]
+
+    %% =========================
+    %% STYLES
+    %% =========================
+
+    %% Root node
+    classDef dbmsRoot fill:#dbeafe,stroke:#1d4ed8,stroke-width:5px,color:#111827,font-weight:bold,font-size:20px;
+
+    %% Layer 1 subsystems
+    classDef importantLayerOne fill:#fbbf24,stroke:#b45309,stroke-width:4px,color:#111827,font-weight:bold,font-size:18px;
+
+    %% Layer 2 components
+    classDef importantLayerTwo fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#111827,font-weight:bold;
+
+    %% =========================
+    %% APPLY STYLES
+    %% =========================
+
+    class DS dbmsRoot;
+    class QP_SP,QP_QO,QP_QE,SE,TM,RM,DM,CM,SecM,RepM,MonM importantLayerOne;
+    class QP_Lex,QP_AST,QP_LP,QP_PP,SE_FM,SE_BP,SE_Pg,TM_Tx,TM_LM,TM_MVCC,RM_WAL,RM_BM,DB,Sch,Tbl,Col,Rw,Cst,FK,Idx,Ptn,Vw,SP,StatM,Usr,Rl,Prm,CN importantLayerTwo;
 ```
 
 ## Feature Class Diagrams
@@ -277,222 +308,246 @@ classDiagram
 ### 1. Database Manager Unit Tests
 
 ```mermaid
-mindmap
-  root((Database Manager))
-    DatabaseServer
-      Start_WhenConfigurationIsValid_ShouldStart
-      Stop_WhenServerIsRunning_ShouldStop
-      Start_WhenPortIsUnavailable_ShouldThrow
-    DatabaseManager
-      CreateDatabase_WhenNameIsValid_ShouldCreateDatabase
-      CreateDatabase_WhenNameAlreadyExists_ShouldThrow
-      DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase
-    Database
-      Open_WhenDatabaseIsClosed_ShouldOpenDatabase
-      Close_WhenDatabaseIsOpen_ShouldCloseDatabase
-      AddSchema_WhenNameAlreadyExists_ShouldThrow
-    CatalogManager
-      Register_WhenObjectIsValid_ShouldAddToCatalog
-      Register_WhenObjectAlreadyExists_ShouldThrow
-      Find_WhenObjectDoesNotExist_ShouldReturnNull
-    StatisticsManager
-      UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics
-      EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate
-      EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback
+flowchart LR
+    Subsystem[Database Manager] --> DatabaseServer
+    DatabaseServer --> Start_WhenConfigurationIsValid_ShouldStart
+    DatabaseServer --> Stop_WhenServerIsRunning_ShouldStop
+    DatabaseServer --> Start_WhenPortIsUnavailable_ShouldThrow
+    
+    Subsystem --> DatabaseManagerClass[DatabaseManager]
+    DatabaseManagerClass --> CreateDatabase_WhenNameIsValid_ShouldCreateDatabase
+    DatabaseManagerClass --> CreateDatabase_WhenNameAlreadyExists_ShouldThrow
+    DatabaseManagerClass --> DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase
+    
+    Subsystem --> Database
+    Database --> Open_WhenDatabaseIsClosed_ShouldOpenDatabase
+    Database --> Close_WhenDatabaseIsOpen_ShouldCloseDatabase
+    Database --> AddSchema_WhenNameAlreadyExists_ShouldThrow
+    
+    Subsystem --> CatalogManager
+    CatalogManager --> Register_WhenObjectIsValid_ShouldAddToCatalog
+    CatalogManager --> Register_WhenObjectAlreadyExists_ShouldThrow
+    CatalogManager --> Find_WhenObjectDoesNotExist_ShouldReturnNull
+    
+    Subsystem --> StatisticsManager
+    StatisticsManager --> UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics
+    StatisticsManager --> EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate
+    StatisticsManager --> EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback
 ```
 
 ### 2. Database Objects Unit Tests
 
 ```mermaid
-mindmap
-  root((Database Objects))
-    Schema
-      AddTable_WhenTableIsValid_ShouldRegisterTable
-      AddTable_WhenNameAlreadyExists_ShouldThrow
-      RemoveTable_WhenTableExists_ShouldRemoveTable
-    Table
-      InsertRow_WhenRowIsValid_ShouldInsertRow
-      InsertRow_WhenSchemaDoesNotMatch_ShouldThrow
-      AddColumn_WhenNameAlreadyExists_ShouldThrow
-    Column
-      Create_WhenDefinitionIsValid_ShouldCreateColumn
-      Create_WhenNameIsInvalid_ShouldThrow
-      ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse
-    Row
-      GetValue_WhenColumnExists_ShouldReturnValue
-      SetValue_WhenValueIsValid_ShouldUpdateValue
-      SetValue_WhenTypeDoesNotMatch_ShouldThrow
-    Constraint
-      Validate_WhenValueSatisfiesConstraint_ShouldSucceed
-      Validate_WhenValueViolatesConstraint_ShouldFail
-      Apply_WhenConstraintIsDisabled_ShouldSkipValidation
-    ForeignKey
-      Validate_WhenParentRecordExists_ShouldSucceed
-      Validate_WhenParentRecordDoesNotExist_ShouldFail
-      DeleteParent_WhenRestricted_ShouldRejectDeletion
-    Index
-      Insert_WhenKeyIsValid_ShouldAddEntry
-      Search_WhenKeyExists_ShouldReturnRecordPointer
-      Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
-    Partition
-      RouteRow_WhenKeyMatchesRange_ShouldReturnPartition
-      RouteRow_WhenKeyIsOutsideRange_ShouldFail
-      AddRange_WhenRangesOverlap_ShouldThrow
-    View
-      Create_WhenQueryIsValid_ShouldCreateView
-      Resolve_WhenDependenciesExist_ShouldReturnDefinition
-      Resolve_WhenDependencyIsMissing_ShouldThrow
-    StoredProcedure
-      Execute_WhenParametersAreValid_ShouldReturnResult
-      Execute_WhenRequiredParameterIsMissing_ShouldThrow
-      Execute_WhenTransactionFails_ShouldPropagateFailure
+flowchart LR
+    Subsystem[Database Objects] --> Schema
+    Schema --> AddTable_WhenTableIsValid_ShouldRegisterTable
+    Schema --> AddTable_WhenNameAlreadyExists_ShouldThrow
+    Schema --> RemoveTable_WhenTableExists_ShouldRemoveTable
+    
+    Subsystem --> Table
+    Table --> InsertRow_WhenRowIsValid_ShouldInsertRow
+    Table --> InsertRow_WhenSchemaDoesNotMatch_ShouldThrow
+    Table --> AddColumn_WhenNameAlreadyExists_ShouldThrow
+    
+    Subsystem --> Column
+    Column --> Create_WhenDefinitionIsValid_ShouldCreateColumn
+    Column --> Create_WhenNameIsInvalid_ShouldThrow
+    Column --> ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse
+    
+    Subsystem --> Row
+    Row --> GetValue_WhenColumnExists_ShouldReturnValue
+    Row --> SetValue_WhenValueIsValid_ShouldUpdateValue
+    Row --> SetValue_WhenTypeDoesNotMatch_ShouldThrow
+    
+    Subsystem --> Constraint
+    Constraint --> Validate_WhenValueSatisfiesConstraint_ShouldSucceed
+    Constraint --> Validate_WhenValueViolatesConstraint_ShouldFail
+    Constraint --> Apply_WhenConstraintIsDisabled_ShouldSkipValidation
+    
+    Subsystem --> ForeignKey
+    ForeignKey --> Validate_WhenParentRecordExists_ShouldSucceed
+    ForeignKey --> Validate_WhenParentRecordDoesNotExist_ShouldFail
+    ForeignKey --> DeleteParent_WhenRestricted_ShouldRejectDeletion
+    
+    Subsystem --> Index
+    Index --> Insert_WhenKeyIsValid_ShouldAddEntry
+    Index --> Search_WhenKeyExists_ShouldReturnRecordPointer
+    Index --> Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
+    
+    Subsystem --> Partition
+    Partition --> RouteRow_WhenKeyMatchesRange_ShouldReturnPartition
+    Partition --> RouteRow_WhenKeyIsOutsideRange_ShouldFail
+    Partition --> AddRange_WhenRangesOverlap_ShouldThrow
+    
+    Subsystem --> View
+    View --> Create_WhenQueryIsValid_ShouldCreateView
+    View --> Resolve_WhenDependenciesExist_ShouldReturnDefinition
+    View --> Resolve_WhenDependencyIsMissing_ShouldThrow
+    
+    Subsystem --> StoredProcedure
+    StoredProcedure --> Execute_WhenParametersAreValid_ShouldReturnResult
+    StoredProcedure --> Execute_WhenRequiredParameterIsMissing_ShouldThrow
+    StoredProcedure --> Execute_WhenTransactionFails_ShouldPropagateFailure
 ```
 
 ### 3. Transaction Management Unit Tests
 
 ```mermaid
-mindmap
-  root((Transaction Management))
-    Transaction
-      Begin_WhenTransactionIsNew_ShouldBecomeActive
-      Commit_WhenTransactionIsActive_ShouldCommit
-      Rollback_WhenTransactionIsActive_ShouldRollback
-    TransactionManager
-      BeginTransaction_ShouldReturnActiveTransaction
-      Commit_WhenTransactionExists_ShouldCommitTransaction
-      Commit_WhenTransactionDoesNotExist_ShouldThrow
-    LockManager
-      Acquire_WhenLocksAreCompatible_ShouldGrantLock
-      Acquire_WhenLocksConflict_ShouldRejectOrWait
-      Release_WhenLockExists_ShouldRemoveLock
-    MVCCManager
-      CreateVersion_WhenRowChanges_ShouldCreateNewVersion
-      ReadVersion_WhenVersionIsVisible_ShouldReturnVersion
-      Cleanup_WhenVersionIsObsolete_ShouldRemoveVersion
+flowchart LR
+    Subsystem[Transaction Management] --> Transaction
+    Transaction --> Begin_WhenTransactionIsNew_ShouldBecomeActive
+    Transaction --> Commit_WhenTransactionIsActive_ShouldCommit
+    Transaction --> Rollback_WhenTransactionIsActive_ShouldRollback
+    
+    Subsystem --> TransactionManagerClass[TransactionManager]
+    TransactionManagerClass --> BeginTransaction_ShouldReturnActiveTransaction
+    TransactionManagerClass --> Commit_WhenTransactionExists_ShouldCommitTransaction
+    TransactionManagerClass --> Commit_WhenTransactionDoesNotExist_ShouldThrow
+    
+    Subsystem --> LockManager
+    LockManager --> Acquire_WhenLocksAreCompatible_ShouldGrantLock
+    LockManager --> Acquire_WhenLocksConflict_ShouldRejectOrWait
+    LockManager --> Release_WhenLockExists_ShouldRemoveLock
+    
+    Subsystem --> MVCCManager
+    MVCCManager --> CreateVersion_WhenRowChanges_ShouldCreateNewVersion
+    MVCCManager --> ReadVersion_WhenVersionIsVisible_ShouldReturnVersion
+    MVCCManager --> Cleanup_WhenVersionIsObsolete_ShouldRemoveVersion
 ```
 
 ### 4. Storage Engine Unit Tests
 
 ```mermaid
-mindmap
-  root((Storage Engine))
-    BufferPool
-      FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame
-      FetchPage_WhenSpaceIsAvailable_ShouldLoadPage
-      FetchPage_WhenAllFramesArePinned_ShouldThrow
-    Page
-      InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord
-      InsertRecord_WhenSpaceIsInsufficient_ShouldFail
-      DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory
-    StorageEngine
-      Initialize_WhenConfigurationIsValid_ShouldInitializeComponents
-      ReadPage_ShouldDelegateToBufferPool
-      Shutdown_ShouldFlushDirtyPagesAndCloseFiles
-    FileManager
-      CreateFile_WhenPathIsValid_ShouldCreateFile
-      OpenFile_WhenFileExists_ShouldReturnHandle
-      DeleteFile_WhenFileIsInUse_ShouldThrow
+flowchart LR
+    Subsystem[Storage Engine] --> BufferPool
+    BufferPool --> FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame
+    BufferPool --> FetchPage_WhenSpaceIsAvailable_ShouldLoadPage
+    BufferPool --> FetchPage_WhenAllFramesArePinned_ShouldThrow
+    
+    Subsystem --> Page
+    Page --> InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord
+    Page --> InsertRecord_WhenSpaceIsInsufficient_ShouldFail
+    Page --> DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory
+    
+    Subsystem --> StorageEngineClass[StorageEngine]
+    StorageEngineClass --> Initialize_WhenConfigurationIsValid_ShouldInitializeComponents
+    StorageEngineClass --> ReadPage_ShouldDelegateToBufferPool
+    StorageEngineClass --> Shutdown_ShouldFlushDirtyPagesAndCloseFiles
+    
+    Subsystem --> FileManager
+    FileManager --> CreateFile_WhenPathIsValid_ShouldCreateFile
+    FileManager --> OpenFile_WhenFileExists_ShouldReturnHandle
+    FileManager --> DeleteFile_WhenFileIsInUse_ShouldThrow
 ```
 
 ### 5. Recovery Management Unit Tests
 
 ```mermaid
-mindmap
-  root((Recovery Management))
-    WALManager
-      Append_WhenRecordIsValid_ShouldAssignLSN
-      Flush_WhenTargetLSNExists_ShouldPersistRecords
-      Append_WhenSequenceIsInvalid_ShouldThrow
-    RecoveryManager
-      Recover_ShouldRedoCommittedTransactions
-      Recover_ShouldUndoUncommittedTransactions
-      Recover_WhenCheckpointExists_ShouldStartFromCheckpoint
-    BackupManager
-      CreateBackup_WhenDatabaseIsOnline_ShouldCreateBackup
-      Restore_WhenBackupIsValid_ShouldRestoreDatabase
-      CreateBackup_WhenWriteFails_ShouldCleanPartialBackup
+flowchart LR
+    Subsystem[Recovery Management] --> WALManager
+    WALManager --> Append_WhenRecordIsValid_ShouldAssignLSN
+    WALManager --> Flush_WhenTargetLSNExists_ShouldPersistRecords
+    WALManager --> Append_WhenSequenceIsInvalid_ShouldThrow
+    
+    Subsystem --> RecoveryManagerClass[RecoveryManager]
+    RecoveryManagerClass --> Recover_ShouldRedoCommittedTransactions
+    RecoveryManagerClass --> Recover_ShouldUndoUncommittedTransactions
+    RecoveryManagerClass --> Recover_WhenCheckpointExists_ShouldStartFromCheckpoint
+    
+    Subsystem --> BackupManager
+    BackupManager --> CreateBackup_WhenDatabaseIsOnline_ShouldCreateBackup
+    BackupManager --> Restore_WhenBackupIsValid_ShouldRestoreDatabase
+    BackupManager --> CreateBackup_WhenWriteFails_ShouldCleanPartialBackup
 ```
 
 ### 6. Query Processor Unit Tests
 
 ```mermaid
-mindmap
-  root((Query Processor))
-    Lexer
-      Tokenize_WhenSQLIsValid_ShouldReturnTokens
-      Tokenize_WhenInputContainsWhitespace_ShouldIgnoreWhitespace
-      Tokenize_WhenTokenIsInvalid_ShouldThrow
-    SQLParser
-      Parse_WhenSelectStatementIsValid_ShouldReturnAST
-      Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError
-      Parse_WhenTokensAreEmpty_ShouldRejectInput
-    AST
-      Accept_WhenVisitorIsProvided_ShouldDispatchVisitor
-      Build_WhenChildrenAreValid_ShouldPreserveTreeStructure
-      Build_WhenRequiredNodeIsMissing_ShouldFail
-    QueryOptimizer
-      Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan
-      Optimize_ShouldPreserveLogicalSemantics
-      Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan
-    LogicalPlan
-      AddOperator_WhenOperatorIsValid_ShouldUpdatePlan
-      Validate_WhenOperatorInputsMatch_ShouldSucceed
-      Validate_WhenSchemaDoesNotMatch_ShouldFail
-    PhysicalPlan
-      Build_WhenLogicalPlanIsValid_ShouldCreatePhysicalOperators
-      CalculateCost_ShouldReturnEstimatedExecutionCost
-      Validate_WhenOperatorIsUnsupported_ShouldFail
-    QueryExecutor
-      Execute_WhenPlanIsValid_ShouldReturnRows
-      Execute_WhenStorageFails_ShouldPropagateFailure
-      Execute_WhenTransactionFails_ShouldRollback
+flowchart LR
+    Subsystem[Query Processor] --> Lexer
+    Lexer --> Tokenize_WhenSQLIsValid_ShouldReturnTokens
+    Lexer --> Tokenize_WhenInputContainsWhitespace_ShouldIgnoreWhitespace
+    Lexer --> Tokenize_WhenTokenIsInvalid_ShouldThrow
+    
+    Subsystem --> SQLParser
+    SQLParser --> Parse_WhenSelectStatementIsValid_ShouldReturnAST
+    SQLParser --> Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError
+    SQLParser --> Parse_WhenTokensAreEmpty_ShouldRejectInput
+    
+    Subsystem --> AST
+    AST --> Accept_WhenVisitorIsProvided_ShouldDispatchVisitor
+    AST --> Build_WhenChildrenAreValid_ShouldPreserveTreeStructure
+    AST --> Build_WhenRequiredNodeIsMissing_ShouldFail
+    
+    Subsystem --> QueryOptimizer
+    QueryOptimizer --> Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan
+    QueryOptimizer --> Optimize_ShouldPreserveLogicalSemantics
+    QueryOptimizer --> Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan
+    
+    Subsystem --> LogicalPlan
+    LogicalPlan --> AddOperator_WhenOperatorIsValid_ShouldUpdatePlan
+    LogicalPlan --> Validate_WhenOperatorInputsMatch_ShouldSucceed
+    LogicalPlan --> Validate_WhenSchemaDoesNotMatch_ShouldFail
+    
+    Subsystem --> PhysicalPlan
+    PhysicalPlan --> Build_WhenLogicalPlanIsValid_ShouldCreatePhysicalOperators
+    PhysicalPlan --> CalculateCost_ShouldReturnEstimatedExecutionCost
+    PhysicalPlan --> Validate_WhenOperatorIsUnsupported_ShouldFail
+    
+    Subsystem --> QueryExecutor
+    QueryExecutor --> Execute_WhenPlanIsValid_ShouldReturnRows
+    QueryExecutor --> Execute_WhenStorageFails_ShouldPropagateFailure
+    QueryExecutor --> Execute_WhenTransactionFails_ShouldRollback
 ```
 
 ### 7. Security Management Unit Tests
 
 ```mermaid
-mindmap
-  root((Security Management))
-    SecurityManager
-      Authenticate_WhenCredentialsAreValid_ShouldReturnUser
-      Authenticate_WhenCredentialsAreInvalid_ShouldFail
-      Authorize_WhenPermissionIsMissing_ShouldDenyAccess
-    User
-      AssignRole_WhenRoleIsValid_ShouldAddRole
-      AssignRole_WhenRoleAlreadyAssigned_ShouldNotDuplicate
-      Disable_WhenUserIsActive_ShouldDisableUser
-    Role
-      AddPermission_WhenPermissionIsValid_ShouldAddPermission
-      AddPermission_WhenPermissionExists_ShouldNotDuplicate
-      RemovePermission_WhenPermissionExists_ShouldRemovePermission
-    Permission
-      Allows_WhenActionAndResourceMatch_ShouldReturnTrue
-      Allows_WhenActionDoesNotMatch_ShouldReturnFalse
-      Allows_WhenScopeDoesNotMatch_ShouldReturnFalse
+flowchart LR
+    Subsystem[Security Management] --> SecurityManagerClass[SecurityManager]
+    SecurityManagerClass --> Authenticate_WhenCredentialsAreValid_ShouldReturnUser
+    SecurityManagerClass --> Authenticate_WhenCredentialsAreInvalid_ShouldFail
+    SecurityManagerClass --> Authorize_WhenPermissionIsMissing_ShouldDenyAccess
+    
+    Subsystem --> User
+    User --> AssignRole_WhenRoleIsValid_ShouldAddRole
+    User --> AssignRole_WhenRoleAlreadyAssigned_ShouldNotDuplicate
+    User --> Disable_WhenUserIsActive_ShouldDisableUser
+    
+    Subsystem --> Role
+    Role --> AddPermission_WhenPermissionIsValid_ShouldAddPermission
+    Role --> AddPermission_WhenPermissionExists_ShouldNotDuplicate
+    Role --> RemovePermission_WhenPermissionExists_ShouldRemovePermission
+    
+    Subsystem --> Permission
+    Permission --> Allows_WhenActionAndResourceMatch_ShouldReturnTrue
+    Permission --> Allows_WhenActionDoesNotMatch_ShouldReturnFalse
+    Permission --> Allows_WhenScopeDoesNotMatch_ShouldReturnFalse
 ```
 
 ### 8. Replication & Cluster Unit Tests
 
 ```mermaid
-mindmap
-  root((Replication & Cluster))
-    ReplicationManager
-      Replicate_WhenFollowerIsAvailable_ShouldSendLogRecords
-      Replicate_WhenFollowerFails_ShouldRetry
-      Commit_WhenQuorumIsNotReached_ShouldFail
-    ClusterNode
-      ReceiveHeartbeat_ShouldUpdateLastSeenTime
-      MarkUnavailable_WhenHeartbeatExpires_ShouldChangeState
-      Create_WhenEndpointIsInvalid_ShouldThrow
+flowchart LR
+    Subsystem[Replication & Cluster] --> ReplicationManagerClass[ReplicationManager]
+    ReplicationManagerClass --> Replicate_WhenFollowerIsAvailable_ShouldSendLogRecords
+    ReplicationManagerClass --> Replicate_WhenFollowerFails_ShouldRetry
+    ReplicationManagerClass --> Commit_WhenQuorumIsNotReached_ShouldFail
+    
+    Subsystem --> ClusterNode
+    ClusterNode --> ReceiveHeartbeat_ShouldUpdateLastSeenTime
+    ClusterNode --> MarkUnavailable_WhenHeartbeatExpires_ShouldChangeState
+    ClusterNode --> Create_WhenEndpointIsInvalid_ShouldThrow
 ```
 
 ### 9. Monitoring Unit Tests
 
 ```mermaid
-mindmap
-  root((Monitoring))
-    MonitoringManager
-      CollectMetrics_WhenSourcesAreAvailable_ShouldReturnMetrics
-      Evaluate_WhenThresholdIsExceeded_ShouldRaiseAlert
-      CollectMetrics_WhenSourceFails_ShouldRecordFailure
+flowchart LR
+    Subsystem[Monitoring] --> MonitoringManagerClass[MonitoringManager]
+    MonitoringManagerClass --> CollectMetrics_WhenSourcesAreAvailable_ShouldReturnMetrics
+    MonitoringManagerClass --> Evaluate_WhenThresholdIsExceeded_ShouldRaiseAlert
+    MonitoringManagerClass --> CollectMetrics_WhenSourceFails_ShouldRecordFailure
 ```
+
+

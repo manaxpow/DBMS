@@ -5,87 +5,56 @@ Database management system
 ```mermaid
 flowchart LR
     %% Left side
-    QP_SP[SQL Parser] --- QP[Query Processor]
-    QP_SA[Semantic Analyzer] --- QP
-    QP_LP[Logical Planner] --- QP
-    QP_QO[Query Optimizer] --- QP
-    QP_QE[Query Executor] --- QP
-    QP --- DBMS[Database Management System]
+    QP_SP[SQLParser] --- DS[DatabaseServer]
+    QP_Lex[Lexer] --- QP_SP
+    QP_AST[AST] --- QP_SP
 
-    SE_FM[File Management] --- SE[Storage Engine]
-    SE_PM[Page Management] --- SE
-    SE_BM[Buffer Management] --- SE
-    SE_RM[Record Management] --- SE
-    SE_IM[Index Management] --- SE
-    SE --- DBMS
+    QP_QO[QueryOptimizer] --- DS
+    QP_LP[LogicalPlan] --- QP_QO
+    QP_PP[PhysicalPlan] --- QP_QO
 
-    TM_TM[Transaction Manager] --- TM[Transaction Management]
-    TM_IM[Isolation Management] --- TM
-    TM_LM[Lock Management] --- TM
-    TM_DM[Deadlock Management] --- TM
-    TM_CC[Concurrency Controller] --- TM
-    TM --- DBMS
+    QP_QE[QueryExecutor] --- DS
 
-    LM_LM[Log Manager] --- LM[Logging Management]
-    LM_WAL[WAL Protocol] --- LM
-    LM_LRM[Log Record Manager] --- LM
-    LM_LSNM[Log Sequence Number Manager] --- LM
-    LM_LBM[Log Buffer Manager] --- LM
-    LM_LW[Log Writer] --- LM
-    LM_LBlkM[Log Block Manager] --- LM
-    LM_LFM[Log File Manager] --- LM
-    LM_LCC[Log Checkpoint Coordinator] --- LM
-    LM --- DBMS
+    SE[StorageEngine] --- DS
+    SE_FM[FileManager] --- SE
+    SE_BP[BufferPool] --- SE
+    SE_Pg[Page] --- SE_BP
 
-    RM_RM[Recovery Manager] --- RM[Recovery Management]
-    RM_LBR[Log-Based Recovery] --- RM
-    RM_CM[Checkpoint Management] --- RM
-    RM_BR[Backup and Restore] --- RM
-    RM --- DBMS
+    TM[TransactionManager] --- DS
+    TM_Tx[Transaction] --- TM
+    TM_LM[LockManager] --- TM
+    TM_MVCC[MVCCManager] --- TM
 
-    %% =========================
-    %% RIGHT SIDE
-    %% =========================
+    RM[RecoveryManager] --- DS
+    RM_WAL[WALManager] --- RM
+    RM_BM[BackupManager] --- RM
 
-    DBMS --- SecM[Security Management]
-    SecM --- SecM_AuthN[Authentication]
-    SecM --- SecM_AuthZ[Authorization]
-    SecM --- SecM_EM[Encryption Management]
-    SecM --- SecM_CM[Connection Management]
-    SecM --- SecM_Aud[Auditing]
-    SecM --- SecM_PM[Principal Management]
+    %% Right side
+    DS --- DM[DatabaseManager]
+    DM --- DB[Database]
+    DB --- Sch[Schema]
+    Sch --- Tbl[Table]
+    Tbl --- Col[Column]
+    Tbl --- Rw[Row]
+    Tbl --- Cst[Constraint]
+    Tbl --- FK[ForeignKey]
+    Tbl --- Idx[Index]
+    Tbl --- Ptn[Partition]
+    Sch --- Vw[View]
+    Sch --- SP[StoredProcedure]
 
-    DBMS --- DM[Database Manager]
-    DM --- DM_DR[Database Registry]
-    DM --- DM_DL[Database Lifecycle]
-    DM --- DM_DM[Database Metadata]
-    DM --- DM_DC[Database Configuration]
-    DM --- DM_DS[Database State]
-    DM --- DM_DFM[Database File Mapping]
-    DM --- DM_DIG[Database ID Generator]
+    DS --- CM[CatalogManager]
+    CM --- StatM[StatisticsManager]
 
-    DBMS --- DOM[Database Object Management]
-    DOM --- DOM_SM[Schema Manager]
-    DOM --- DOM_TM[Table Manager]
-    DOM --- DOM_IM[Index Manager]
-    DOM --- DOM_VM[View Manager]
-    DOM --- DOM_SPM[Stored Procedure Manager]
-    DOM --- DOM_FM[Function Manager]
-    DOM --- DOM_TrM[Trigger Manager]
-    DOM --- DOM_SC[System Catalog]
+    DS --- SecM[SecurityManager]
+    SecM --- Usr[User]
+    SecM --- Rl[Role]
+    SecM --- Prm[Permission]
 
-    DBMS --- PM[Performance Management]
-    PM --- PM_PM[Performance Monitor]
-    PM --- PM_QS[Query Statistics]
-    PM --- PM_RM[Resource Monitor]
-    PM --- PM_CM[Cache Monitor]
-    PM --- PM_SM[Storage Monitor]
-    PM --- PM_PA[Performance Advisor]
+    DS --- RepM[ReplicationManager]
+    RepM --- CN[ClusterNode]
 
-    DBMS --- SysM[System Management]
-    SysM --- SysM_CM[Configuration Management]
-    SysM --- SysM_SM[System Monitoring]
-    SysM --- SysM_IE[Import and Export]
+    DS --- MonM[MonitoringManager]
 
     %% =========================
     %% STYLES
@@ -94,29 +63,19 @@ flowchart LR
     %% Root node
     classDef dbmsRoot fill:#dbeafe,stroke:#1d4ed8,stroke-width:5px,color:#111827,font-weight:bold,font-size:20px;
 
-    %% Three important Layer 1 subsystems
+    %% Layer 1 subsystems
     classDef importantLayerOne fill:#fbbf24,stroke:#b45309,stroke-width:4px,color:#111827,font-weight:bold,font-size:18px;
 
-    %% Two selected Layer 2 components inside each important Layer 1
+    %% Layer 2 components
     classDef importantLayerTwo fill:#fffbeb,stroke:#f59e0b,stroke-width:2px,color:#111827,font-weight:bold;
 
     %% =========================
     %% APPLY STYLES
     %% =========================
 
-    class DBMS dbmsRoot;
-
-    %% Only three important Layer 1 nodes
-    class QP,SE,TM importantLayerOne;
-
-    %% Query Processor: two important Layer 2 components
-    class QP_QO,QP_QE importantLayerTwo;
-
-    %% Storage Engine: two important Layer 2 components
-    class SE_PM,SE_BM importantLayerTwo;
-
-    %% Transaction Management: two important Layer 2 components
-    class TM_TM,TM_LM importantLayerTwo;
+    class DS dbmsRoot;
+    class QP_SP,QP_QO,QP_QE,SE,TM,RM,DM,CM,SecM,RepM,MonM importantLayerOne;
+    class QP_Lex,QP_AST,QP_LP,QP_PP,SE_FM,SE_BP,SE_Pg,TM_Tx,TM_LM,TM_MVCC,RM_WAL,RM_BM,DB,Sch,Tbl,Col,Rw,Cst,FK,Idx,Ptn,Vw,SP,StatM,Usr,Rl,Prm,CN importantLayerTwo;
 ```
 
 ## Feature Class Diagrams
@@ -126,99 +85,21 @@ flowchart LR
 ```mermaid
 classDiagram
     direction TB
-
     class StorageEngine {
         +Initialize() void
-        +Shutdown() void
     }
-
-    class IFileLifecycleManager {
-        <<interface>>
-        +CreateFile(string path) FileId
-        +DeleteFile(FileId fileId) void
-        +OpenFile(FileId fileId) FileHandle
-        +CloseFile(FileHandle handle) void
+    class BufferPool {
+        +GetPage() Page
     }
-    class FileLifecycleManager {
-        -Dictionary~FileId, string~ filePaths
-        +InitializeStorage() void
+    class Page {
+        +Read() byte[]
     }
-
-    class IPhysicalFileSystem {
-        <<interface>>
-        +ReadBlock(DiskAddress address, byte[] buffer) void
-        +WriteBlock(DiskAddress address, byte[] buffer) void
+    class FileManager {
+        +OpenFile() void
     }
-    class PhysicalFileSystem {
-        -FileStream diskStream
-        +SeekToAddress(DiskAddress addr) void
-    }
-
-    class IBufferPoolManager {
-        <<interface>>
-        +FetchPage(PageId pageId) Page
-        +UnpinPage(PageId pageId, bool isDirty) void
-        +FlushPage(PageId pageId) void
-        +NewPage(FileId fileId) Page
-        +DeletePage(PageId pageId) void
-    }
-    class BufferPoolManager {
-        -BufferPool pool
-        +FindFreeFrame() FrameId
-    }
-
-    class IPageReplacementPolicy {
-        <<interface>>
-        +Pin(FrameId frameId) void
-        +Unpin(FrameId frameId) void
-        +Victim() FrameId
-    }
-    class ClockReplacementPolicy {
-        -List~FrameId~ clockHand
-        +AdvanceClock() void
-    }
-
-    class IRecordManager {
-        <<interface>>
-        +InsertRecord(Record record) RecordId
-        +GetRecord(RecordId recordId) Record
-        +UpdateRecord(RecordId recordId, Record record) void
-        +DeleteRecord(RecordId recordId) void
-    }
-    class RecordManager {
-        -RecordLayoutCalculator layout
-        +CompactPage(Page page) void
-    }
-
-    class IIndex {
-        <<interface>>
-        +Insert(IndexKey key, RecordPointer ptr) void
-        +Delete(IndexKey key) void
-        +Search(IndexKey key) RecordPointer
-    }
-    class BPlusTreeIndex {
-        -BPlusTreeNode root
-        +SplitNode(BPlusTreeNode node) void
-        +MergeNode(BPlusTreeNode node) void
-    }
-
-    IFileLifecycleManager <|-- FileLifecycleManager
-    IPhysicalFileSystem <|-- PhysicalFileSystem
-    IBufferPoolManager <|-- BufferPoolManager
-    IPageReplacementPolicy <|-- ClockReplacementPolicy
-    IRecordManager <|-- RecordManager
-    IIndex <|-- BPlusTreeIndex
-
-    %% Structural Relationships
-    StorageEngine *-- IFileLifecycleManager
-    StorageEngine *-- IBufferPoolManager
-    StorageEngine *-- IRecordManager
-    StorageEngine *-- IIndex
-
-    BufferPoolManager --> IPhysicalFileSystem : Uses
-    BufferPoolManager --> IPageReplacementPolicy : Uses
-    RecordManager --> IBufferPoolManager : Uses
-    BPlusTreeIndex --> IBufferPoolManager : Uses
+    StorageEngine *-- BufferPool
+    StorageEngine *-- FileManager
+    BufferPool *-- Page
 ```
 
 ### 2. Query Processor
@@ -226,83 +107,32 @@ classDiagram
 ```mermaid
 classDiagram
     direction TB
-
-    class QueryProcessor {
-        +Initialize() void
-        +ProcessQuery(string sql) QueryResult
+    class QueryExecutor {
+        +Execute() void
     }
-
-    class ISqlParser {
-        <<interface>>
-        +Parse(string sql) SqlStatement
+    class SQLParser {
+        +Parse() AST
     }
-    class SqlParser {
-        -Lexer lexer
-        +BuildAST() ASTNode
+    class Lexer {
+        +Tokenize() void
     }
-
-    class ISemanticAnalyzer {
-        <<interface>>
-        +Analyze(SqlStatement statement, SemanticContext ctx) BoundStatement
-    }
-    class SemanticAnalyzer {
-        -Catalog catalog
-        +ValidateTypes() void
-    }
-
-    class ILogicalPlanBuilder {
-        <<interface>>
-        +Build(BoundStatement statement) LogicalPlan
-    }
-    class LogicalPlanBuilder {
-        +CreateOperators() void
-    }
-
-    class IQueryOptimizer {
-        <<interface>>
-        +Optimize(LogicalPlan plan) LogicalPlan
+    class AST {
+        +GetRoot() void
     }
     class QueryOptimizer {
-        -OptimizationRuleSet rules
-        +ApplyRules() void
+        +Optimize() PhysicalPlan
+    }
+    class LogicalPlan {
+    }
+    class PhysicalPlan {
     }
 
-    class IPhysicalPlanBuilder {
-        <<interface>>
-        +Build(LogicalPlan logicalPlan) PhysicalPlan
-    }
-    class PhysicalPlanBuilder {
-        +SelectAccessPath() void
-    }
-
-    class IQueryExecutor {
-        <<interface>>
-        +Execute(PhysicalPlan plan, ExecutionContext ctx) QueryResult
-    }
-    class QueryExecutor {
-        -OperatorExecutorFactory factory
-        +RunPipeline() void
-    }
-
-    ISqlParser <|-- SqlParser
-    ISemanticAnalyzer <|-- SemanticAnalyzer
-    ILogicalPlanBuilder <|-- LogicalPlanBuilder
-    IQueryOptimizer <|-- QueryOptimizer
-    IPhysicalPlanBuilder <|-- PhysicalPlanBuilder
-    IQueryExecutor <|-- QueryExecutor
-
-    QueryProcessor *-- ISqlParser
-    QueryProcessor *-- ISemanticAnalyzer
-    QueryProcessor *-- ILogicalPlanBuilder
-    QueryProcessor *-- IQueryOptimizer
-    QueryProcessor *-- IPhysicalPlanBuilder
-    QueryProcessor *-- IQueryExecutor
-
-    SemanticAnalyzer --> ISqlParser : Uses (Implicit)
-    LogicalPlanBuilder --> ISemanticAnalyzer : Uses
-    QueryOptimizer --> ILogicalPlanBuilder : Uses
-    PhysicalPlanBuilder --> IQueryOptimizer : Uses
-    QueryExecutor --> IPhysicalPlanBuilder : Uses
+    QueryExecutor *-- SQLParser
+    QueryExecutor *-- QueryOptimizer
+    SQLParser *-- Lexer
+    SQLParser --> AST : Creates
+    QueryOptimizer --> LogicalPlan : Uses
+    QueryOptimizer --> PhysicalPlan : Creates
 ```
 
 ### 3. Transaction Management
@@ -310,611 +140,414 @@ classDiagram
 ```mermaid
 classDiagram
     direction TB
-
-    class TransactionManagement {
-        +Initialize() void
-        +Shutdown() void
-    }
-
-    class ITransactionManager {
-        <<interface>>
-        +BeginTransaction(IsolationLevel level) TransactionId
-        +CommitTransaction(TransactionId txId) void
-        +RollbackTransaction(TransactionId txId) void
-        +GetTransactionState(TransactionId txId) TransactionState
-    }
     class TransactionManager {
-        -TransactionRegistry registry
-        +CreateContext() TransactionContext
+        +BeginTransaction() Transaction
     }
-
-    class IIsolationPolicy {
-        <<interface>>
-        +EnforceReadRules(TransactionId txId, LockResource res) void
-        +EnforceWriteRules(TransactionId txId, LockResource res) void
-    }
-    class RepeatableReadPolicy {
-        +CheckSnapshot() void
-    }
-
-    class ILockManager {
-        <<interface>>
-        +AcquireLock(TransactionId txId, LockResource res, LockMode mode) bool
-        +ReleaseLock(TransactionId txId, LockResource res) void
-        +UpgradeLock(TransactionId txId, LockResource res, LockMode newMode) bool
+    class Transaction {
+        +Commit() void
+        +Rollback() void
     }
     class LockManager {
-        -LockTable lockTable
-        +DetectWaiters() void
+        +AcquireLock() void
+    }
+    class MVCCManager {
+        +GetSnapshot() void
     }
 
-    class IDeadlockDetector {
-        <<interface>>
-        +DetectDeadlock() DeadlockCycle
-        +ResolveDeadlock(DeadlockCycle cycle) TransactionId
-    }
-    class DeadlockDetector {
-        -WaitForGraph wfg
-        +SelectVictim() void
-    }
-
-    class IConcurrencyController {
-        <<interface>>
-        +CheckAccess(TransactionId txId, OperationAccess access) bool
-    }
-    class ConcurrencyController {
-        +ResolveLocks() void
-    }
-
-    ITransactionManager <|-- TransactionManager
-    IIsolationPolicy <|-- RepeatableReadPolicy
-    ILockManager <|-- LockManager
-    IDeadlockDetector <|-- DeadlockDetector
-    IConcurrencyController <|-- ConcurrencyController
-
-    TransactionManagement *-- ITransactionManager
-    TransactionManagement *-- ILockManager
-    TransactionManagement *-- IDeadlockDetector
-    TransactionManagement *-- IConcurrencyController
-
-    TransactionManager --> ILockManager : Uses
-    TransactionManager --> IIsolationPolicy : Uses
-    LockManager --> IDeadlockDetector : Triggers
-    ConcurrencyController --> ILockManager : Uses
+    TransactionManager *-- LockManager
+    TransactionManager *-- MVCCManager
+    TransactionManager --> Transaction : Manages
 ```
 
-### 4. Logging Management
+### 4. Recovery Management
 
 ```mermaid
 classDiagram
     direction TB
-
-    class LoggingManagement {
-        +Initialize() void
-        +Shutdown() void
-    }
-
-    class ILogManager {
-        <<interface>>
-        +AppendLog(LogRecord record) LogSequenceNumber
-        +FlushToLSN(LogSequenceNumber lsn) void
-        +GetLogRecord(LogSequenceNumber lsn) LogRecord
-    }
-    class LogManager {
-        -LogSequenceNumberGenerator lsnGen
-        +CreateAppendRequest() void
-    }
-
-    class IWALProtocol {
-        <<interface>>
-        +EnsureWAL(LogSequenceNumber pageLsn) void
-    }
-    class WALProtocol {
-        +ValidatePageLSN() void
-    }
-
-    class ILogBufferManager {
-        <<interface>>
-        +WriteToBuffer(LogRecord record) void
-        +FlushBuffer() void
-    }
-    class LogBufferManager {
-        -LogBuffer buffer
-        +RotateBuffer() void
-    }
-
-    class ILogWriter {
-        <<interface>>
-        +WriteBlock(LogBlock block) void
-        +Sync() void
-    }
-    class LogWriter {
-        -DurableLSNTracker tracker
-        +PerformIO() void
-    }
-
-    ILogManager <|-- LogManager
-    IWALProtocol <|-- WALProtocol
-    ILogBufferManager <|-- LogBufferManager
-    ILogWriter <|-- LogWriter
-
-    LoggingManagement *-- ILogManager
-    LoggingManagement *-- IWALProtocol
-    LoggingManagement *-- ILogBufferManager
-    LoggingManagement *-- ILogWriter
-
-    LogManager --> IWALProtocol : Uses
-    LogManager --> ILogBufferManager : Uses
-    LogBufferManager --> ILogWriter : Uses
-```
-
-### 5. Recovery Management
-
-```mermaid
-classDiagram
-    direction TB
-
-    class RecoveryManagement {
-        +Initialize() void
-        +StartRecovery() void
-    }
-
-    class IRecoveryManager {
-        <<interface>>
-        +RecoverDatabase() void
-        +UndoTransaction(TransactionId txId) void
-    }
     class RecoveryManager {
-        -RecoveryContext ctx
-        +AnalyzeState() void
+        +Recover() void
     }
-
-    class ILogBasedRecovery {
-        <<interface>>
-        +PerformAnalysis() RecoveryAnalysisPhase
-        +PerformRedo() void
-        +PerformUndo() void
-    }
-    class AriesRecoveryAlgorithm {
-        -TransactionRecoveryTable trt
-        -DirtyPageTable dpt
-    }
-
-    class ICheckpointCoordinator {
-        <<interface>>
-        +CreateCheckpoint() CheckpointId
-        +GetLatestCheckpoint() CheckpointMetadata
-    }
-    class CheckpointCoordinator {
-        -CheckpointWriter writer
-        +FlushDirtyPages() void
-    }
-
-    class IBackupManager {
-        <<interface>>
-        +CreateFullBackup(string destination) BackupId
-        +CreateIncrementalBackup(string destination) BackupId
+    class WALManager {
+        +WriteLog() void
     }
     class BackupManager {
-        -BackupPlanner planner
-        +WriteManifest() void
+        +CreateBackup() void
     }
 
-    class IRestoreManager {
-        <<interface>>
-        +RestoreFromBackup(BackupId backupId) void
-    }
-    class RestoreManager {
-        -RestoreValidator validator
-        +ApplyLogs() void
-    }
-
-    IRecoveryManager <|-- RecoveryManager
-    ILogBasedRecovery <|-- AriesRecoveryAlgorithm
-    ICheckpointCoordinator <|-- CheckpointCoordinator
-    IBackupManager <|-- BackupManager
-    IRestoreManager <|-- RestoreManager
-
-    RecoveryManagement *-- IRecoveryManager
-    RecoveryManagement *-- ILogBasedRecovery
-    RecoveryManagement *-- ICheckpointCoordinator
-    RecoveryManagement *-- IBackupManager
-    RecoveryManagement *-- IRestoreManager
-
-    RecoveryManager --> ILogBasedRecovery : Uses
-    RecoveryManager --> ICheckpointCoordinator : Uses
-    RestoreManager --> ILogBasedRecovery : Uses
+    RecoveryManager *-- WALManager
+    RecoveryManager *-- BackupManager
 ```
 
-### 6. Security Management
+### 5. Security Management
 
 ```mermaid
 classDiagram
     direction TB
-
-    class SecurityManagement {
-        +Initialize() void
-        +EnforceSecurity() void
+    class SecurityManager {
+        +Authenticate() void
+    }
+    class User {
+        +string Username
+    }
+    class Role {
+        +string RoleName
+    }
+    class Permission {
+        +string Action
     }
 
-    class IAuthenticationManager {
-        <<interface>>
-        +Authenticate(Credential cred) AuthenticationResult
-        +CreateLoginSession(UserId userId) SessionId
-    }
-    class AuthenticationManager {
-        -PasswordHasher hasher
-        +ValidateToken() void
-    }
-
-    class IAuthorizationManager {
-        <<interface>>
-        +CheckPermission(UserId userId, SecuredResource res, Privilege priv) bool
-        +GrantPermission(UserId userId, SecuredResource res, Privilege priv) void
-    }
-    class AuthorizationManager {
-        -PermissionEvaluator evaluator
-        +ResolveRoles() void
-    }
-
-    class IPrincipalManager {
-        <<interface>>
-        +CreateUser(string username, string password) UserId
-        +AssignRole(UserId userId, RoleId roleId) void
-    }
-    class PrincipalManager {
-        -PrincipalRepository repo
-        +UpdateStatus() void
-    }
-
-    class IConnectionManager {
-        <<interface>>
-        +OpenConnection(ConnectionContext ctx) ConnectionId
-        +CloseConnection(ConnectionId connId) void
-        +GetActiveConnections() List~ConnectionId~
-    }
-    class ConnectionManager {
-        -ConnectionRegistry registry
-        +LimitConnections() void
-    }
-
-    IAuthenticationManager <|-- AuthenticationManager
-    IAuthorizationManager <|-- AuthorizationManager
-    IPrincipalManager <|-- PrincipalManager
-    IConnectionManager <|-- ConnectionManager
-
-    SecurityManagement *-- IAuthenticationManager
-    SecurityManagement *-- IAuthorizationManager
-    SecurityManagement *-- IPrincipalManager
-    SecurityManagement *-- IConnectionManager
-
-    AuthenticationManager --> IPrincipalManager : Uses
-    AuthorizationManager --> IPrincipalManager : Uses
-    ConnectionManager --> IAuthenticationManager : Uses
+    SecurityManager *-- User
+    SecurityManager *-- Role
+    SecurityManager *-- Permission
+    User *-- Role
+    Role *-- Permission
 ```
 
-### 7. Database Manager
+### 6. Database Manager
 
 ```mermaid
 classDiagram
     direction TB
-
-    class DatabaseManagerSystem {
-        +Initialize() void
-        +GetDatabases() List~DatabaseId~
+    class DatabaseServer {
+        +Start() void
+    }
+    class DatabaseManager {
+        +CreateDatabase() void
+    }
+    class Database {
+        +string Name
+    }
+    class CatalogManager {
+        +GetMetadata() void
+    }
+    class StatisticsManager {
+        +UpdateStats() void
     }
 
-    class IDatabaseRegistry {
-        <<interface>>
-        +RegisterDatabase(DatabaseDescriptor desc) void
-        +UnregisterDatabase(DatabaseId dbId) void
-        +GetDatabase(DatabaseId dbId) DatabaseDescriptor
-    }
-    class DatabaseRegistry {
-        -DatabaseLookupService lookup
-        +ResolveName() void
-    }
-
-    class IDatabaseLifecycleManager {
-        <<interface>>
-        +CreateDatabase(string name) DatabaseId
-        +DropDatabase(DatabaseId dbId) void
-        +StartDatabase(DatabaseId dbId) void
-        +StopDatabase(DatabaseId dbId) void
-    }
-    class DatabaseLifecycleManager {
-        -DatabaseBootstrapper bootstrapper
-        +CoordinateStartup() void
-    }
-
-    class IDatabaseMetadataManager {
-        <<interface>>
-        +GetMetadata(DatabaseId dbId) DatabaseMetadata
-        +UpdateMetadata(DatabaseId dbId, DatabaseMetadata meta) void
-    }
-    class DatabaseMetadataManager {
-        -DatabaseMetadataRepository repo
-        +SyncVersion() void
-    }
-
-    class IDatabaseConfigurationManager {
-        <<interface>>
-        +LoadConfiguration(DatabaseId dbId) DatabaseConfiguration
-        +SaveConfiguration(DatabaseId dbId, DatabaseConfiguration config) void
-    }
-    class DatabaseConfigurationManager {
-        -DatabaseConfigurationLoader loader
-        +ValidateConfig() void
-    }
-
-    IDatabaseRegistry <|-- DatabaseRegistry
-    IDatabaseLifecycleManager <|-- DatabaseLifecycleManager
-    IDatabaseMetadataManager <|-- DatabaseMetadataManager
-    IDatabaseConfigurationManager <|-- DatabaseConfigurationManager
-
-    DatabaseManagerSystem *-- IDatabaseRegistry
-    DatabaseManagerSystem *-- IDatabaseLifecycleManager
-    DatabaseManagerSystem *-- IDatabaseMetadataManager
-    DatabaseManagerSystem *-- IDatabaseConfigurationManager
-
-    DatabaseLifecycleManager --> IDatabaseRegistry : Uses
-    DatabaseLifecycleManager --> IDatabaseMetadataManager : Uses
-    DatabaseLifecycleManager --> IDatabaseConfigurationManager : Uses
+    DatabaseServer *-- DatabaseManager
+    DatabaseServer *-- CatalogManager
+    DatabaseManager *-- Database
+    CatalogManager *-- StatisticsManager
 ```
 
-### 8. Database Object Management
+### 7. Database Objects
 
 ```mermaid
 classDiagram
     direction TB
-
-    class DatabaseObjectManagement {
-        +Initialize() void
-        +ResolveObject() void
+    class Schema {
+        +string Name
+    }
+    class Table {
+        +string Name
+    }
+    class Column {
+        +string Name
+        +string Type
+    }
+    class Row {
+        +object[] Values
+    }
+    class Constraint {
+        +Check() bool
+    }
+    class ForeignKey {
+        +string RefTable
+    }
+    class Index {
+        +Scan() void
+    }
+    class Partition {
+        +string Range
+    }
+    class View {
+        +string Query
+    }
+    class StoredProcedure {
+        +Execute() void
     }
 
-    class ISchemaManager {
-        <<interface>>
-        +CreateSchema(string name, UserId ownerId) SchemaId
-        +DropSchema(SchemaId schemaId) void
-    }
-    class SchemaManager {
-        -SystemCatalog catalog
-        +ValidateSchema() void
-    }
-
-    class ITableManager {
-        <<interface>>
-        +CreateTable(SchemaId schemaId, TableDefinition def) TableId
-        +DropTable(TableId tableId) void
-        +AlterTable(TableId tableId, TableDefinition newDef) void
-    }
-    class TableManager {
-        -SystemCatalog catalog
-        +CheckConstraints() void
-    }
-
-    class IIndexDefinitionManager {
-        <<interface>>
-        +CreateIndex(TableId tableId, IndexDefinition def) IndexId
-        +DropIndex(IndexId indexId) void
-    }
-    class IndexDefinitionManager {
-        +ValidateIndexColumns() void
-    }
-
-    class IViewManager {
-        <<interface>>
-        +CreateView(SchemaId schemaId, ViewDefinition def) ViewId
-        +DropView(ViewId viewId) void
-    }
-    class ViewManager {
-        +CompileView() void
-    }
-
-    class IConstraintManager {
-        <<interface>>
-        +AddConstraint(TableId tableId, ConstraintDefinition def) ConstraintId
-        +DropConstraint(ConstraintId constraintId) void
-    }
-    class ConstraintManager {
-        +ValidateConstraints() void
-    }
-
-    class ITriggerManager {
-        <<interface>>
-        +CreateTrigger(TableId tableId, TriggerDefinition def) TriggerId
-        +DropTrigger(TriggerId triggerId) void
-    }
-    class TriggerManager {
-        +ExecuteTriggers() void
-    }
-
-    class IStoredProcedureManager {
-        <<interface>>
-        +CreateProcedure(SchemaId schemaId, StoredProcedureDefinition def) StoredProcedureId
-        +DropProcedure(StoredProcedureId procedureId) void
-    }
-    class StoredProcedureManager {
-        +CompileProcedure() void
-    }
-
-    class IFunctionManager {
-        <<interface>>
-        +CreateFunction(SchemaId schemaId, FunctionDefinition def) FunctionId
-        +DropFunction(FunctionId functionId) void
-    }
-    class FunctionManager {
-        +EvaluateFunction() void
-    }
-
-    class ISystemCatalog {
-        <<interface>>
-        +GetTableDefinition(TableId tableId) TableDefinition
-        +GetIndexDefinition(IndexId indexId) IndexDefinition
-        +InvalidateCache(CatalogObjectId id) void
-    }
-    class SystemCatalog {
-        -CatalogCache cache
-        +FlushToDisk() void
-    }
-
-    ISchemaManager <|-- SchemaManager
-    ITableManager <|-- TableManager
-    IIndexDefinitionManager <|-- IndexDefinitionManager
-    IViewManager <|-- ViewManager
-    IConstraintManager <|-- ConstraintManager
-    ITriggerManager <|-- TriggerManager
-    IStoredProcedureManager <|-- StoredProcedureManager
-    IFunctionManager <|-- FunctionManager
-    ISystemCatalog <|-- SystemCatalog
-
-    DatabaseObjectManagement *-- ISchemaManager
-    DatabaseObjectManagement *-- ITableManager
-    DatabaseObjectManagement *-- IIndexDefinitionManager
-    DatabaseObjectManagement *-- IViewManager
-    DatabaseObjectManagement *-- IConstraintManager
-    DatabaseObjectManagement *-- ITriggerManager
-    DatabaseObjectManagement *-- IStoredProcedureManager
-    DatabaseObjectManagement *-- IFunctionManager
-    DatabaseObjectManagement *-- ISystemCatalog
-
-    SchemaManager --> ISystemCatalog : Uses
-    TableManager --> ISystemCatalog : Uses
-    IndexDefinitionManager --> ISystemCatalog : Uses
-    ViewManager --> ISystemCatalog : Uses
+    Schema *-- Table
+    Schema *-- View
+    Schema *-- StoredProcedure
+    Table *-- Column
+    Table *-- Row
+    Table *-- Constraint
+    Constraint <|-- ForeignKey
+    Table *-- Index
+    Table *-- Partition
 ```
 
-### 9. Performance Management
+### 8. Replication and Cluster
 
 ```mermaid
 classDiagram
     direction TB
-
-    class PerformanceManagement {
-        +Initialize() void
-        +GenerateReport() void
+    class ReplicationManager {
+        +Sync() void
+    }
+    class ClusterNode {
+        +string NodeId
     }
 
-    class IPerformanceMonitor {
-        <<interface>>
-        +StartMonitoring() void
-        +StopMonitoring() void
-        +GetSnapshot() PerformanceSnapshot
-    }
-    class PerformanceMonitor {
-        -PerformanceMonitorScheduler scheduler
-        +AggregateMetrics() void
-    }
-
-    class IQueryStatisticsCollector {
-        <<interface>>
-        +RecordQueryExecution(QueryExecutionStatistics stats) void
-        +GetSlowQueries(TimeSpan threshold) List~QueryExecutionStatistics~
-    }
-    class QueryStatisticsCollector {
-        -QueryStatisticsRepository repo
-        +DetectSlowQueries() void
-    }
-
-    class IResourceMonitor {
-        <<interface>>
-        +GetCpuUsage() double
-        +GetMemoryUsage() double
-        +GetDiskIO() StorageStatistics
-    }
-    class ResourceMonitor {
-        -CpuMonitor cpu
-        -MemoryMonitor memory
-        +SampleResources() void
-    }
-
-    class IPerformanceAdvisor {
-        <<interface>>
-        +AnalyzeWorkload() List~PerformanceRecommendation~
-        +SuggestIndexes() List~MissingIndexRecommendationRule~
-    }
-    class PerformanceAdvisor {
-        -RecommendationEngine engine
-        +EvaluateRules() void
-    }
-
-    IPerformanceMonitor <|-- PerformanceMonitor
-    IQueryStatisticsCollector <|-- QueryStatisticsCollector
-    IResourceMonitor <|-- ResourceMonitor
-    IPerformanceAdvisor <|-- PerformanceAdvisor
-
-    PerformanceManagement *-- IPerformanceMonitor
-    PerformanceManagement *-- IQueryStatisticsCollector
-    PerformanceManagement *-- IResourceMonitor
-    PerformanceManagement *-- IPerformanceAdvisor
-
-    PerformanceMonitor --> IResourceMonitor : Uses
-    PerformanceAdvisor --> IQueryStatisticsCollector : Uses
-    PerformanceAdvisor --> IPerformanceMonitor : Uses
+    ReplicationManager *-- ClusterNode
 ```
 
-### 10. System Management
+### 9. Monitoring
 
 ```mermaid
 classDiagram
     direction TB
-
-    class SystemManagement {
-        +Initialize() void
-        +ShutdownSystem() void
+    class MonitoringManager {
+        +CollectMetrics() void
     }
-
-    class ISystemConfigurationManager {
-        <<interface>>
-        +GetSetting(string key) ConfigurationValue
-        +UpdateSetting(string key, ConfigurationValue val) void
-        +LoadGlobalConfig() ConfigurationSnapshot
-    }
-    class SystemConfigurationManager {
-        -ConfigurationLoader loader
-        +MergeConfigs() void
-    }
-
-    class ISystemHealthMonitor {
-        <<interface>>
-        +PerformHealthCheck() SystemHealthReport
-        +RegisterHealthCheck(IHealthCheck check) void
-    }
-    class SystemHealthMonitor {
-        -List~IHealthCheck~ checks
-        +EvaluateStatus() void
-    }
-
-    class IImportManager {
-        <<interface>>
-        +ImportData(ImportRequest request) ImportResult
-        +ValidateImportPlan(ImportPlan plan) bool
-    }
-    class ImportManager {
-        -ImportPlanner planner
-        +ParseFormat() void
-    }
-
-    class IExportManager {
-        <<interface>>
-        +ExportData(ExportRequest request) ExportResult
-    }
-    class ExportManager {
-        -ExportPlanner planner
-        +FormatOutput() void
-    }
-
-    ISystemConfigurationManager <|-- SystemConfigurationManager
-    ISystemHealthMonitor <|-- SystemHealthMonitor
-    IImportManager <|-- ImportManager
-    IExportManager <|-- ExportManager
-
-    SystemManagement *-- ISystemConfigurationManager
-    SystemManagement *-- ISystemHealthMonitor
-    SystemManagement *-- IImportManager
-    SystemManagement *-- IExportManager
-
-    SystemHealthMonitor --> ISystemConfigurationManager : Uses
-    ImportManager --> ISystemConfigurationManager : Uses
 ```
+
+## Unit Tests Architecture
+
+### 1. Database Manager Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Database Manager] --> DatabaseServer
+    DatabaseServer --> Start_WhenConfigurationIsValid_ShouldStart
+    DatabaseServer --> Stop_WhenServerIsRunning_ShouldStop
+    DatabaseServer --> Start_WhenPortIsUnavailable_ShouldThrow
+    
+    Subsystem --> DatabaseManagerClass[DatabaseManager]
+    DatabaseManagerClass --> CreateDatabase_WhenNameIsValid_ShouldCreateDatabase
+    DatabaseManagerClass --> CreateDatabase_WhenNameAlreadyExists_ShouldThrow
+    DatabaseManagerClass --> DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase
+    
+    Subsystem --> Database
+    Database --> Open_WhenDatabaseIsClosed_ShouldOpenDatabase
+    Database --> Close_WhenDatabaseIsOpen_ShouldCloseDatabase
+    Database --> AddSchema_WhenNameAlreadyExists_ShouldThrow
+    
+    Subsystem --> CatalogManager
+    CatalogManager --> Register_WhenObjectIsValid_ShouldAddToCatalog
+    CatalogManager --> Register_WhenObjectAlreadyExists_ShouldThrow
+    CatalogManager --> Find_WhenObjectDoesNotExist_ShouldReturnNull
+    
+    Subsystem --> StatisticsManager
+    StatisticsManager --> UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics
+    StatisticsManager --> EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate
+    StatisticsManager --> EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback
+```
+
+### 2. Database Objects Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Database Objects] --> Schema
+    Schema --> AddTable_WhenTableIsValid_ShouldRegisterTable
+    Schema --> AddTable_WhenNameAlreadyExists_ShouldThrow
+    Schema --> RemoveTable_WhenTableExists_ShouldRemoveTable
+    
+    Subsystem --> Table
+    Table --> InsertRow_WhenRowIsValid_ShouldInsertRow
+    Table --> InsertRow_WhenSchemaDoesNotMatch_ShouldThrow
+    Table --> AddColumn_WhenNameAlreadyExists_ShouldThrow
+    
+    Subsystem --> Column
+    Column --> Create_WhenDefinitionIsValid_ShouldCreateColumn
+    Column --> Create_WhenNameIsInvalid_ShouldThrow
+    Column --> ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse
+    
+    Subsystem --> Row
+    Row --> GetValue_WhenColumnExists_ShouldReturnValue
+    Row --> SetValue_WhenValueIsValid_ShouldUpdateValue
+    Row --> SetValue_WhenTypeDoesNotMatch_ShouldThrow
+    
+    Subsystem --> Constraint
+    Constraint --> Validate_WhenValueSatisfiesConstraint_ShouldSucceed
+    Constraint --> Validate_WhenValueViolatesConstraint_ShouldFail
+    Constraint --> Apply_WhenConstraintIsDisabled_ShouldSkipValidation
+    
+    Subsystem --> ForeignKey
+    ForeignKey --> Validate_WhenParentRecordExists_ShouldSucceed
+    ForeignKey --> Validate_WhenParentRecordDoesNotExist_ShouldFail
+    ForeignKey --> DeleteParent_WhenRestricted_ShouldRejectDeletion
+    
+    Subsystem --> Index
+    Index --> Insert_WhenKeyIsValid_ShouldAddEntry
+    Index --> Search_WhenKeyExists_ShouldReturnRecordPointer
+    Index --> Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
+    
+    Subsystem --> Partition
+    Partition --> RouteRow_WhenKeyMatchesRange_ShouldReturnPartition
+    Partition --> RouteRow_WhenKeyIsOutsideRange_ShouldFail
+    Partition --> AddRange_WhenRangesOverlap_ShouldThrow
+    
+    Subsystem --> View
+    View --> Create_WhenQueryIsValid_ShouldCreateView
+    View --> Resolve_WhenDependenciesExist_ShouldReturnDefinition
+    View --> Resolve_WhenDependencyIsMissing_ShouldThrow
+    
+    Subsystem --> StoredProcedure
+    StoredProcedure --> Execute_WhenParametersAreValid_ShouldReturnResult
+    StoredProcedure --> Execute_WhenRequiredParameterIsMissing_ShouldThrow
+    StoredProcedure --> Execute_WhenTransactionFails_ShouldPropagateFailure
+```
+
+### 3. Transaction Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Transaction Management] --> Transaction
+    Transaction --> Begin_WhenTransactionIsNew_ShouldBecomeActive
+    Transaction --> Commit_WhenTransactionIsActive_ShouldCommit
+    Transaction --> Rollback_WhenTransactionIsActive_ShouldRollback
+    
+    Subsystem --> TransactionManagerClass[TransactionManager]
+    TransactionManagerClass --> BeginTransaction_ShouldReturnActiveTransaction
+    TransactionManagerClass --> Commit_WhenTransactionExists_ShouldCommitTransaction
+    TransactionManagerClass --> Commit_WhenTransactionDoesNotExist_ShouldThrow
+    
+    Subsystem --> LockManager
+    LockManager --> Acquire_WhenLocksAreCompatible_ShouldGrantLock
+    LockManager --> Acquire_WhenLocksConflict_ShouldRejectOrWait
+    LockManager --> Release_WhenLockExists_ShouldRemoveLock
+    
+    Subsystem --> MVCCManager
+    MVCCManager --> CreateVersion_WhenRowChanges_ShouldCreateNewVersion
+    MVCCManager --> ReadVersion_WhenVersionIsVisible_ShouldReturnVersion
+    MVCCManager --> Cleanup_WhenVersionIsObsolete_ShouldRemoveVersion
+```
+
+### 4. Storage Engine Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Storage Engine] --> BufferPool
+    BufferPool --> FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame
+    BufferPool --> FetchPage_WhenSpaceIsAvailable_ShouldLoadPage
+    BufferPool --> FetchPage_WhenAllFramesArePinned_ShouldThrow
+    
+    Subsystem --> Page
+    Page --> InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord
+    Page --> InsertRecord_WhenSpaceIsInsufficient_ShouldFail
+    Page --> DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory
+    
+    Subsystem --> StorageEngineClass[StorageEngine]
+    StorageEngineClass --> Initialize_WhenConfigurationIsValid_ShouldInitializeComponents
+    StorageEngineClass --> ReadPage_ShouldDelegateToBufferPool
+    StorageEngineClass --> Shutdown_ShouldFlushDirtyPagesAndCloseFiles
+    
+    Subsystem --> FileManager
+    FileManager --> CreateFile_WhenPathIsValid_ShouldCreateFile
+    FileManager --> OpenFile_WhenFileExists_ShouldReturnHandle
+    FileManager --> DeleteFile_WhenFileIsInUse_ShouldThrow
+```
+
+### 5. Recovery Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Recovery Management] --> WALManager
+    WALManager --> Append_WhenRecordIsValid_ShouldAssignLSN
+    WALManager --> Flush_WhenTargetLSNExists_ShouldPersistRecords
+    WALManager --> Append_WhenSequenceIsInvalid_ShouldThrow
+    
+    Subsystem --> RecoveryManagerClass[RecoveryManager]
+    RecoveryManagerClass --> Recover_ShouldRedoCommittedTransactions
+    RecoveryManagerClass --> Recover_ShouldUndoUncommittedTransactions
+    RecoveryManagerClass --> Recover_WhenCheckpointExists_ShouldStartFromCheckpoint
+    
+    Subsystem --> BackupManager
+    BackupManager --> CreateBackup_WhenDatabaseIsOnline_ShouldCreateBackup
+    BackupManager --> Restore_WhenBackupIsValid_ShouldRestoreDatabase
+    BackupManager --> CreateBackup_WhenWriteFails_ShouldCleanPartialBackup
+```
+
+### 6. Query Processor Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Query Processor] --> Lexer
+    Lexer --> Tokenize_WhenSQLIsValid_ShouldReturnTokens
+    Lexer --> Tokenize_WhenInputContainsWhitespace_ShouldIgnoreWhitespace
+    Lexer --> Tokenize_WhenTokenIsInvalid_ShouldThrow
+    
+    Subsystem --> SQLParser
+    SQLParser --> Parse_WhenSelectStatementIsValid_ShouldReturnAST
+    SQLParser --> Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError
+    SQLParser --> Parse_WhenTokensAreEmpty_ShouldRejectInput
+    
+    Subsystem --> AST
+    AST --> Accept_WhenVisitorIsProvided_ShouldDispatchVisitor
+    AST --> Build_WhenChildrenAreValid_ShouldPreserveTreeStructure
+    AST --> Build_WhenRequiredNodeIsMissing_ShouldFail
+    
+    Subsystem --> QueryOptimizer
+    QueryOptimizer --> Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan
+    QueryOptimizer --> Optimize_ShouldPreserveLogicalSemantics
+    QueryOptimizer --> Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan
+    
+    Subsystem --> LogicalPlan
+    LogicalPlan --> AddOperator_WhenOperatorIsValid_ShouldUpdatePlan
+    LogicalPlan --> Validate_WhenOperatorInputsMatch_ShouldSucceed
+    LogicalPlan --> Validate_WhenSchemaDoesNotMatch_ShouldFail
+    
+    Subsystem --> PhysicalPlan
+    PhysicalPlan --> Build_WhenLogicalPlanIsValid_ShouldCreatePhysicalOperators
+    PhysicalPlan --> CalculateCost_ShouldReturnEstimatedExecutionCost
+    PhysicalPlan --> Validate_WhenOperatorIsUnsupported_ShouldFail
+    
+    Subsystem --> QueryExecutor
+    QueryExecutor --> Execute_WhenPlanIsValid_ShouldReturnRows
+    QueryExecutor --> Execute_WhenStorageFails_ShouldPropagateFailure
+    QueryExecutor --> Execute_WhenTransactionFails_ShouldRollback
+```
+
+### 7. Security Management Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Security Management] --> SecurityManagerClass[SecurityManager]
+    SecurityManagerClass --> Authenticate_WhenCredentialsAreValid_ShouldReturnUser
+    SecurityManagerClass --> Authenticate_WhenCredentialsAreInvalid_ShouldFail
+    SecurityManagerClass --> Authorize_WhenPermissionIsMissing_ShouldDenyAccess
+    
+    Subsystem --> User
+    User --> AssignRole_WhenRoleIsValid_ShouldAddRole
+    User --> AssignRole_WhenRoleAlreadyAssigned_ShouldNotDuplicate
+    User --> Disable_WhenUserIsActive_ShouldDisableUser
+    
+    Subsystem --> Role
+    Role --> AddPermission_WhenPermissionIsValid_ShouldAddPermission
+    Role --> AddPermission_WhenPermissionExists_ShouldNotDuplicate
+    Role --> RemovePermission_WhenPermissionExists_ShouldRemovePermission
+    
+    Subsystem --> Permission
+    Permission --> Allows_WhenActionAndResourceMatch_ShouldReturnTrue
+    Permission --> Allows_WhenActionDoesNotMatch_ShouldReturnFalse
+    Permission --> Allows_WhenScopeDoesNotMatch_ShouldReturnFalse
+```
+
+### 8. Replication & Cluster Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Replication & Cluster] --> ReplicationManagerClass[ReplicationManager]
+    ReplicationManagerClass --> Replicate_WhenFollowerIsAvailable_ShouldSendLogRecords
+    ReplicationManagerClass --> Replicate_WhenFollowerFails_ShouldRetry
+    ReplicationManagerClass --> Commit_WhenQuorumIsNotReached_ShouldFail
+    
+    Subsystem --> ClusterNode
+    ClusterNode --> ReceiveHeartbeat_ShouldUpdateLastSeenTime
+    ClusterNode --> MarkUnavailable_WhenHeartbeatExpires_ShouldChangeState
+    ClusterNode --> Create_WhenEndpointIsInvalid_ShouldThrow
+```
+
+### 9. Monitoring Unit Tests
+
+```mermaid
+flowchart LR
+    Subsystem[Monitoring] --> MonitoringManagerClass[MonitoringManager]
+    MonitoringManagerClass --> CollectMetrics_WhenSourcesAreAvailable_ShouldReturnMetrics
+    MonitoringManagerClass --> Evaluate_WhenThresholdIsExceeded_ShouldRaiseAlert
+    MonitoringManagerClass --> CollectMetrics_WhenSourceFails_ShouldRecordFailure
+```
+
+

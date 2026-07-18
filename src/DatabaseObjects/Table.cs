@@ -35,6 +35,8 @@ public class Table
     public void AddColumn(Column column) => throw new NotImplementedException();
     public void DropColumn(string columnName) => throw new NotImplementedException();
     public void AlterColumn(string columnName, Column newColumn) => throw new NotImplementedException();
+    public void AddConstraint(Constraint constraint) => throw new NotImplementedException();
+    public void DropConstraint(string constraintName) => throw new NotImplementedException();
     public void InsertRow(Row row) => throw new NotImplementedException();
     public bool DeleteRow(Row row) => throw new NotImplementedException();
     public bool ContainsColumn(string columnName) => throw new NotImplementedException();

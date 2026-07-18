@@ -9,6 +9,11 @@ public abstract class Constraint
     {
     }
 
+    protected Constraint(string name)
+    {
+        Name = name;
+    }
+
     protected abstract bool Check(object value);
     public bool Validate(object value) => throw new NotImplementedException();
     public void Apply(object value) => throw new NotImplementedException();

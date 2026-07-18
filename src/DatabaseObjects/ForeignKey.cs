@@ -18,12 +18,20 @@ public class ForeignKey : Constraint
     public ReferentialAction OnDelete { get; set; }
     public ReferentialAction OnUpdate { get; set; }
     public bool IsNullable { get; set; }
-    
+
     private Schema _schema;
 
     public ForeignKey(string referencedTableName)
     {
         ReferencedTableName = referencedTableName;
+    }
+
+    public ForeignKey(string name, string childColumnName, string referencedTableName, string referencedColumnName)
+        : base(name)
+    {
+        ChildColumnName = childColumnName;
+        ReferencedTableName = referencedTableName;
+        ReferencedColumnName = referencedColumnName;
     }
 
     protected override bool Check(object value) => throw new NotImplementedException();

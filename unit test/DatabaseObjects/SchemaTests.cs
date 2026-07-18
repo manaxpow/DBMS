@@ -1,10 +1,13 @@
+using FluentAssertions;
+
 public class SchemaTests
 {
     private Schema _schema;
     public SchemaTests()
     {
-        _schema = new Schema();
+        _schema = new Schema("TestSchema");
     }
+
     [Fact]
     public void AddTable_WhenTableIsValid_ShouldRegisterTable()
     {
@@ -16,8 +19,18 @@ public class SchemaTests
         _schema.AddTable(table);
 
         // Assert
-        Assert.True(isContainedBeforeAdd == false);
-        Assert.Same(table, _schema.GetTable("TestTable"));
+        isContainedBeforeAdd.Should().Be(false);
+        _schema.GetTable("TestTable").Should().BeSameAs(table);
+    }
+
+
+    [Fact]
+    public void AddTable_WhenTableIsNull_ShouldThrow()
+    {
+        // Act
+        Action action = () => _schema.AddTable(null);
+        // Assert
+        action.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -28,84 +41,136 @@ public class SchemaTests
         var newTable = new Table("TestTable");
         _schema.AddTable(existingTable);
 
-        // Act & Assert
-        Assert.True(_schema.ContainsTable("TestTable"));
-        Assert.Throws<DuplicateTableNameException>(() => _schema.AddTable(newTable));
+        // Act
+        Action action = () => _schema.AddTable(newTable);
+        // Assert
+        _schema.ContainsTable("TestTable").Should().Be(true);
+        action.Should().Throw<TableAlreadyExistsException>();
     }
 
     [Fact]
-    public void RemoveTable_WhenTableExists_ShouldRemoveTable()
+    public void GetTable_WhenTableExists_ShouldReturnTable()
     {
         // Arrange
         var table = new Table("TestTable");
         _schema.AddTable(table);
 
         // Act
-        var isContainedBeforeRemove = _schema.ContainsTable("TestTable");
-        _schema.RemoveTable("TestTable");
+        var retrievedTable = _schema.GetTable("TestTable");
 
         // Assert
-        Assert.True(isContainedBeforeRemove == true);
-        Assert.False(_schema.ContainsTable("TestTable"));
-    }
-
-    [Fact]
-    public void AddTable_WhenTableIsNull_ShouldThrow()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void GetTable_WhenTableExists_ShouldReturnTable()
-    {
-        throw new NotImplementedException();
+        retrievedTable.Should().BeSameAs(table);
     }
 
     [Fact]
     public void GetTable_WhenTableDoesNotExist_ShouldReturnNull()
     {
-        throw new NotImplementedException();
+        // Act
+        var retrievedTable = _schema.GetTable("NonExistentTable");
+
+        // Assert
+        retrievedTable.Should().BeNull();
     }
 
     [Fact]
     public void ContainsTable_WhenTableExists_ShouldReturnTrue()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var table = new Table("TestTable");
+        _schema.AddTable(table);
+
+        // Act
+        var containsTable = _schema.ContainsTable("TestTable");
+
+        // Assert
+        containsTable.Should().Be(true);
     }
 
     [Fact]
     public void ContainsTable_WhenTableDoesNotExist_ShouldReturnFalse()
     {
-        throw new NotImplementedException();
+        // Act
+        var containsTable = _schema.ContainsTable("NonExistentTable");
+
+        // Assert
+        containsTable.Should().Be(false);
     }
 
     [Fact]
     public void DropTable_WhenTableIsNotReferenced_ShouldRemoveTable()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var table = new Table("TestTable");
+        _schema.AddTable(table);
+
+        // Act
+        var isContainedBeforeDrop = _schema.ContainsTable("TestTable");
+        _schema.DropTable("TestTable");
+
+        // Assert
+        isContainedBeforeDrop.Should().Be(true);
+        _schema.ContainsTable("TestTable").Should().Be(false);
     }
 
     [Fact]
     public void DropTable_WhenTableIsReferencedByForeignKey_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var childTable = new Table("TestTable");
+        childTable.AddColumn(new Column("Id", typeof(int)));
+        childTable.AddColumn(new Column("ForeignKeyId", typeof(int)));
+
+        var referencedTable = new Table("TableReferenced");
+        referencedTable.AddColumn(new Column("Id", typeof(int)));
+        _schema.AddTable(referencedTable);
+        _schema.AddTable(childTable);
+
+        childTable.AddConstraint(new ForeignKey("FK_TestTable_TableReferenced", "ForeignKeyId", "TableReferenced", "Id"));
+
+        // Act & Assert
+        Action action = () => _schema.DropTable("TableReferenced");
+        action.Should().Throw<TableReferencedException>();
     }
 
     [Fact]
     public void DropTable_WhenTableDoesNotExist_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        Action action = () => _schema.DropTable("NonExistentTable");
+
+        // Assert
+        action.Should().Throw<TableNotFoundException>();
     }
 
     [Fact]
     public void AlterTable_WhenTableExists_ShouldUpdateTable()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var originalTable = new Table("TestTable");
+        _schema.AddTable(originalTable);
+
+        var newTable = new Table("TestTable");
+        newTable.AddColumn(new Column("NewColumn", typeof(int)));
+
+        // Act
+        _schema.AlterTable("TestTable", newTable);
+
+        // Assert
+        var alteredTable = _schema.GetTable("TestTable");
+        alteredTable.Should().BeSameAs(newTable);
+        alteredTable.Columns.Should().ContainSingle(c => c.Name == "NewColumn");
     }
 
     [Fact]
     public void AlterTable_WhenTableDoesNotExist_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var newTable = new Table("NonExistentTable");
+
+        // Act
+        Action action = () => _schema.AlterTable("NonExistentTable", newTable);
+
+        // Assert
+        action.Should().Throw<TableNotFoundException>();
     }
 }

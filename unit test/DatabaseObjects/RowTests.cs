@@ -21,4 +21,34 @@ public class RowTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void GetValue_WhenColumnDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void SetValue_WhenColumnDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void SetValue_WhenNullIsAllowed_ShouldUpdateValue()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void SetValue_WhenNullIsNotAllowed_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void SetValue_WhenValidationFails_ShouldPreserveExistingValue()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -21,4 +21,40 @@ public class QueryOptimizerTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Optimize_WhenStatisticsAreMissing_ShouldUseFallbackCost()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenPredicatePushdownIsValid_ShouldPushPredicate()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenJoinReorderingReducesCost_ShouldReorderJoins()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenIndexScanIsCheaper_ShouldChooseIndexScan()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenIndexIsUnavailable_ShouldChooseTableScan()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenLogicalPlanIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -21,4 +21,34 @@ public class TransactionTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Begin_WhenTransactionIsAlreadyActive_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Commit_WhenTransactionIsNotActive_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Rollback_WhenTransactionAlreadyCommitted_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Rollback_WhenTransactionAlreadyRolledBack_ShouldRemainRolledBack()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void MarkFailed_WhenTransactionIsActive_ShouldEnterFailedState()
+    {
+        throw new NotImplementedException();
+    }
 }

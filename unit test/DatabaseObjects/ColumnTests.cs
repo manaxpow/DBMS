@@ -21,4 +21,28 @@ public class ColumnTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Create_WhenDataTypeIsNull_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ValidateValue_WhenTypeMatches_ShouldReturnTrue()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ValidateValue_WhenValueIsNullAndNullable_ShouldReturnTrue()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ValidateValue_WhenValueIsNullAndNotNullable_ShouldReturnFalse()
+    {
+        throw new NotImplementedException();
+    }
 }

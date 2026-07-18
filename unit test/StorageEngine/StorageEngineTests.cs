@@ -21,4 +21,34 @@ public class StorageEngineTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Initialize_WhenConfigurationIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Initialize_WhenComponentFails_ShouldCleanUpInitializedComponents()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void WritePage_ShouldMarkPageAsDirty()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Shutdown_WhenEngineIsNotInitialized_ShouldRemainStopped()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Shutdown_WhenFlushFails_ShouldPropagateFailure()
+    {
+        throw new NotImplementedException();
+    }
 }

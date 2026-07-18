@@ -21,4 +21,16 @@ public class StatisticsManagerTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void UpdateStatistics_WhenObjectDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void EstimateSelectivity_WhenPredicateIsUnsupported_ShouldUseFallback()
+    {
+        throw new NotImplementedException();
+    }
 }

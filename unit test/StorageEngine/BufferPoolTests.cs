@@ -46,4 +46,82 @@ public class BufferPoolTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void FetchPage_WhenPageIsBuffered_ShouldIncrementPinCount()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void FetchPage_WhenPageIsBuffered_ShouldNotReadFromFile()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void FetchPage_WhenNoFreeFrameAndCleanVictimExists_ShouldEvictVictim()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void FetchPage_WhenNoFreeFrameAndDirtyVictimExists_ShouldFlushThenEvictVictim()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void FetchPage_WhenFileReadFails_ShouldNotRegisterPage()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Flush_WhenPageIsDirty_ShouldWriteToDisk()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Flush_WhenPageIsClean_ShouldNotWriteToDisk()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Flush_WhenPageIsNotBuffered_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Unpin_WhenPageIsPinned_ShouldDecreasePinCount()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Unpin_WhenPinCountIsZero_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Unpin_WhenMarkedDirty_ShouldSetDirtyFlag()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Evict_WhenFrameIsUnpinned_ShouldFreeSpace()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Evict_WhenFrameIsPinned_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

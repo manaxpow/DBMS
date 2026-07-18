@@ -367,85 +367,168 @@ classDiagram
 
     class Schema {
         +string Name
+        +IReadOnlyCollection~Table~ Tables
+        +IReadOnlyCollection~View~ Views
+        +IReadOnlyCollection~StoredProcedure~ StoredProcedures
+        -Dictionary~string, Table~ _tables
+        -Dictionary~string, View~ _views
+        -Dictionary~string, StoredProcedure~ _storedProcedures
         +AddTable(Table table) void
-        +RemoveTable(string tableName) void
         +DropTable(string tableName) void
         +AlterTable(string tableName, Table newTable) void
-        +GetTable(string tableName) Table
+        +GetTable(string tableName) Table?
         +ContainsTable(string tableName) bool
         +ContainsObject(string objectName) bool
-        +ResolveObject(string objectName) object
+        +ResolveObject(string objectName) object?
+        ~RegisterView(View view) void
+        ~UnregisterView(string viewName) void
+        ~IsObjectReferenced(string objectName) bool
+        -IsTableReferencedByForeignKey(string tableName) bool
     }
 
     class Table {
         +string Name
+        +IReadOnlyList~Column~ Columns
+        +IReadOnlyList~Row~ Rows
+        +IReadOnlyList~Constraint~ Constraints
+        +IReadOnlyList~Index~ Indexes
+        +IReadOnlyList~Partition~ Partitions
+        -List~Column~ _columns
+        -List~Row~ _rows
+        -List~Constraint~ _constraints
+        -List~Index~ _indexes
+        -List~Partition~ _partitions
         +AddColumn(Column column) void
         +DropColumn(string columnName) void
         +AlterColumn(string columnName, Column newColumn) void
         +InsertRow(Row row) void
-        +DeleteRow(Row row) void
+        +DeleteRow(Row row) bool
         +ContainsColumn(string columnName) bool
         +ContainsRow(Row row) bool
         +GetColumn(string columnName) Column
         +GetColumnIndex(Column column) int
-        +GetPrimaryIndex() Index
-        +GetForeignKeyIndex() Index
+        +GetColumnIndex(string columnName) int
+        +GetPrimaryIndex() Index?
+        +GetForeignKeyIndex() Index?
+        -ValidateValueCount(Row row) bool
+        -ValidateRowValues(Row row) bool
+        -IsColumnReferencedByConstraint(string columnName) bool
+        -RemoveColumnValues(int columnIndex) void
     }
 
     class Column {
         +string Name
-        +string Type
-        +Create(string name, string type) Column
-        +ValidateValue(object value) bool
+        +Type DataType
+        +bool IsNullable
+        +Create(string name, string type, bool isNullable) Column
+        +ValidateValue(object? value) bool
+        -ResolveDataType(string type) Type
     }
 
     class Row {
-        +object[] Values
-        +GetValue(string columnName) object
-        +SetValue(string columnName, object value) void
+        +Table Table
+        +IReadOnlyList~object?~ Values
+        -List~object?~ _values
+        +GetValue(string columnName) object?
+        +SetValue(string columnName, object? value) void
+        ~RemoveValueAt(int columnIndex) void
     }
 
     class Constraint {
+        <<abstract>>
+        +string Name
         +bool IsEnabled
-        +Check(object value) bool
-        +Validate(object value) bool
-        +Apply(object value) void
+        +Validate(object? value) bool
+        +Apply(object? value) void
+        +Enable() void
+        +Disable() void
+        #Check(object? value) bool
+        #OnApply(object? value) void
     }
 
     class ForeignKey {
-        +string RefTable
-        +Validate(object parentKey) bool
-        +ValidateParentDeletion(object parentKey) void
+        +string ChildColumnName
+        +string ReferencedTableName
+        +string ReferencedColumnName
+        +ReferentialAction OnDelete
+        +ReferentialAction OnUpdate
+        +bool IsNullable
+        -Schema _schema
+        +Validate(object? parentKey) bool
+        +DeleteParent(object parentKey) void
+        +UpdateParent(object oldKey, object newKey) void
+        -GetReferencingRows(object parentKey) IReadOnlyList~Row~
     }
 
     class Index {
         +bool IsUnique
-        +Insert(object key, object recordPointer) void
-        +Search(object key) object
-        +Delete(object key) void
+        +bool AllowsNull
+        +IReadOnlyDictionary~object, List~object~~ Entries
+        -Dictionary~object, List~object~~ _entries
+        +Insert(object? key, object recordPointer) void
+        +Search(object key) object?
+        +RangeSearch(object startKey, object endKey) object[]
+        +Update(object key, object newRecordPointer) void
+        +Delete(object key) bool
+        -ContainsKey(object key) bool
+        -AddEntry(object key, object recordPointer) void
+        -ReplaceEntry(object key, object newRecordPointer) void
+        -FindEntriesInRange(object startKey, object endKey) IEnumerable~IndexEntry~
+        -OrderByKey(IEnumerable~IndexEntry~ entries) object[]
+    }
+
+    class IndexEntry {
+        +object Key
+        +IReadOnlyList~object~ RecordPointers
     }
 
     class Partition {
-        +string Range
+        +string Name
+        +IReadOnlyList~PartitionRange~ Ranges
+        -List~PartitionRange~ _ranges
         +RouteRow(Row row, string partitionKey) Partition
-        +AddRange(string range) void
+        +AddRange(PartitionRange range) void
+        +RemoveRange(PartitionRange range) void
+        -FindMatchingRange(object key) PartitionRange?
+        -HasOverlappingRange(PartitionRange range) bool
+    }
+
+    class PartitionRange {
+        +object Start
+        +object End
+        +bool IncludeStart
+        +bool IncludeEnd
+        +Partition Target
         +Contains(object key) bool
+        +Overlaps(PartitionRange other) bool
     }
 
     class View {
         +string Name
         +string Query
+        +bool IsDropped
+        +IReadOnlyList~string~ Dependencies
+        -Schema _schema
         +Create(string name, string query, Schema schema) View
         +AlterView(string newQuery) void
         +DropView() void
         +Resolve(Schema schema) object
+        -ValidateQuery(string query) void
+        -GetDependencies(string query) IReadOnlyList~string~
+        -EnsureDependenciesExist(Schema schema, IReadOnlyList~string~ dependencies) void
     }
 
     class StoredProcedure {
+        +string Name
+        +bool IsEnabled
+        +bool IsDropped
+        +ProcedureBody Body
+        -TransactionManager _transactionManager
         +Execute(object parameters) object
-        +ValidateParameters(object parameters) bool
-        +AlterProcedure(object newBody) void
+        +AlterProcedure(ProcedureBody newBody) void
         +DropProcedure() void
+        -ValidateParameters(object parameters) bool
+        -ValidateBody(ProcedureBody newBody) bool
     }
 
     class TransactionManager {
@@ -469,20 +552,14 @@ classDiagram
     Table *-- Partition
 
     Constraint <|-- ForeignKey
-
-    Row --> Table : resolves column
-    Row --> Column : validates value
-
-    ForeignKey --> Schema : resolves parent table
-    ForeignKey --> Table : obtains index
-    ForeignKey --> Index : searches reference
-
-    Partition --> Row : reads partition key
-
-    View --> Schema : resolves dependencies
-
-    StoredProcedure --> TransactionManager : controls transaction
-    StoredProcedure --> ProcedureBody : executes body
+    Row --> Table
+    Row --> Column
+    ForeignKey --> Schema
+    ForeignKey --> Table
+    ForeignKey --> Index
+    Partition --> PartitionRange
+    StoredProcedure --> TransactionManager
+    StoredProcedure --> ProcedureBody
 ```
 
 ### 8. Replication and Cluster

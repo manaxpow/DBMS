@@ -21,4 +21,28 @@ public class CatalogManagerTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Register_WhenObjectIsNull_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Find_WhenObjectExists_ShouldReturnObject()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Remove_WhenObjectExists_ShouldRemoveObject()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Remove_WhenObjectDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -21,4 +21,28 @@ public class RoleTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void AddPermission_WhenPermissionIsNull_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void RemovePermission_WhenPermissionDoesNotExist_ShouldRemainUnchanged()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void HasPermission_WhenPermissionExists_ShouldReturnTrue()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void HasPermission_WhenPermissionDoesNotExist_ShouldReturnFalse()
+    {
+        throw new NotImplementedException();
+    }
 }

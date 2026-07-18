@@ -2,8 +2,9 @@ using System;
 
 public class ProcedureBody
 {
-    public object Execute(object parameters, object transaction)
+    public ProcedureBody()
     {
-        throw new NotImplementedException();
     }
+
+    public object Execute(object parameters, object transaction) => throw new NotImplementedException();
 }

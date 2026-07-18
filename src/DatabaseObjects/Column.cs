@@ -3,15 +3,16 @@ using System;
 public class Column
 {
     public string Name { get; set; }
-    public string Type { get; set; }
+    public Type DataType { get; set; }
+    public bool IsNullable { get; set; }
 
-    public static Column Create(string name, string type)
+    public Column(string name, Type dataType)
     {
-        throw new NotImplementedException();
+        Name = name;
+        DataType = dataType;
     }
 
-    public bool ValidateValue(object value)
-    {
-        throw new NotImplementedException();
-    }
+    public Column Create(string name, string type, bool isNullable) => throw new NotImplementedException();
+    public bool ValidateValue(object value) => throw new NotImplementedException();
+    private Type ResolveDataType(string type) => throw new NotImplementedException();
 }

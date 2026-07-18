@@ -48,4 +48,64 @@ public class SchemaTests
         Assert.True(isContainedBeforeRemove == true);
         Assert.False(_schema.ContainsTable("TestTable"));
     }
+
+    [Fact]
+    public void AddTable_WhenTableIsNull_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void GetTable_WhenTableExists_ShouldReturnTable()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void GetTable_WhenTableDoesNotExist_ShouldReturnNull()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ContainsTable_WhenTableExists_ShouldReturnTrue()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ContainsTable_WhenTableDoesNotExist_ShouldReturnFalse()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropTable_WhenTableIsNotReferenced_ShouldRemoveTable()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropTable_WhenTableIsReferencedByForeignKey_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropTable_WhenTableDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void AlterTable_WhenTableExists_ShouldUpdateTable()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void AlterTable_WhenTableDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

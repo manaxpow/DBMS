@@ -21,4 +21,22 @@ public class ConstraintTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Enable_WhenConstraintIsDisabled_ShouldEnable()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Disable_WhenConstraintIsEnabled_ShouldDisable()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Apply_WhenValidationFails_ShouldNotMutateState()
+    {
+        throw new NotImplementedException();
+    }
 }

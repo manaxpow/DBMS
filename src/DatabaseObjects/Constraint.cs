@@ -1,21 +1,18 @@
 using System;
 
-public class Constraint
+public abstract class Constraint
 {
+    public string Name { get; set; }
     public bool IsEnabled { get; set; }
 
-    public bool Check(object value)
+    protected Constraint()
     {
-        throw new NotImplementedException();
     }
 
-    public bool Validate(object value)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Apply(object value)
-    {
-        throw new NotImplementedException();
-    }
+    protected abstract bool Check(object value);
+    public bool Validate(object value) => throw new NotImplementedException();
+    public void Apply(object value) => throw new NotImplementedException();
+    public void Enable() => throw new NotImplementedException();
+    public void Disable() => throw new NotImplementedException();
+    protected virtual void OnApply(object value) => throw new NotImplementedException();
 }

@@ -1,5 +1,3 @@
-using System;
-
 public class DatabaseServer
 {
     public void Start()

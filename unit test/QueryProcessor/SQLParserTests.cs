@@ -21,4 +21,40 @@ public class SQLParserTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Parse_WhenInsertStatementIsValid_ShouldReturnAST()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenUpdateStatementIsValid_ShouldReturnAST()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenDeleteStatementIsValid_ShouldReturnAST()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenUnexpectedTokenAppears_ShouldReportTokenPosition()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenExpressionIsNested_ShouldPreservePrecedence()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenClauseOrderIsInvalid_ShouldThrowSyntaxError()
+    {
+        throw new NotImplementedException();
+    }
 }

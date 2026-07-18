@@ -21,4 +21,34 @@ public class ClusterNodeTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void Create_WhenEndpointIsValid_ShouldCreateNode()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReceiveHeartbeat_WhenHeartbeatIsStale_ShouldIgnoreHeartbeat()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void MarkAvailable_WhenHeartbeatRestored_ShouldChangeState()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ChangeRole_WhenTransitionIsValid_ShouldUpdateRole()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ChangeRole_WhenTransitionIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "unit test", "unit test", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "unit test\UnitTests.csproj", "{5652C3C0-58A3-4176-A396-6D038DC6EEC9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scratch", "scratch", "{F2659A5F-1EBD-3F4F-4A30-86EC08B46DDA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SequenceGenerator", "SequenceGenerator", "{2416E1E2-3411-BB2C-0826-1A7D936B5C20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,5 +56,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{08B0FFB1-6D66-429B-8AFC-8517195E5D60} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{5652C3C0-58A3-4176-A396-6D038DC6EEC9} = {B4F6B849-B147-3BB6-BAC8-40F8628DF72D}
+		{2416E1E2-3411-BB2C-0826-1A7D936B5C20} = {F2659A5F-1EBD-3F4F-4A30-86EC08B46DDA}
 	EndGlobalSection
 EndGlobal

@@ -21,4 +21,46 @@ public class BackupManagerTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void CreateBackup_WhenDatabaseIsOffline_ShouldRejectBackup()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void CreateBackup_WhenDestinationAlreadyExists_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Restore_WhenBackupIsCorrupt_ShouldFail()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Restore_WhenBackupDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Restore_WhenFormatVersionIsUnsupported_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Restore_WhenWriteFails_ShouldPreserveExistingDatabase()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ValidateBackup_WhenBackupIsValid_ShouldReturnTrue()
+    {
+        throw new NotImplementedException();
+    }
 }

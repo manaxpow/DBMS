@@ -20,4 +20,40 @@ public class ViewTests
     {
         throw new NotImplementedException();
     }
+
+    [Fact]
+    public void Create_WhenQueryIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void AlterView_WhenQueryIsValid_ShouldUpdateDefinition()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void AlterView_WhenQueryIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropView_WhenViewExists_ShouldRemoveView()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropView_WhenViewDoesNotExist_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void DropView_WhenViewIsReferenced_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }

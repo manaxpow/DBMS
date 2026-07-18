@@ -21,4 +21,22 @@ public class ASTTests
         throw new NotImplementedException();
     }
 
+
+    [Fact]
+    public void AddChild_WhenNodeIsValid_ShouldAddChild()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void AddChild_WhenNodeIsNull_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Traverse_ShouldVisitNodesInDefinedOrder()
+    {
+        throw new NotImplementedException();
+    }
 }

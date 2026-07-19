@@ -5,7 +5,7 @@ public class Row
 {
     public Table Table { get; set; }
     public IReadOnlyList<object> Values { get; }
-    
+
     private List<object> _values;
 
     public Row(Table table, List<object> values)

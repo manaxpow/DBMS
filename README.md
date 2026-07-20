@@ -591,8 +591,8 @@ classDiagram
 
 | Module                 | Classes | Test cases |
 | ---------------------- | ------: | ---------: |
-| Database Manager       |       5 |         38 |
-| Database Objects       |      10 |         93 |
+| Database Manager       |       5 |         43 |
+| Database Objects       |      10 |        101 |
 | Transaction Management |       3 |         29 |
 | Storage Engine         |       4 |         51 |
 | Recovery Management    |       3 |         29 |
@@ -600,7 +600,7 @@ classDiagram
 | Security Management    |       4 |         32 |
 | Replication & Cluster  |       2 |         19 |
 | Monitoring             |       1 |         10 |
-| **Total**              |  **39** |    **354** |
+| **Total**              |  **39** |    **367** |
 
 ---
 
@@ -626,7 +626,7 @@ flowchart LR
     class Database_Manager_DatabaseServer_T1,Database_Manager_DatabaseServer_T2,Database_Manager_DatabaseServer_T3,Database_Manager_DatabaseServer_T4,Database_Manager_DatabaseServer_T5,Database_Manager_DatabaseServer_T6,Database_Manager_DatabaseServer_T7 testNode
 ```
 
-### 1.2 `DatabaseManager` — 8 cases
+### 1.2 `DatabaseManager` — 10 cases
 
 ```mermaid
 flowchart LR
@@ -641,13 +641,16 @@ flowchart LR
     Database_Manager_DatabaseManager --> Database_Manager_DatabaseManager_T7["DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase"]
     Database_Manager_DatabaseManager --> Database_Manager_DatabaseManager_T8["DropDatabase_WhenDatabaseDoesNotExist_ShouldThrow"]
 
+    Database_Manager_DatabaseManager --> Database_Manager_DatabaseManager_T9["CreateDatabase_WhenUserLacksPermission_ShouldThrow"]
+    Database_Manager_DatabaseManager --> Database_Manager_DatabaseManager_T10["DropDatabase_WhenUserLacksPermission_ShouldThrow"]
+
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
     class Database_Manager_DatabaseManager classNode
-    class Database_Manager_DatabaseManager_T1,Database_Manager_DatabaseManager_T2,Database_Manager_DatabaseManager_T3,Database_Manager_DatabaseManager_T4,Database_Manager_DatabaseManager_T5,Database_Manager_DatabaseManager_T6,Database_Manager_DatabaseManager_T7,Database_Manager_DatabaseManager_T8 testNode
+    class Database_Manager_DatabaseManager_T1,Database_Manager_DatabaseManager_T2,Database_Manager_DatabaseManager_T3,Database_Manager_DatabaseManager_T4,Database_Manager_DatabaseManager_T5,Database_Manager_DatabaseManager_T6,Database_Manager_DatabaseManager_T7,Database_Manager_DatabaseManager_T8,Database_Manager_DatabaseManager_T9,Database_Manager_DatabaseManager_T10 testNode
 ```
 
-### 1.3 `Database` — 11 cases
+### 1.3 `Database` — 14 cases
 
 ```mermaid
 flowchart LR
@@ -665,10 +668,14 @@ flowchart LR
     Database_Manager_Database --> Database_Manager_Database_T10["AlterSchema_WhenSchemaExists_ShouldUpdateSchema"]
     Database_Manager_Database --> Database_Manager_Database_T11["AlterSchema_WhenSchemaDoesNotExist_ShouldThrow"]
 
+    Database_Manager_Database --> Database_Manager_Database_T12["AddSchema_WhenUserLacksPermission_ShouldThrow"]
+    Database_Manager_Database --> Database_Manager_Database_T13["DropSchema_WhenUserLacksPermission_ShouldThrow"]
+    Database_Manager_Database --> Database_Manager_Database_T14["AlterSchema_WhenUserLacksPermission_ShouldThrow"]
+
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
     class Database_Manager_Database classNode
-    class Database_Manager_Database_T1,Database_Manager_Database_T2,Database_Manager_Database_T3,Database_Manager_Database_T4,Database_Manager_Database_T5,Database_Manager_Database_T6,Database_Manager_Database_T7,Database_Manager_Database_T8,Database_Manager_Database_T9,Database_Manager_Database_T10,Database_Manager_Database_T11 testNode
+    class Database_Manager_Database_T1,Database_Manager_Database_T2,Database_Manager_Database_T3,Database_Manager_Database_T4,Database_Manager_Database_T5,Database_Manager_Database_T6,Database_Manager_Database_T7,Database_Manager_Database_T8,Database_Manager_Database_T9,Database_Manager_Database_T10,Database_Manager_Database_T11,Database_Manager_Database_T12,Database_Manager_Database_T13,Database_Manager_Database_T14 testNode
 ```
 
 ### 1.4 `CatalogManager` — 7 cases
@@ -713,7 +720,7 @@ flowchart LR
 
 ## 2. Database Objects Unit Tests
 
-### 2.1 `Schema` — 12 cases
+### 2.1 `Schema` — 15 cases
 
 ```mermaid
 flowchart LR
@@ -732,13 +739,17 @@ flowchart LR
     Database_Objects_Schema --> Database_Objects_Schema_T11["AlterTable_WhenTableExists_ShouldUpdateTable"]
     Database_Objects_Schema --> Database_Objects_Schema_T12["AlterTable_WhenTableDoesNotExist_ShouldThrow"]
 
+    Database_Objects_Schema --> Database_Objects_Schema_T13["AddTable_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Schema --> Database_Objects_Schema_T14["DropTable_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Schema --> Database_Objects_Schema_T15["AlterTable_WhenUserLacksPermission_ShouldThrow"]
+
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
     class Database_Objects_Schema classNode
-    class Database_Objects_Schema_T1,Database_Objects_Schema_T2,Database_Objects_Schema_T3,Database_Objects_Schema_T4,Database_Objects_Schema_T5,Database_Objects_Schema_T6,Database_Objects_Schema_T7,Database_Objects_Schema_T8,Database_Objects_Schema_T9,Database_Objects_Schema_T10,Database_Objects_Schema_T11,Database_Objects_Schema_T12 testNode
+    class Database_Objects_Schema_T1,Database_Objects_Schema_T2,Database_Objects_Schema_T3,Database_Objects_Schema_T4,Database_Objects_Schema_T5,Database_Objects_Schema_T6,Database_Objects_Schema_T7,Database_Objects_Schema_T8,Database_Objects_Schema_T9,Database_Objects_Schema_T10,Database_Objects_Schema_T11,Database_Objects_Schema_T12,Database_Objects_Schema_T13,Database_Objects_Schema_T14,Database_Objects_Schema_T15 testNode
 ```
 
-### 2.2 `Table` — 17 cases
+### 2.2 `Table` — 22 cases
 
 ```mermaid
 flowchart LR
@@ -762,10 +773,16 @@ flowchart LR
     Database_Objects_Table --> Database_Objects_Table_T16["AlterColumn_WhenColumnExists_ShouldUpdateDefinition"]
     Database_Objects_Table --> Database_Objects_Table_T17["AlterColumn_WhenColumnDoesNotExist_ShouldThrow"]
 
+    Database_Objects_Table --> Database_Objects_Table_T18["InsertRow_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Table --> Database_Objects_Table_T19["DeleteRow_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Table --> Database_Objects_Table_T20["AddColumn_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Table --> Database_Objects_Table_T21["DropColumn_WhenUserLacksPermission_ShouldThrow"]
+    Database_Objects_Table --> Database_Objects_Table_T22["AlterColumn_WhenUserLacksPermission_ShouldThrow"]
+
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
     class Database_Objects_Table classNode
-    class Database_Objects_Table_T1,Database_Objects_Table_T2,Database_Objects_Table_T3,Database_Objects_Table_T4,Database_Objects_Table_T5,Database_Objects_Table_T6,Database_Objects_Table_T7,Database_Objects_Table_T8,Database_Objects_Table_T9,Database_Objects_Table_T10,Database_Objects_Table_T11,Database_Objects_Table_T12,Database_Objects_Table_T13,Database_Objects_Table_T14,Database_Objects_Table_T15,Database_Objects_Table_T16,Database_Objects_Table_T17 testNode
+    class Database_Objects_Table_T1,Database_Objects_Table_T2,Database_Objects_Table_T3,Database_Objects_Table_T4,Database_Objects_Table_T5,Database_Objects_Table_T6,Database_Objects_Table_T7,Database_Objects_Table_T8,Database_Objects_Table_T9,Database_Objects_Table_T10,Database_Objects_Table_T11,Database_Objects_Table_T12,Database_Objects_Table_T13,Database_Objects_Table_T14,Database_Objects_Table_T15,Database_Objects_Table_T16,Database_Objects_Table_T17,Database_Objects_Table_T18,Database_Objects_Table_T19,Database_Objects_Table_T20,Database_Objects_Table_T21,Database_Objects_Table_T22 testNode
 ```
 
 ### 2.3 `Column` — 7 cases
@@ -1500,3 +1517,4 @@ flowchart LR
 ```
 
 ---
+

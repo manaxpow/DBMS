@@ -2,6 +2,8 @@ using System;
 
 public abstract class Constraint
 {
+    public int Id { get; set; }
+
     public string Name { get; set; }
     public bool IsEnabled { get; set; }
 
@@ -20,16 +22,16 @@ public abstract class Constraint
 
     public bool Validate(ConstraintContext context)
     {
-         throw new NotImplementedException();    
+        throw new NotImplementedException();
     }
 
     public void Enable()
     {
-       throw new NotImplementedException();    
+        throw new NotImplementedException();
     }
 
     public void Disable()
     {
-       throw new NotImplementedException();    
+        throw new NotImplementedException();
     }
 }

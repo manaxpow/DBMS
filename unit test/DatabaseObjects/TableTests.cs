@@ -286,4 +286,53 @@ public class TableTests
         // Assert
         act.Should().Throw<ColumnNotFoundException>();
     }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void InsertRow_WhenConstraintFails_ShouldNotInsertRow()
+    {
+        // Arrange
+        var column1 = new Column("Id", typeof(int));
+        _table.AddColumn(column1);
+        var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
+        _table.AddConstraint(constraint);
+        
+        var row1 = new Row(_table, new List<object> { 1 });
+        var row2 = new Row(_table, new List<object> { 1 });
+        
+        _table.InsertRow(row1);
+
+        // Act
+        Action act = () => _table.InsertRow(row2);
+
+        // Assert
+        act.Should().Throw<ConstraintViolationException>();
+        _table.ContainsRow(row2).Should().Be(false);
+    }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void UpdateRow_WhenConstraintFails_ShouldPreserveExistingRow()
+    {
+        // Arrange
+        var column1 = new Column("Id", typeof(int));
+        _table.AddColumn(column1);
+        var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
+        _table.AddConstraint(constraint);
+        
+        var row1 = new Row(_table, new List<object> { 1 });
+        var row2 = new Row(_table, new List<object> { 2 });
+        _table.InsertRow(row1);
+        _table.InsertRow(row2);
+        
+        var updatedRow2 = new Row(_table, new List<object> { 1 });
+
+        // Act
+        Action act = () => _table.UpdateRow(row2, updatedRow2);
+
+        // Assert
+        act.Should().Throw<ConstraintViolationException>();
+        _table.ContainsRow(row2).Should().Be(true);
+        _table.ContainsRow(updatedRow2).Should().Be(false);
+    }
 }

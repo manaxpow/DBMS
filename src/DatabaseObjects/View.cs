@@ -3,11 +3,13 @@ using System.Collections.Generic;
 
 public class View
 {
+    public int Id { get; set; }
+
     public string Name { get; set; }
     public string Query { get; set; }
     public bool IsDropped { get; set; }
     public IReadOnlyList<string> Dependencies { get; }
-    
+
     private Schema _schema;
 
     public View(string name, string query)
@@ -21,7 +23,7 @@ public class View
     public void AlterView(string newQuery) => throw new NotImplementedException();
     public void DropView() => throw new NotImplementedException();
     public object Resolve(Schema schema) => throw new NotImplementedException();
-    
+
     private void ValidateQuery(string query) => throw new NotImplementedException();
     private IReadOnlyList<string> GetDependencies(string query) => throw new NotImplementedException();
     private void EnsureDependenciesExist(Schema schema, IReadOnlyList<string> dependencies) => throw new NotImplementedException();

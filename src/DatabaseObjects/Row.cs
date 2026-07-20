@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class Row
 {
+    public int Id { get; set; }
+
     public Table Table { get; set; }
     public IReadOnlyList<object> Values { get; }
 

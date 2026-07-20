@@ -1,4 +1,4 @@
-# 150 Most Important Unit Tests
+# Most Important Unit Tests Plan
 
 ## Progress Summary
 
@@ -8,12 +8,12 @@
 | Database Objects | Table | 11 | 11 | 0 | 100% |
 | Database Objects | Column | 6 | 6 | 0 | 100% |
 | Database Objects | Row | 6 | 6 | 0 | 100% |
-| Database Objects | Constraint | 6 | 0 | 6 | 0% |
-| Database Objects | CheckConstraint | 3 | 0 | 3 | 0% |
-| Database Objects | UniqueConstraint | 4 | 0 | 4 | 0% |
-| Database Objects | PrimaryKeyConstraint | 4 | 0 | 4 | 0% |
-| Database Objects | ForeignKeyConstraint | 5 | 0 | 5 | 0% |
-| Database Objects | Index | 8 | 0 | 8 | 0% |
+| Database Objects | Constraint | 6 | 6 | 0 | 100% |
+| Database Objects | CheckConstraint | 3 | 3 | 0 | 100% |
+| Database Objects | UniqueConstraint | 4 | 4 | 0 | 100% |
+| Database Objects | PrimaryKeyConstraint | 4 | 4 | 0 | 100% |
+| Database Objects | ForeignKeyConstraint | 5 | 5 | 0 | 100% |
+| Database Objects | Index | 8 | 8 | 0 | 100% |
 | Database Management | DatabaseServer | 5 | 0 | 5 | 0% |
 | Database Management | DatabaseManager | 6 | 0 | 6 | 0% |
 | Database Management | Database | 8 | 0 | 8 | 0% |
@@ -22,7 +22,7 @@
 | Transaction Management | Transaction | 6 | 0 | 6 | 0% |
 | Transaction Management | TransactionManager | 5 | 0 | 5 | 0% |
 | Transaction Management | LockManager | 8 | 0 | 8 | 0% |
-| Storage Engine | BufferPool | 9 | 0 | 9 | 0% |
+| Storage Engine | BufferPool | 9 | 1 | 8 | 11% |
 | Storage Engine | Page | 8 | 0 | 8 | 0% |
 | Storage Engine | StorageEngine | 6 | 0 | 6 | 0% |
 | Storage Engine | FileManager | 9 | 0 | 9 | 0% |
@@ -34,7 +34,7 @@
 | Query Processor | Executor | 3 | 0 | 3 | 0% |
 | Security | Authentication | 3 | 0 | 3 | 0% |
 | Security | Authorization | 5 | 0 | 5 | 0% |
-| **Total** | | **165** | **28** | **137** | **17%** |
+| **Total** | | **165** | **59** | **106** | **35%** |
 
 ## Database Objects
 
@@ -144,7 +144,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Constraint classNode
-    class CST_001,CST_002,CST_003,CST_004,CST_005,CST_006 missingTest
+    class CST_001,CST_002,CST_003,CST_004,CST_005,CST_006 completedTest
 ```
 
 ### CheckConstraint
@@ -162,7 +162,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_CheckConstraint classNode
-    class CHK_001,CHK_002,CHK_003 missingTest
+    class CHK_001,CHK_002,CHK_003 completedTest
 ```
 
 ### UniqueConstraint
@@ -181,7 +181,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_UniqueConstraint classNode
-    class UQ_001,UQ_002,UQ_003,UQ_004 missingTest
+    class UQ_001,UQ_002,UQ_003,UQ_004 completedTest
 ```
 
 ### PrimaryKeyConstraint
@@ -200,7 +200,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_PrimaryKeyConstraint classNode
-    class PK_001,PK_002,PK_003,PK_004 missingTest
+    class PK_001,PK_002,PK_003,PK_004 completedTest
 ```
 
 ### ForeignKeyConstraint
@@ -220,7 +220,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_ForeignKeyConstraint classNode
-    class FK_001,FK_002,FK_003,FK_004,FK_005 missingTest
+    class FK_001,FK_002,FK_003,FK_004,FK_005 completedTest
 ```
 
 ### Index
@@ -243,7 +243,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Index classNode
-    class IDX_001,IDX_002,IDX_003,IDX_004,IDX_005,IDX_006,IDX_007,IDX_008 missingTest
+    class IDX_001,IDX_002,IDX_003,IDX_004,IDX_005,IDX_006,IDX_007,IDX_008 completedTest
 ```
 
 ## Database Management
@@ -440,7 +440,8 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_BufferPool classNode
-    class BP_001,BP_002,BP_003,BP_004,BP_005,BP_006,BP_007,BP_008,BP_009 missingTest
+    class BP_001 completedTest
+    class BP_002,BP_003,BP_004,BP_005,BP_006,BP_007,BP_008,BP_009 missingTest
 ```
 
 ### Page

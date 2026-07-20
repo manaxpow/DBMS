@@ -371,10 +371,10 @@ classDiagram
     }
 
     class CatalogManager {
-        -Dictionary~string, object~ _store
-        +Register(object obj) void
-        +Find(string name) object?
-        +Remove(object obj) void
+        -Dictionary~string, ICatalogObject~ _store
+        +Register(ICatalogObject obj) void
+        +Find~T~(string name) T?
+        +Remove(ICatalogObject obj) void
     }
 
     class StatisticsManager {

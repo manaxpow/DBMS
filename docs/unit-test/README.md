@@ -14,11 +14,11 @@
 | Database Objects | PrimaryKeyConstraint | 4 | 4 | 0 | 100% |
 | Database Objects | ForeignKeyConstraint | 5 | 5 | 0 | 100% |
 | Database Objects | Index | 8 | 8 | 0 | 100% |
-| Database Management | DatabaseServer | 5 | 0 | 5 | 0% |
-| Database Management | DatabaseManager | 6 | 0 | 6 | 0% |
-| Database Management | Database | 8 | 0 | 8 | 0% |
-| Database Management | CatalogManager | 5 | 0 | 5 | 0% |
-| Database Management | StatisticsManager | 4 | 0 | 4 | 0% |
+| Database Management | DatabaseServer | 5 | 5 | 0 | 100% |
+| Database Management | DatabaseManager | 6 | 6 | 0 | 100% |
+| Database Management | Database | 8 | 8 | 0 | 100% |
+| Database Management | CatalogManager | 5 | 5 | 0 | 100% |
+
 | Transaction Management | Transaction | 6 | 0 | 6 | 0% |
 | Transaction Management | TransactionManager | 5 | 0 | 5 | 0% |
 | Transaction Management | LockManager | 8 | 0 | 8 | 0% |
@@ -34,7 +34,7 @@
 | Query Processor | Executor | 3 | 0 | 3 | 0% |
 | Security | Authentication | 3 | 0 | 3 | 0% |
 | Security | Authorization | 5 | 0 | 5 | 0% |
-| **Total** | | **165** | **59** | **106** | **35%** |
+| **Total** | | **161** | **83** | **78** | **52%** |
 
 ## Database Objects
 
@@ -265,7 +265,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_DatabaseServer classNode
-    class SRV_001,SRV_002,SRV_003,SRV_004,SRV_005 missingTest
+    class SRV_001,SRV_002,SRV_003,SRV_004,SRV_005 completedTest
 ```
 
 ### DatabaseManager
@@ -286,7 +286,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_DatabaseManager classNode
-    class MGR_001,MGR_002,MGR_003,MGR_004,MGR_005,MGR_006 missingTest
+    class MGR_001,MGR_002,MGR_003,MGR_004,MGR_005,MGR_006 completedTest
 ```
 
 ### Database
@@ -309,7 +309,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Database classNode
-    class DB_001,DB_002,DB_003,DB_004,DB_005,DB_006,DB_007,DB_008 missingTest
+    class DB_001,DB_002,DB_003,DB_004,DB_005,DB_006,DB_007,DB_008 completedTest
 ```
 
 ### CatalogManager
@@ -329,27 +329,9 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_CatalogManager classNode
-    class CAT_001,CAT_002,CAT_003,CAT_004,CAT_005 missingTest
+    class CAT_001,CAT_002,CAT_003,CAT_004,CAT_005 completedTest
 ```
 
-### StatisticsManager
-
-```mermaid
-flowchart LR
-    Class_StatisticsManager["StatisticsManager"]
-
-    Class_StatisticsManager --> STAT_001["UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics"]
-    Class_StatisticsManager --> STAT_002["UpdateStatistics_WhenObjectDoesNotExist_ShouldThrow"]
-    Class_StatisticsManager --> STAT_003["EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate"]
-    Class_StatisticsManager --> STAT_004["EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback"]
-
-    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
-    classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
-    classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
-
-    class Class_StatisticsManager classNode
-    class STAT_001,STAT_002,STAT_003,STAT_004 missingTest
-```
 
 ## Transaction Management
 

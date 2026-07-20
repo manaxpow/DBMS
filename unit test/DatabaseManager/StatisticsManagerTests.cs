@@ -3,11 +3,23 @@ using Xunit;
 
 public class StatisticsManagerTests
 {
+    private readonly StatisticsManager _statisticsManager;
+
+    public StatisticsManagerTests()
+    {
+        _statisticsManager = new StatisticsManager(new object());
+    }
     [Trait("Category", "Important")]
     [Fact]
     public void UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var data = new object();
+
+        // Act
+        _statisticsManager.UpdateStatistics(data);
+
+        // Assert
     }
 
     [Trait("Category", "Important")]

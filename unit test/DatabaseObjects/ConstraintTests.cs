@@ -1,8 +1,15 @@
-using System;
-using Xunit;
-
 public class ConstraintTests
 {
+    private readonly Constraint _constraint;
+
+    public ConstraintTests()
+    {
+        var table = new Table("TestTable");
+        var column = new Column("Id", typeof(int), isNullable: false);
+        table.AddColumn(column);
+
+        _constraint = new Constraint(column);
+    }
     [Fact]
     public void Validate_WhenValueSatisfiesConstraint_ShouldSucceed()
     {

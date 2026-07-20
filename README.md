@@ -342,22 +342,46 @@ classDiagram
 ```mermaid
 classDiagram
     direction TB
+
     class DatabaseServer {
-        +Start() void
+        -Configuration _config
+        -IReadOnlyList~Component~ _components
+        -bool _isRunning
+        +Start(Configuration config) void
+        +Stop() void
     }
+
     class DatabaseManager {
-        +CreateDatabase() void
+        -CatalogManager _catalog
+        -Dictionary~string, Database~ _databases
+        +CreateDatabase(string name) void
+        +GetDatabase(string name) Database
+        +DropDatabase(string name) void
     }
+
     class Database {
         +string Name
-        +DropSchema(string schemaName) void
-        +AlterSchema(string schemaName, object newSchema) void
+        -StorageEngine _storage
+        -SchemaManager _schemaManager
+        -bool _isOpen
+        +Open() void
+        +Close() void
+        +AddSchema(Schema schema) void
+        +DropSchema(string name) void
     }
+
     class CatalogManager {
-        +GetMetadata() void
+        -Dictionary~string, object~ _store
+        +Register(object obj) void
+        +Find(string name) object?
+        +Remove(object obj) void
     }
+
     class StatisticsManager {
-        +UpdateStats() void
+        -Dictionary~string, Statistics~ _stats
+        -DatabaseStore _store
+        +UpdateStatistics(object obj) void
+        +EstimateSelectivity(Predicate predicate) double
     }
 
     DatabaseServer *-- DatabaseManager

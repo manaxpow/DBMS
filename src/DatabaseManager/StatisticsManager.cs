@@ -1,18 +1,18 @@
 using System;
+using System.Collections.Generic;
+using DBMS.Exceptions;
 
 public class StatisticsManager
 {
-    public void UpdateStats()
+    private Dictionary<string, object> _stats;
+    private object _store;
+
+    public void UpdateStatistics(object obj)
     {
-        throw new NotImplementedException();
+        throw new ObjectNotFoundException();
     }
 
-    public void UpdateStatistics()
-    {
-        throw new NotImplementedException();
-    }
-
-    public double EstimateSelectivity()
+    public double EstimateSelectivity(object predicate)
     {
         throw new NotImplementedException();
     }

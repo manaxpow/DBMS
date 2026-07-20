@@ -1,18 +1,84 @@
-using System;
-using Xunit;
+using System.ComponentModel;
+using DBMS.Exceptions;
+using FluentAssertions;
+using NSubstitute;
 
 public class DatabaseServerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
-    public void Start_WhenConfigurationIsValid_ShouldStart()
+    public void Start_WhenConfigurationIsValid_ShouldStartServer()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var components = Substitute.For<IServerComponent>();
+        var server = new DatabaseServer(new List<IServerComponent> { components });
+        var config = new { Port = 5432, MaxConnections = 100 };
+
+        // Act
+        server.Start(config);
+
+        // Assert
+        server.IsRunning.Should().Be(true);
     }
 
+
+    [Trait("Category", "Important")]
     [Fact]
-    public void Stop_WhenServerIsRunning_ShouldStop()
+    public void Start_WhenServerIsAlreadyRunning_ShouldNotInitializeComponentsAgain()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var components = Substitute.For<IServerComponent>();
+        var server = new DatabaseServer(new List<IServerComponent> { components });
+        var config = new { Port = 5432, MaxConnections = 100 };
+
+        server.Start(config);
+
+        // Act
+        server.Start(config);
+
+        // Assert
+        components.Received(1).Initialize(config);
+        server.IsRunning.Should().Be(true);
+    }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Start_WhenComponentInitializationFails_ShouldRemainStopped()
+    {
+        // Arrange
+        var components = Substitute.For<IServerComponent>();
+        components
+            .When(c => c.Initialize(Arg.Any<object>()))
+            .Do(x => throw new ComponentInitializationException());
+
+        var server = new DatabaseServer(new List<IServerComponent> { components });
+        var config = new { Port = 5432, MaxConnections = 100 };
+
+        // Act
+        Action act = () => server.Start(config);
+
+        // Assert
+        act.Should().Throw<ComponentInitializationException>();
+        server.IsRunning.Should().Be(false);
+    }
+
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Stop_WhenServerIsRunning_ShouldStopAllComponents()
+    {
+        // Arrange
+        var components = Substitute.For<IServerComponent>();
+        var config = new { Port = 5432, MaxConnections = 100 };
+        var server = new DatabaseServer(new List<IServerComponent> { components });
+        server.Start(config);
+
+        // Act
+        server.Stop();
+
+        // Assert
+        components.Received(1).Shutdown();
+        server.IsRunning.Should().Be(false);
     }
 
     [Fact]
@@ -23,20 +89,7 @@ public class DatabaseServerTests
 
 
     [Fact]
-    public void Start_WhenServerIsAlreadyRunning_ShouldThrow()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
     public void Start_WhenConfigurationIsInvalid_ShouldThrow()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Trait("Category", "Important")]
-    [Fact]
-    public void Start_WhenComponentInitializationFails_ShouldRemainStopped()
     {
         throw new NotImplementedException();
     }
@@ -46,5 +99,26 @@ public class DatabaseServerTests
     {
         throw new NotImplementedException();
     }
-}
 
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Stop_WhenComponentShutdownFails_ShouldReportFailureAndRemainConsistent()
+    {
+        // Arrange
+        var components = Substitute.For<IServerComponent>();
+        components
+            .When(c => c.Shutdown())
+            .Do(x => throw new ComponentShutdownException());
+
+        var config = new { Port = 5432, MaxConnections = 100 };
+        var server = new DatabaseServer(new List<IServerComponent> { components });
+        server.Start(config);
+
+        // Act
+        Action act = () => server.Stop();
+
+        // Assert
+        components.Received(1).Shutdown();
+        act.Should().Throw<ComponentShutdownException>();
+    }
+}

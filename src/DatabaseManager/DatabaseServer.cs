@@ -1,6 +1,13 @@
+using System;
+using System.Collections.Generic;
+
 public class DatabaseServer
 {
-    public void Start()
+    private object _config;
+    private IReadOnlyList<object> _components;
+    private bool _isRunning;
+
+    public void Start(object config)
     {
         throw new NotImplementedException();
     }

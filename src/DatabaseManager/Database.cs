@@ -2,9 +2,10 @@ using System;
 
 public class Database
 {
-    public int Id { get; set; }
-
     public string Name { get; set; }
+    private object _storage;
+    private object _schemaManager;
+    private bool _isOpen;
 
     public void Open()
     {
@@ -16,17 +17,12 @@ public class Database
         throw new NotImplementedException();
     }
 
-    public void AddSchema(string schemaName)
+    public void AddSchema(object schema)
     {
         throw new NotImplementedException();
     }
 
-    public void DropSchema(string schemaName)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void AlterSchema(string schemaName, object newSchema)
+    public void DropSchema(string name)
     {
         throw new NotImplementedException();
     }

@@ -75,5 +75,19 @@ public class DatabaseTests
     {
         throw new NotImplementedException();
     }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Close_WhenFlushFails_ShouldNotReportSuccessfulClose()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void DropSchema_WhenSchemaIsReferenced_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
 }
 

@@ -3,8 +3,9 @@ using Xunit;
 
 public class DatabaseManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
-    public void CreateDatabase_WhenNameIsValid_ShouldCreateDatabase()
+    public void CreateDatabase_WhenNameIsValid_ShouldRegisterDatabase()
     {
         throw new NotImplementedException();
     }

@@ -1,16 +1,15 @@
-using System;
-using Xunit;
-
 public class DatabaseServerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
-    public void Start_WhenConfigurationIsValid_ShouldStart()
+    public void Start_WhenConfigurationIsValid_ShouldStartServer()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Stop_WhenServerIsRunning_ShouldStop()
+    public void Stop_WhenServerIsRunning_ShouldStopAllComponents()
     {
         throw new NotImplementedException();
     }
@@ -22,8 +21,9 @@ public class DatabaseServerTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Start_WhenServerIsAlreadyRunning_ShouldThrow()
+    public void Start_WhenServerIsAlreadyRunning_ShouldNotInitializeComponentsAgain()
     {
         throw new NotImplementedException();
     }
@@ -43,6 +43,13 @@ public class DatabaseServerTests
 
     [Fact]
     public void Stop_WhenServerIsNotRunning_ShouldRemainStopped()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Stop_WhenComponentShutdownFails_ShouldReportFailureAndRemainConsistent()
     {
         throw new NotImplementedException();
     }

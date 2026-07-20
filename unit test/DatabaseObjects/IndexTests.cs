@@ -3,18 +3,21 @@ using Xunit;
 
 public class IndexTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Insert_WhenKeyIsValid_ShouldAddEntry()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Search_WhenKeyExists_ShouldReturnRecordPointer()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Insert_WhenUniqueKeyAlreadyExists_ShouldThrow()
     {
@@ -22,18 +25,21 @@ public class IndexTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Insert_WhenIndexIsNonUnique_ShouldAllowDuplicateKeys()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Search_WhenKeyDoesNotExist_ShouldReturnNull()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Delete_WhenKeyExists_ShouldRemoveEntry()
     {
@@ -46,12 +52,14 @@ public class IndexTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Update_WhenKeyExists_ShouldReplaceRecordPointer()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Insert_WhenKeyIsNullAndNullsAreNotAllowed_ShouldThrow()
     {
@@ -64,3 +72,5 @@ public class IndexTests
         throw new NotImplementedException();
     }
 }
+
+

@@ -116,8 +116,15 @@ classDiagram
     Schema *-- Table
     Table *-- Column
     Table *-- Row
+        Constraint <|-- CheckConstraint
+    Constraint <|-- UniqueConstraint
+    Constraint <|-- PrimaryKeyConstraint
+    Constraint <|-- ForeignKeyConstraint
+    Constraint ..> ConstraintContext : Uses
+
+    Table *-- ConstraintContext
     Table *-- Constraint
-    Table *-- ForeignKey
+    Table *-- ForeignKeyConstraint
     Table *-- Index
     Table *-- Partition
     Schema *-- View
@@ -434,30 +441,46 @@ classDiagram
         ~RemoveValueAt(int columnIndex) void
     }
 
+    class ConstraintContext {
+        +Row CandidateRow
+        +Row? ExistingRow
+        +Table Table
+        +Schema Schema
+    }
+
     class Constraint {
         <<abstract>>
         +string Name
         +bool IsEnabled
-        +Validate(object? value) bool
-        +Apply(object? value) void
+        +Validate(ConstraintContext context) bool
         +Enable() void
         +Disable() void
-        #Check(object? value) bool
-        #OnApply(object? value) void
+        #Check(ConstraintContext context) bool
     }
 
-    class ForeignKey {
+    class CheckConstraint {
+        +Func~Row, bool~ Predicate
+        #Check(ConstraintContext context) bool
+    }
+
+    class UniqueConstraint {
+        +IReadOnlyList~string~ ColumnNames
+        #Check(ConstraintContext context) bool
+    }
+
+    class PrimaryKeyConstraint {
+        +IReadOnlyList~string~ ColumnNames
+        #Check(ConstraintContext context) bool
+    }
+
+    class ForeignKeyConstraint {
         +string ChildColumnName
         +string ReferencedTableName
         +string ReferencedColumnName
         +ReferentialAction OnDelete
         +ReferentialAction OnUpdate
         +bool IsNullable
-        -Schema _schema
-        +Validate(object? parentKey) bool
-        +DeleteParent(object parentKey) void
-        +UpdateParent(object oldKey, object newKey) void
-        -GetReferencingRows(object parentKey) IReadOnlyList~Row~
+        #Check(ConstraintContext context) bool
     }
 
     class Index {
@@ -547,6 +570,13 @@ classDiagram
 
     Table *-- Column
     Table *-- Row
+        Constraint <|-- CheckConstraint
+    Constraint <|-- UniqueConstraint
+    Constraint <|-- PrimaryKeyConstraint
+    Constraint <|-- ForeignKeyConstraint
+    Constraint ..> ConstraintContext : Uses
+
+    Table *-- ConstraintContext
     Table *-- Constraint
     Table *-- Index
     Table *-- Partition
@@ -1517,4 +1547,5 @@ flowchart LR
 ```
 
 ---
+
 

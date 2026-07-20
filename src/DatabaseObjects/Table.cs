@@ -52,3 +52,5 @@ public class Table
     private bool IsColumnReferencedByConstraint(string columnName) => throw new NotImplementedException();
     private void RemoveColumnValues(int columnIndex) => throw new NotImplementedException();
 }
+
+

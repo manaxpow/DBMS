@@ -3,12 +3,14 @@ using Xunit;
 
 public class RecoveryManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Recover_ShouldRedoCommittedTransactions()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Recover_ShouldUndoUncommittedTransactions()
     {
@@ -58,3 +60,4 @@ public class RecoveryManagerTests
         throw new NotImplementedException();
     }
 }
+

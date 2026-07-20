@@ -57,3 +57,4 @@ public class ViewTests
         throw new NotImplementedException();
     }
 }
+

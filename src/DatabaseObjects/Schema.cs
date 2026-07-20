@@ -36,3 +36,4 @@ public class Schema
     internal bool IsObjectReferenced(string objectName) => throw new NotImplementedException();
     private bool IsTableReferencedByForeignKey(string tableName) => throw new NotImplementedException();
 }
+

@@ -19,3 +19,4 @@ public class Row
     public void SetValue(string columnName, object value) => throw new NotImplementedException();
     internal void RemoveValueAt(int columnIndex) => throw new NotImplementedException();
 }
+

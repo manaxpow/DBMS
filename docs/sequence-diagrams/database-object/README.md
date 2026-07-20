@@ -996,60 +996,74 @@ sequenceDiagram
 
 ## 6. Constraint Tests
 
-### 6.1 Validate_WhenValueSatisfiesConstraint_ShouldSucceed
+### 6.1 Validate_WhenConstraintIsEnabled_ShouldCallCheck
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as ConstraintTests
     participant Constraint as Constraint
 
-    Test->>Constraint: Validate(value)
+    Test->>Constraint: Validate(context)
     activate Constraint
-    Constraint->>Constraint: Check(value)
+    Constraint->>Constraint: Check(context)
     Constraint-->>Test: true
     deactivate Constraint
 ```
 
-### 6.2 Validate_WhenValueViolatesConstraint_ShouldFail
+### 6.2 Validate_WhenCheckReturnsTrue_ShouldReturnTrue
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as ConstraintTests
     participant Constraint as Constraint
 
-    Test->>Constraint: Validate(value)
+    Test->>Constraint: Validate(context)
     activate Constraint
-    Constraint->>Constraint: Check(value)
+    Constraint->>Constraint: Check(context)
+    Constraint-->>Constraint: true
+    Constraint-->>Test: true
+    deactivate Constraint
+```
+
+### 6.3 Validate_WhenCheckReturnsFalse_ShouldReturnFalse
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as ConstraintTests
+    participant Constraint as Constraint
+
+    Test->>Constraint: Validate(context)
+    activate Constraint
+    Constraint->>Constraint: Check(context)
+    Constraint-->>Constraint: false
     Constraint-->>Test: false
     deactivate Constraint
 ```
 
-### 6.3 Apply_WhenConstraintIsDisabled_ShouldSkipValidation
+### 6.4 Validate_WhenConstraintIsDisabled_ShouldSkipCheck
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as ConstraintTests
     participant Constraint as Constraint
 
-    Test->>Constraint: Apply(value)
+    Test->>Constraint: Validate(context)
     activate Constraint
-    Constraint->>Constraint: check IsEnabled
-    Constraint-->>Test: return without Check(value)
+    Constraint->>Constraint: IsEnabled
+    Constraint-->>Constraint: false
+    Constraint-->>Test: true
     deactivate Constraint
 ```
 
-### 6.4 Enable_WhenConstraintIsDisabled_ShouldEnable
+### 6.5 Enable_WhenConstraintIsDisabled_ShouldEnable
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as ConstraintTests
     participant Constraint as Constraint
 
@@ -1058,12 +1072,11 @@ sequenceDiagram
     Constraint-->>Test: success
 ```
 
-### 6.5 Disable_WhenConstraintIsEnabled_ShouldDisable
+### 6.6 Disable_WhenConstraintIsEnabled_ShouldDisable
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as ConstraintTests
     participant Constraint as Constraint
 
@@ -1072,228 +1085,327 @@ sequenceDiagram
     Constraint-->>Test: success
 ```
 
-### 6.6 Apply_WhenValidationFails_ShouldNotMutateState
+## 7. CheckConstraint Tests
+
+### 7.1 Validate_WhenPredicateReturnsTrue_ShouldReturnTrue
 
 ```mermaid
 sequenceDiagram
     autonumber
+    participant Test as CheckConstraintTests
+    participant Constraint as CheckConstraint
 
-    participant Test as ConstraintTests
-    participant Constraint as Constraint
-
-    Test->>Constraint: Apply(value)
+    Test->>Constraint: Validate(row)
     activate Constraint
-    Constraint->>Constraint: Validate(value)
-    Constraint-->>Constraint: false
-    Note right of Constraint: OnApply(value) is not called
-    Constraint-->>Test: throws ConstraintViolationException
+    Constraint->>Constraint: Invoke Predicate(row)
+    Constraint-->>Constraint: true
+    Constraint-->>Test: true
     deactivate Constraint
 ```
 
-## 7. ForeignKey Tests
-
-### 7.1 Validate_WhenParentRecordExists_ShouldSucceed
+### 7.2 Validate_WhenPredicateReturnsFalse_ShouldReturnFalse
 
 ```mermaid
 sequenceDiagram
     autonumber
+    participant Test as CheckConstraintTests
+    participant Constraint as CheckConstraint
 
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Constraint: Invoke Predicate(row)
+    Constraint-->>Constraint: false
+    Constraint-->>Test: false
+    deactivate Constraint
+```
+
+### 7.3 Validate_WhenPredicateUsesMultipleColumns_ShouldEvaluateCandidateRow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as CheckConstraintTests
+    participant Constraint as CheckConstraint
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Constraint: Invoke Predicate(row)
+    Note right of Constraint: Evaluates multiple columns from row
+    Constraint-->>Constraint: true/false
+    Constraint-->>Test: result
+    deactivate Constraint
+```
+
+## 8. UniqueConstraint Tests
+
+### 8.1 Validate_WhenKeyIsUnique_ShouldReturnTrue
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as UniqueConstraintTests
+    participant Constraint as UniqueConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: null
+    Constraint-->>Test: true
+    deactivate Constraint
+```
+
+### 8.2 Validate_WhenDuplicateKeyExists_ShouldReturnFalse
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as UniqueConstraintTests
+    participant Constraint as UniqueConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: existingRecord
+    Constraint-->>Test: false
+    deactivate Constraint
+```
+
+### 8.3 Validate_WhenUpdatingSameRow_ShouldIgnoreExistingRow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as UniqueConstraintTests
+    participant Constraint as UniqueConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: existingRecord
+    Constraint->>Constraint: existingRecord == row
+    Constraint-->>Constraint: true
+    Constraint-->>Test: true
+    deactivate Constraint
+```
+
+### 8.4 Validate_WhenCompositeKeyAlreadyExists_ShouldReturnFalse
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as UniqueConstraintTests
+    participant Constraint as UniqueConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Index: Search(compositeKey)
+    Index-->>Constraint: existingRecord
+    Constraint-->>Test: false
+    deactivate Constraint
+```
+
+## 9. PrimaryKeyConstraint Tests
+
+### 9.1 Validate_WhenKeyIsUniqueAndNotNull_ShouldReturnTrue
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PrimaryKeyConstraintTests
+    participant Constraint as PrimaryKeyConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Constraint: ContainsNull(row.Key)
+    Constraint-->>Constraint: false
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: null
+    Constraint-->>Test: true
+    deactivate Constraint
+```
+
+### 9.2 Validate_WhenKeyContainsNull_ShouldReturnFalse
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PrimaryKeyConstraintTests
+    participant Constraint as PrimaryKeyConstraint
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Constraint: ContainsNull(row.Key)
+    Constraint-->>Constraint: true
+    Constraint-->>Test: false
+    deactivate Constraint
+```
+
+### 9.3 Validate_WhenDuplicateKeyExists_ShouldReturnFalse
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PrimaryKeyConstraintTests
+    participant Constraint as PrimaryKeyConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Constraint: ContainsNull(row.Key)
+    Constraint-->>Constraint: false
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: existingRecord
+    Constraint-->>Test: false
+    deactivate Constraint
+```
+
+### 9.4 Validate_WhenUpdatingSameRow_ShouldIgnoreExistingRow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PrimaryKeyConstraintTests
+    participant Constraint as PrimaryKeyConstraint
+    participant Index as Index
+
+    Test->>Constraint: Validate(row)
+    activate Constraint
+    Constraint->>Index: Search(row.Key)
+    Index-->>Constraint: existingRecord
+    Constraint->>Constraint: existingRecord == row
+    Constraint-->>Constraint: true
+    Constraint-->>Test: true
+    deactivate Constraint
+```
+
+## 10. ForeignKeyConstraint Tests
+
+### 10.1 Validate_WhenReferencedValueExists_ShouldReturnTrue
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as ForeignKeyConstraintTests
+    participant FK as ForeignKeyConstraint
     participant Schema as Schema
     participant Table as Table
     participant Index as Index
 
-    Test->>FK: Validate(parentKey)
+    Test->>FK: Validate(row)
     activate FK
     FK->>Schema: GetTable(ReferencedTableName)
     Schema-->>FK: parentTable
     FK->>Table: GetPrimaryIndex()
     Table-->>FK: parentIndex
-    FK->>Index: Search(parentKey)
+    FK->>Index: Search(row.ForeignKeyValue)
     Index-->>FK: recordPointer
     FK-->>Test: true
     deactivate FK
 ```
 
-### 7.2 Validate_WhenParentRecordDoesNotExist_ShouldFail
+### 10.2 Validate_WhenReferencedValueDoesNotExist_ShouldReturnFalse
 
 ```mermaid
 sequenceDiagram
     autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
+    participant Test as ForeignKeyConstraintTests
+    participant FK as ForeignKeyConstraint
     participant Schema as Schema
     participant Table as Table
     participant Index as Index
 
-    Test->>FK: Validate(parentKey)
+    Test->>FK: Validate(row)
     activate FK
     FK->>Schema: GetTable(ReferencedTableName)
     Schema-->>FK: parentTable
     FK->>Table: GetPrimaryIndex()
     Table-->>FK: parentIndex
-    FK->>Index: Search(parentKey)
+    FK->>Index: Search(row.ForeignKeyValue)
     Index-->>FK: null
     FK-->>Test: false
     deactivate FK
 ```
 
-### 7.3 Validate_WhenValueIsNullAndNullable_ShouldSucceed
+### 10.3 Validate_WhenForeignKeyValueIsNull_ShouldSkipReferenceCheck
 
 ```mermaid
 sequenceDiagram
     autonumber
+    participant Test as ForeignKeyConstraintTests
+    participant FK as ForeignKeyConstraint
 
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
-    participant Schema as Schema
-    participant Table as Table
-    participant Index as Index
-
-    Test->>FK: Validate(null)
-    FK->>FK: check IsNullable
+    Test->>FK: Validate(row)
+    activate FK
+    FK->>FK: row.ForeignKeyValue is null
+    FK-->>FK: true
     FK-->>Test: true
-```
-
-### 7.4 DeleteParent_WhenRestricted_ShouldRejectDeletion
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
-    participant Schema as Schema
-    participant Table as Table
-    participant Index as Index
-
-    Test->>FK: DeleteParent(parentKey)
-    activate FK
-    FK->>FK: GetReferencingRows(parentKey)
-    FK-->>FK: childRows
-    FK->>FK: check OnDelete
-    FK-->>Test: throws ForeignKeyConstraintException
     deactivate FK
 ```
 
-### 7.5 DeleteParent_WhenCascadeIsEnabled_ShouldDeleteChildren
+### 10.4 Validate_WhenReferencedTableDoesNotExist_ShouldThrow
 
 ```mermaid
 sequenceDiagram
     autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
+    participant Test as ForeignKeyConstraintTests
+    participant FK as ForeignKeyConstraint
     participant Schema as Schema
-    participant Table as Table
-    participant Index as Index
 
-    Test->>FK: DeleteParent(parentKey)
+    Test->>FK: Validate(row)
     activate FK
-    FK->>FK: GetReferencingRows(parentKey)
-    FK-->>FK: childRows
-    loop each child row
-        FK->>Table: DeleteRow(row)
-    end
-    FK-->>Test: success
+    FK->>Schema: GetTable(ReferencedTableName)
+    Schema-->>FK: null
+    FK-->>Test: throws TableNotFoundException
     deactivate FK
 ```
 
-### 7.6 DeleteParent_WhenSetNullIsEnabled_ShouldClearChildReference
+### 10.5 Validate_WhenReferencedColumnDoesNotExist_ShouldThrow
 
 ```mermaid
 sequenceDiagram
     autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
+    participant Test as ForeignKeyConstraintTests
+    participant FK as ForeignKeyConstraint
     participant Schema as Schema
     participant Table as Table
-    participant Index as Index
 
-    Test->>FK: DeleteParent(parentKey)
+    Test->>FK: Validate(row)
     activate FK
-    FK->>FK: GetReferencingRows(parentKey)
-    FK-->>FK: childRows
-    loop each child row
-        FK->>FK: row.SetValue(ChildColumnName, null)
-    end
-    FK-->>Test: success
+    FK->>Schema: GetTable(ReferencedTableName)
+    Schema-->>FK: parentTable
+    FK->>Table: GetColumn(ReferencedColumnName)
+    Table-->>FK: throws ColumnNotFoundException
+    FK-->>Test: propagates exception
     deactivate FK
 ```
 
-### 7.7 UpdateParent_WhenRestricted_ShouldRejectUpdate
+## 11. Index Tests
+
+### 11.1 Insert_WhenKeyIsValid_ShouldAddEntry
 
 ```mermaid
 sequenceDiagram
     autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
-    participant Schema as Schema
-    participant Table as Table
-    participant Index as Index
-
-    Test->>FK: UpdateParent(oldKey, newKey)
-    activate FK
-    FK->>FK: GetReferencingRows(oldKey)
-    FK-->>FK: childRows
-    FK->>FK: check OnUpdate
-    FK-->>Test: throws ForeignKeyConstraintException
-    deactivate FK
-```
-
-### 7.8 UpdateParent_WhenCascadeIsEnabled_ShouldUpdateChildren
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ForeignKeyTests
-    participant FK as ForeignKey
-    participant Schema as Schema
-    participant Table as Table
-    participant Index as Index
-
-    Test->>FK: UpdateParent(oldKey, newKey)
-    activate FK
-    FK->>FK: GetReferencingRows(oldKey)
-    FK-->>FK: childRows
-    loop each child row
-        FK->>FK: row.SetValue(ChildColumnName, newKey)
-    end
-    FK-->>Test: success
-    deactivate FK
-```
-
-## 8. Index Tests
-
-### 8.1 Insert_WhenKeyIsValid_ShouldAddEntry
-
-```mermaid
-sequenceDiagram
-    autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
     Test->>Index: Insert(key, recordPointer)
     activate Index
-    Index->>Index: ContainsKey(key)
-    Index-->>Index: false
     Index->>Index: AddEntry(key, recordPointer)
     Index-->>Test: success
     deactivate Index
 ```
 
-### 8.2 Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
+### 11.2 Insert_WhenUniqueKeyAlreadyExists_ShouldThrow
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
@@ -1306,12 +1418,11 @@ sequenceDiagram
     deactivate Index
 ```
 
-### 8.3 Insert_WhenIndexIsNonUnique_ShouldAllowDuplicateKeys
+### 11.3 Insert_WhenIndexIsNonUnique_ShouldAllowDuplicateKeys
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
@@ -1326,40 +1437,37 @@ sequenceDiagram
     deactivate Index
 ```
 
-### 8.4 Search_WhenKeyExists_ShouldReturnRecordPointer
+### 11.4 Search_WhenKeyExists_ShouldReturnRecordPointer
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
     Test->>Index: Search(key)
-    Index->>Index: _entries.TryGetValue(key, out pointers)
+    Index->>Index: _entries.TryGetValue(key)
     Index-->>Test: recordPointer
 ```
 
-### 8.5 Search_WhenKeyDoesNotExist_ShouldReturnNull
+### 11.5 Search_WhenKeyDoesNotExist_ShouldReturnNull
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
     Test->>Index: Search(key)
-    Index->>Index: _entries.TryGetValue(key, out pointers)
+    Index->>Index: _entries.TryGetValue(key)
     Index-->>Test: null
 ```
 
-### 8.6 Delete_WhenKeyExists_ShouldRemoveEntry
+### 11.6 Delete_WhenKeyExists_ShouldRemoveEntry
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
@@ -1368,26 +1476,11 @@ sequenceDiagram
     Index-->>Test: true
 ```
 
-### 8.7 Delete_WhenKeyDoesNotExist_ShouldReturnFalse
+### 11.7 Update_WhenKeyExists_ShouldReplaceRecordPointer
 
 ```mermaid
 sequenceDiagram
     autonumber
-
-    participant Test as IndexTests
-    participant Index as Index
-
-    Test->>Index: Delete(key)
-    Index->>Index: _entries.Remove(key)
-    Index-->>Test: false
-```
-
-### 8.8 Update_WhenKeyExists_ShouldReplaceRecordPointer
-
-```mermaid
-sequenceDiagram
-    autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
@@ -1400,12 +1493,11 @@ sequenceDiagram
     deactivate Index
 ```
 
-### 8.9 Insert_WhenKeyIsNullAndNullsAreNotAllowed_ShouldThrow
+### 11.8 Insert_WhenKeyIsNullAndNullsAreNotAllowed_ShouldThrow
 
 ```mermaid
 sequenceDiagram
     autonumber
-
     participant Test as IndexTests
     participant Index as Index
 
@@ -1416,496 +1508,3 @@ sequenceDiagram
     deactivate Index
 ```
 
-### 8.10 RangeSearch_WhenKeysMatch_ShouldReturnOrderedEntries
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as IndexTests
-    participant Index as Index
-
-    Test->>Index: RangeSearch(startKey, endKey)
-    activate Index
-    Index->>Index: FindEntriesInRange(startKey, endKey)
-    Index-->>Index: entries
-    Index->>Index: OrderByKey(entries)
-    Index-->>Test: ordered entries
-    deactivate Index
-```
-
-## 9. Partition Tests
-
-### 9.1 RouteRow_WhenKeyMatchesRange_ShouldReturnPartition
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: RouteRow(row, partitionKey)
-    activate Partition
-    Partition->>Row: GetValue(partitionKey)
-    Row-->>Partition: key
-    Partition->>Partition: FindMatchingRange(key)
-    Partition-->>Test: target partition
-    deactivate Partition
-```
-
-### 9.2 RouteRow_WhenKeyIsOutsideRange_ShouldFail
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: RouteRow(row, partitionKey)
-    activate Partition
-    Partition->>Row: GetValue(partitionKey)
-    Row-->>Partition: key
-    Partition->>Partition: FindMatchingRange(key)
-    Partition-->>Partition: null
-    Partition-->>Test: throws PartitionNotFoundException
-    deactivate Partition
-```
-
-### 9.3 RouteRow_WhenKeyIsOnBoundary_ShouldUseConfiguredBoundary
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: RouteRow(row, partitionKey)
-    activate Partition
-    Partition->>Row: GetValue(partitionKey)
-    Row-->>Partition: boundaryKey
-    Partition->>Partition: FindMatchingRange(boundaryKey)
-    Note right of Partition: Uses IncludeStart and IncludeEnd
-    Partition-->>Test: configured partition
-    deactivate Partition
-```
-
-### 9.4 AddRange_WhenRangeIsValid_ShouldAddRange
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: AddRange(range)
-    activate Partition
-    Partition->>Partition: HasOverlappingRange(range)
-    Partition-->>Partition: false
-    Partition->>Partition: _ranges.Add(range)
-    Partition-->>Test: success
-    deactivate Partition
-```
-
-### 9.5 AddRange_WhenRangesOverlap_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: AddRange(range)
-    activate Partition
-    Partition->>Partition: HasOverlappingRange(range)
-    Partition-->>Partition: true
-    Partition-->>Test: throws PartitionRangeOverlapException
-    deactivate Partition
-```
-
-### 9.6 RemoveRange_WhenRangeExists_ShouldRemoveRange
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: RemoveRange(range)
-    Partition->>Partition: _ranges.Remove(range)
-    Partition-->>Test: success
-```
-
-### 9.7 RemoveRange_WhenRangeDoesNotExist_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as PartitionTests
-    participant Partition as Partition
-    participant Row as Row
-
-    Test->>Partition: RemoveRange(range)
-    activate Partition
-    Partition->>Partition: _ranges.Remove(range)
-    Partition-->>Partition: false
-    Partition-->>Test: throws PartitionRangeNotFoundException
-    deactivate Partition
-```
-
-## 10. View Tests
-
-### 10.1 Create_WhenQueryIsValid_ShouldCreateView
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: Create(name, query, schema)
-    activate View
-    View->>View: ValidateQuery(query)
-    View->>View: GetDependencies(query)
-    View-->>View: dependencies
-    View->>View: EnsureDependenciesExist(schema, dependencies)
-    View->>Schema: RegisterView(view)
-    View-->>Test: view
-    deactivate View
-```
-
-### 10.2 Create_WhenQueryIsInvalid_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: Create(name, query, schema)
-    activate View
-    View->>View: ValidateQuery(query)
-    View-->>Test: throws InvalidViewQueryException
-    deactivate View
-```
-
-### 10.3 Resolve_WhenDependenciesExist_ShouldReturnDefinition
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: Resolve(schema)
-    activate View
-    View->>View: EnsureDependenciesExist(schema, Dependencies)
-    View-->>Test: definition
-    deactivate View
-```
-
-### 10.4 Resolve_WhenDependencyIsMissing_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: Resolve(schema)
-    activate View
-    View->>View: EnsureDependenciesExist(schema, Dependencies)
-    View-->>Test: throws ViewDependencyException
-    deactivate View
-```
-
-### 10.5 AlterView_WhenQueryIsValid_ShouldUpdateDefinition
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: AlterView(newQuery)
-    activate View
-    View->>View: ValidateQuery(newQuery)
-    View->>View: GetDependencies(newQuery)
-    View->>View: Query = newQuery
-    View->>View: Dependencies = newDependencies
-    View-->>Test: success
-    deactivate View
-```
-
-### 10.6 AlterView_WhenQueryIsInvalid_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: AlterView(newQuery)
-    activate View
-    View->>View: ValidateQuery(newQuery)
-    View-->>Test: throws InvalidViewQueryException
-    deactivate View
-```
-
-### 10.7 DropView_WhenViewExists_ShouldRemoveView
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: DropView()
-    activate View
-    View->>Schema: UnregisterView(Name)
-    View->>View: IsDropped = true
-    View-->>Test: success
-    deactivate View
-```
-
-### 10.8 DropView_WhenViewDoesNotExist_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: DropView()
-    activate View
-    View->>View: check IsDropped
-    View-->>Test: throws ViewNotFoundException
-    deactivate View
-```
-
-### 10.9 DropView_WhenViewIsReferenced_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as ViewTests
-    participant View as View
-    participant Schema as Schema
-
-    Test->>View: DropView()
-    activate View
-    View->>Schema: IsObjectReferenced(Name)
-    Schema-->>View: true
-    View-->>Test: throws ViewReferencedException
-    deactivate View
-```
-
-## 11. StoredProcedure Tests
-
-### 11.1 Execute_WhenParametersAreValid_ShouldReturnResult
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: Execute(parameters)
-    activate Procedure
-    Procedure->>Procedure: ValidateParameters(parameters)
-    Procedure-->>Procedure: true
-    Procedure->>TM: BeginTransaction()
-    TM-->>Procedure: transaction
-    Procedure->>Body: Execute(parameters, transaction)
-    Body-->>Procedure: result
-    Procedure->>TM: Commit(transaction)
-    Procedure-->>Test: result
-    deactivate Procedure
-```
-
-### 11.2 Execute_WhenRequiredParameterIsMissing_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: Execute(parameters)
-    activate Procedure
-    Procedure->>Procedure: ValidateParameters(parameters)
-    Procedure-->>Procedure: false
-    Procedure-->>Test: throws ProcedureParameterException
-    deactivate Procedure
-```
-
-### 11.3 Execute_WhenParameterTypeDoesNotMatch_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: Execute(parameters)
-    activate Procedure
-    Procedure->>Procedure: ValidateParameters(parameters)
-    Procedure-->>Procedure: false
-    Procedure-->>Test: throws ProcedureParameterException
-    deactivate Procedure
-```
-
-### 11.4 Execute_WhenTransactionFails_ShouldPropagateFailure
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: Execute(parameters)
-    activate Procedure
-    Procedure->>TM: BeginTransaction()
-    TM-->>Procedure: transaction
-    Procedure->>Body: Execute(parameters, transaction)
-    Body-->>Procedure: throws Exception
-    Procedure->>TM: Rollback(transaction)
-    Procedure-->>Test: propagates exception
-    deactivate Procedure
-```
-
-### 11.5 Execute_WhenProcedureIsDisabled_ShouldRejectExecution
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: Execute(parameters)
-    activate Procedure
-    Procedure->>Procedure: check IsEnabled
-    Procedure-->>Test: throws ProcedureDisabledException
-    deactivate Procedure
-```
-
-### 11.6 AlterProcedure_WhenBodyIsValid_ShouldUpdateProcedure
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: AlterProcedure(newBody)
-    activate Procedure
-    Procedure->>Procedure: ValidateBody(newBody)
-    Procedure-->>Procedure: true
-    Procedure->>Procedure: Body = newBody
-    Procedure-->>Test: success
-    deactivate Procedure
-```
-
-### 11.7 AlterProcedure_WhenBodyIsInvalid_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: AlterProcedure(newBody)
-    activate Procedure
-    Procedure->>Procedure: ValidateBody(newBody)
-    Procedure-->>Procedure: false
-    Procedure-->>Test: throws InvalidProcedureBodyException
-    deactivate Procedure
-```
-
-### 11.8 DropProcedure_WhenProcedureExists_ShouldRemoveProcedure
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: DropProcedure()
-    activate Procedure
-    Procedure->>Procedure: check IsDropped
-    Procedure-->>Procedure: false
-    Procedure->>Procedure: IsDropped = true
-    Procedure-->>Test: success
-    deactivate Procedure
-```
-
-### 11.9 DropProcedure_WhenProcedureDoesNotExist_ShouldThrow
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as StoredProcedureTests
-    participant Procedure as StoredProcedure
-    participant TM as TransactionManager
-    participant Body as ProcedureBody
-
-    Test->>Procedure: DropProcedure()
-    activate Procedure
-    Procedure->>Procedure: check IsDropped
-    Procedure-->>Test: throws ProcedureNotFoundException
-    deactivate Procedure
-```

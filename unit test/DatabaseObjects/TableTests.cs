@@ -6,6 +6,7 @@ public class TableTests
     {
         _table = new Table("TestTable");
     }
+    [Trait("Category", "Important")]
     [Fact]
     public void AddColumn_WhenColumnIsValid_ShouldAddColumn()
     {
@@ -30,6 +31,7 @@ public class TableTests
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void AddColumn_WhenNameAlreadyExists_ShouldThrow()
     {
@@ -49,6 +51,7 @@ public class TableTests
     }
 
     // Internal
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRow_WhenRowIsValid_ShouldInsertRow()
     {
@@ -73,6 +76,7 @@ public class TableTests
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRow_WhenValueCountDoesNotMatch_ShouldThrow()
     {
@@ -93,6 +97,7 @@ public class TableTests
         act.Should().Throw<RowSchemaMismatchException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRow_WhenValueTypeDoesNotMatch_ShouldThrow()
     {
@@ -133,6 +138,7 @@ public class TableTests
         _table.Rows.Should().Contain(row);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRow_WhenNullValueIsNotAllowed_ShouldThrow()
     {
@@ -153,6 +159,7 @@ public class TableTests
         act.Should().Throw<RowSchemaMismatchException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DeleteRow_WhenRowExists_ShouldRemoveRow()
     {
@@ -210,6 +217,7 @@ public class TableTests
         act.Should().Throw<InvalidOperationException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropColumn_WhenColumnIsReferencedByConstraint_ShouldThrow()
     {
@@ -217,7 +225,7 @@ public class TableTests
         var referencedTable = new Table("ReferencedTable");
         var column = new Column("Id", typeof(int));
         _table.AddColumn(column);
-        var constraint = new ForeignKey("FK_TestTable_Id", "Id", referencedTableName: "ReferencedTable", referencedColumnName: "Id");
+        var constraint = new ForeignKeyConstraint("FK_TestTable_Id", "Id", referencedTableName: "ReferencedTable", referencedColumnName: "Id");
         _table.AddConstraint(constraint);
 
         // Act
@@ -227,6 +235,7 @@ public class TableTests
         act.Should().Throw<ColumnReferencedException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropColumn_WhenRowsExist_ShouldRemoveCorrespondingValues()
     {

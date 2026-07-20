@@ -9,12 +9,14 @@ public class LockManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Acquire_WhenLocksConflict_ShouldRejectOrWait()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Release_WhenLockExists_ShouldRemoveLock()
     {
@@ -28,6 +30,7 @@ public class LockManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Acquire_WhenExclusiveLockExists_ShouldRejectOtherTransactions()
     {
@@ -40,12 +43,14 @@ public class LockManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Upgrade_WhenTransactionIsSoleReader_ShouldGrantExclusiveLock()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Upgrade_WhenOtherReadersExist_ShouldRejectOrWait()
     {
@@ -58,12 +63,14 @@ public class LockManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ReleaseAll_WhenTransactionHasLocks_ShouldRemoveAllLocks()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DetectDeadlock_WhenCycleExists_ShouldAbortVictimTransaction()
     {
@@ -76,3 +83,4 @@ public class LockManagerTests
         throw new NotImplementedException();
     }
 }
+

@@ -1,13 +1,21 @@
-using System;
-using Xunit;
-
 public class CatalogManagerTests
 {
+    private CatalogManager _catalogManager;
+
+    public CatalogManagerTests()
+    {
+        _catalogManager = new CatalogManager();
+    }
+
     [Trait("Category", "Important")]
     [Fact]
     public void Register_WhenObjectIsValid_ShouldAddToCatalog()
     {
-        throw new NotImplementedException();
+        // Act
+        _catalogManager.Register(new Database("TestDatabase"));
+
+        // Assert
+        _catalogManager.Find<Database>("TestDatabase").Should().NotBeNull();
     }
 
     [Trait("Category", "Important")]

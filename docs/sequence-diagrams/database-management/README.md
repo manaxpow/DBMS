@@ -105,8 +105,8 @@ sequenceDiagram
     Test->>Server: Start(validConfig)
     activate Server
     Server->>Component: Initialize()
-    Component-->>Server: throws Exception
-    Server-->>Test: throws Exception
+    Component-->>Server: throws ComponentInitializationException
+    Server-->>Test: throws ComponentInitializationException
     deactivate Server
 ```
 
@@ -145,8 +145,8 @@ sequenceDiagram
     Server->>Server: get _isRunning
     Server-->>Server: true
     Server->>Component: Shutdown()
-    Component-->>Server: throws Exception
-    Server-->>Test: throws Exception
+    Component-->>Server: throws ComponentShutdownException
+    Server-->>Test: throws ComponentShutdownException
     deactivate Server
 ```
 
@@ -200,8 +200,8 @@ sequenceDiagram
     Test->>Manager: CreateDatabase(validName)
     activate Manager
     Manager->>Catalog: Register(database)
-    Catalog-->>Manager: throws Exception
-    Manager-->>Test: throws Exception
+    Catalog-->>Manager: throws DatabaseCreationException
+    Manager-->>Test: throws DatabaseCreationException
     deactivate Manager
 ```
 
@@ -293,9 +293,9 @@ sequenceDiagram
     Test->>DB: Open()
     activate DB
     DB->>Storage: Initialize()
-    Storage-->>DB: throws Exception
+    Storage-->>DB: throws StorageInitializationException
     DB->>DB: _isOpen = false
-    DB-->>Test: throws Exception
+    DB-->>Test: throws StorageInitializationException
     deactivate DB
 ```
 
@@ -331,8 +331,8 @@ sequenceDiagram
     Test->>DB: Close()
     activate DB
     DB->>Storage: Flush()
-    Storage-->>DB: throws Exception
-    DB-->>Test: throws Exception
+    Storage-->>DB: throws FlushFailureException
+    DB-->>Test: throws FlushFailureException
     deactivate DB
 ```
 
@@ -367,8 +367,8 @@ sequenceDiagram
     Test->>DB: AddSchema(existingSchema)
     activate DB
     DB->>SchemaManager: Register(existingSchema)
-    SchemaManager-->>DB: throws Exception
-    DB-->>Test: throws Exception
+    SchemaManager-->>DB: throws SchemaAlreadyExistsException
+    DB-->>Test: throws SchemaAlreadyExistsException
     deactivate DB
 ```
 

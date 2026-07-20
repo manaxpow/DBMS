@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DBMS.Exceptions;
 
 public class StatisticsManager
 {
@@ -8,7 +9,7 @@ public class StatisticsManager
 
     public void UpdateStatistics(object obj)
     {
-        throw new NotImplementedException();
+        throw new ObjectNotFoundException();
     }
 
     public double EstimateSelectivity(object predicate)

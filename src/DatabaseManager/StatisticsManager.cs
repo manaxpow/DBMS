@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using DBMS.Exceptions;
 
 public class StatisticsManager
@@ -7,6 +5,11 @@ public class StatisticsManager
     private Dictionary<string, object> _stats;
     private object _store;
 
+    public StatisticsManager(object store)
+    {
+        _store = store;
+        _stats = new Dictionary<string, object>();
+    }
     public void UpdateStatistics(object obj)
     {
         throw new ObjectNotFoundException();

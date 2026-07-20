@@ -1,22 +1,20 @@
-using System;
-using System.Collections.Generic;
 using DBMS.Exceptions;
 
 public class CatalogManager
 {
-    private Dictionary<string, object> _store;
+    private Dictionary<string, ICatalogObject> _store;
 
-    public void Register(object obj)
+    public void Register(ICatalogObject obj)
     {
         throw new ObjectAlreadyExistsException();
     }
 
-    public object Find(string name)
+    public T Find<T>(string name) where T : class, ICatalogObject
     {
         throw new ObjectNotFoundException();
     }
 
-    public void Remove(object obj)
+    public void Remove(ICatalogObject obj)
     {
         throw new ObjectNotFoundException();
     }

@@ -501,10 +501,28 @@ classDiagram
         +string ChildColumnName
         +string ReferencedTableName
         +string ReferencedColumnName
-        +ReferentialAction OnDelete
-        +ReferentialAction OnUpdate
+        +IReferentialAction OnDelete
+        +IReferentialAction OnUpdate
         +bool IsNullable
+        +OnParentRowDeleted(Row parentRow, Table childTable) void
         #Check(ConstraintContext context) bool
+    }
+
+    class IReferentialAction {
+        <<interface>>
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class CascadeAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class RestrictAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class SetNullAction {
+        +Execute(Row parentRow, Table childTable) void
     }
 
     class Index {
@@ -605,15 +623,20 @@ classDiagram
     Table *-- Index
     Table *-- Partition
 
-    Constraint <|-- ForeignKey
+    Constraint <|-- ForeignKeyConstraint
     Row --> Table
     Row --> Column
-    ForeignKey --> Schema
-    ForeignKey --> Table
-    ForeignKey --> Index
+    ForeignKeyConstraint --> Schema
+    ForeignKeyConstraint --> Table
+    ForeignKeyConstraint --> Index
     Partition --> PartitionRange
     StoredProcedure --> TransactionManager
     StoredProcedure --> ProcedureBody
+
+    IReferentialAction <|.. CascadeAction
+    IReferentialAction <|.. RestrictAction
+    IReferentialAction <|.. SetNullAction
+    ForeignKeyConstraint *-- IReferentialAction
 ```
 
 ### 8. Replication and Cluster

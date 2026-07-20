@@ -91,14 +91,31 @@ classDiagram
         +string ChildColumnName
         +string ReferencedTableName
         +string ReferencedColumnName
-        +ReferentialAction OnDelete
-        +ReferentialAction OnUpdate
+        +IReferentialAction OnDelete
+        +IReferentialAction OnUpdate
         +bool IsNullable
         -Schema _schema
         +Validate(object? parentKey) bool
         +DeleteParent(object parentKey) void
         +UpdateParent(object oldKey, object newKey) void
         -GetReferencingRows(object parentKey) IReadOnlyList~Row~
+    }
+
+    class IReferentialAction {
+        <<interface>>
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class CascadeAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class RestrictAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class SetNullAction {
+        +Execute(Row parentRow, Table childTable) void
     }
 
     class Index {
@@ -201,6 +218,11 @@ classDiagram
     Partition --> PartitionRange
     StoredProcedure --> TransactionManager
     StoredProcedure --> ProcedureBody
+
+    IReferentialAction <|.. CascadeAction
+    IReferentialAction <|.. RestrictAction
+    IReferentialAction <|.. SetNullAction
+    ForeignKey *-- IReferentialAction
 ```
 
 ## 2. Schema Tests

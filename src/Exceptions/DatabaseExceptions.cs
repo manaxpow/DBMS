@@ -10,6 +10,7 @@ namespace DBMS.Exceptions
     public class ObjectNotFoundException : DatabaseException { }
     public class SchemaAlreadyExistsException : DatabaseException { }
     public class SchemaNotFoundException : DatabaseException { }
+    public class SchemaNotEmptyException : DatabaseException { }
     public class SchemaReferencedException : DatabaseException { }
     public class ReferentialIntegrityException : DatabaseException { }
     public class ServerAlreadyRunningException : DatabaseException { }

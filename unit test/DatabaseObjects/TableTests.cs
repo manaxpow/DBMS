@@ -225,7 +225,7 @@ public class TableTests
         var referencedTable = new Table("ReferencedTable");
         var column = new Column("Id", typeof(int));
         _table.AddColumn(column);
-        var constraint = new ForeignKeyConstraint("FK_TestTable_Id", "Id", referencedTableName: "ReferencedTable", referencedColumnName: "Id");
+        var constraint = new ForeignKeyConstraint("FK_TestTable_Id", "Id", referencedTableName: "ReferencedTable", referencedColumnName: "Id", new RestrictAction(), new RestrictAction());
         _table.AddConstraint(constraint);
 
         // Act

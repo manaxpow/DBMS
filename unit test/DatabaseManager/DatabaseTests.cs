@@ -121,7 +121,7 @@ public class DatabaseTests
         var childTable = new Table("ChildTable");
         childTable.AddColumn(new Column("ParentId", typeof(int)));
 
-        var foreignKey = new ForeignKeyConstraint("FK_Child_Parent", "ParentId", parentTable.Name, "Id");
+        var foreignKey = new ForeignKeyConstraint("FK_Child_Parent", "ParentId", parentTable.Name, "Id", new RestrictAction(), new RestrictAction());
         childTable.AddConstraint(foreignKey);
         childSchema.AddTable(childTable);
 

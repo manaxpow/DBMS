@@ -11,9 +11,12 @@ classDiagram
         +IReadOnlyCollection~Table~ Tables
         +IReadOnlyCollection~View~ Views
         +IReadOnlyCollection~StoredProcedure~ StoredProcedures
+        +IEnumerable~ISchemaObject~ Objects
         -Dictionary~string, Table~ _tables
         -Dictionary~string, View~ _views
         -Dictionary~string, StoredProcedure~ _storedProcedures
+        +RegisterObject(ISchemaObject obj) void
+        +UnregisterObject(string name) ISchemaObject
         +AddTable(Table table) void
         +DropTable(string tableName) void
         +AlterTable(string tableName, Table newTable) void
@@ -25,6 +28,7 @@ classDiagram
         ~UnregisterView(string viewName) void
         ~IsObjectReferenced(string objectName) bool
         -IsTableReferencedByForeignKey(string tableName) bool
+        +Drop() void
     }
 
     class Table {
@@ -44,6 +48,7 @@ classDiagram
         +AlterColumn(string columnName, Column newColumn) void
         +InsertRow(Row row) void
         +DeleteRow(Row row) bool
+        +Drop() void
         +ContainsColumn(string columnName) bool
         +ContainsRow(Row row) bool
         +GetColumn(string columnName) Column
@@ -169,7 +174,7 @@ classDiagram
         -Schema _schema
         +Create(string name, string query, Schema schema) View
         +AlterView(string newQuery) void
-        +DropView() void
+        +Drop() void
         +Resolve(Schema schema) object
         -ValidateQuery(string query) void
         -GetDependencies(string query) IReadOnlyList~string~
@@ -184,7 +189,7 @@ classDiagram
         -TransactionManager _transactionManager
         +Execute(object parameters) object
         +AlterProcedure(ProcedureBody newBody) void
-        +DropProcedure() void
+        +Drop() void
         -ValidateParameters(object parameters) bool
         -ValidateBody(ProcedureBody newBody) bool
     }
@@ -223,6 +228,19 @@ classDiagram
     IReferentialAction <|.. RestrictAction
     IReferentialAction <|.. SetNullAction
     ForeignKey *-- IReferentialAction
+    
+    class ISchemaObject {
+        <<interface>>
+        +int Id
+        +string Name
+        +Drop() void
+    }
+    
+    ISchemaObject <|.. Schema
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
+    Schema *-- ISchemaObject
 ```
 
 ## 2. Schema Tests

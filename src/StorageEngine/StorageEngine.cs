@@ -35,4 +35,9 @@ public class StorageEngine
     {
         throw new NotImplementedException();
     }
+
+    public void DropTableStorage(int tableId)
+    {
+        throw new NotImplementedException();
+    }
 }

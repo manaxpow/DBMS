@@ -3,6 +3,7 @@ using Xunit;
 
 public class UserTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void AssignRole_WhenRoleIsValid_ShouldAddRole()
     {
@@ -58,3 +59,4 @@ public class UserTests
         throw new NotImplementedException();
     }
 }
+

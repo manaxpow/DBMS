@@ -3,12 +3,14 @@ using Xunit;
 
 public class CatalogManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Register_WhenObjectIsValid_ShouldAddToCatalog()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Register_WhenObjectAlreadyExists_ShouldThrow()
     {
@@ -28,21 +30,25 @@ public class CatalogManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Find_WhenObjectExists_ShouldReturnObject()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Remove_WhenObjectExists_ShouldRemoveObject()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Remove_WhenObjectDoesNotExist_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 }
+

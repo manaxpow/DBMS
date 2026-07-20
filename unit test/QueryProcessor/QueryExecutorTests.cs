@@ -3,6 +3,7 @@ using Xunit;
 
 public class QueryExecutorTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Execute_WhenPlanIsValid_ShouldReturnRows()
     {
@@ -52,3 +53,4 @@ public class QueryExecutorTests
         throw new NotImplementedException();
     }
 }
+

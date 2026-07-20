@@ -34,6 +34,7 @@ public class DatabaseServerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Start_WhenComponentInitializationFails_ShouldRemainStopped()
     {
@@ -46,3 +47,4 @@ public class DatabaseServerTests
         throw new NotImplementedException();
     }
 }
+

@@ -8,6 +8,7 @@ public class SchemaTests
         _schema = new Schema("TestSchema");
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void AddTable_WhenTableIsValid_ShouldRegisterTable()
     {
@@ -33,6 +34,7 @@ public class SchemaTests
         action.Should().Throw<ArgumentNullException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void AddTable_WhenNameAlreadyExists_ShouldThrow()
     {
@@ -96,6 +98,7 @@ public class SchemaTests
         containsTable.Should().Be(false);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropTable_WhenTableIsNotReferenced_ShouldRemoveTable()
     {
@@ -112,6 +115,7 @@ public class SchemaTests
         _schema.ContainsTable("TestTable").Should().Be(false);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropTable_WhenTableIsReferencedByForeignKey_ShouldThrow()
     {
@@ -125,13 +129,14 @@ public class SchemaTests
         _schema.AddTable(referencedTable);
         _schema.AddTable(childTable);
 
-        childTable.AddConstraint(new ForeignKey("FK_TestTable_TableReferenced", "ForeignKeyId", "TableReferenced", "Id"));
+        childTable.AddConstraint(new ForeignKeyConstraint("FK_TestTable_TableReferenced", "ForeignKeyId", "TableReferenced", "Id"));
 
         // Act & Assert
         Action action = () => _schema.DropTable("TableReferenced");
         action.Should().Throw<TableReferencedException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropTable_WhenTableDoesNotExist_ShouldThrow()
     {
@@ -174,3 +179,6 @@ public class SchemaTests
         action.Should().Throw<TableNotFoundException>();
     }
 }
+
+
+

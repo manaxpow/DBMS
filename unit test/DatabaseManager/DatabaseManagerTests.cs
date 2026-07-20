@@ -9,12 +9,14 @@ public class DatabaseManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void CreateDatabase_WhenNameAlreadyExists_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase()
     {
@@ -28,12 +30,14 @@ public class DatabaseManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void CreateDatabase_WhenCreationFails_ShouldNotRegisterDatabase()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void GetDatabase_WhenDatabaseExists_ShouldReturnDatabase()
     {
@@ -46,9 +50,11 @@ public class DatabaseManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropDatabase_WhenDatabaseDoesNotExist_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 }
+

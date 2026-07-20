@@ -3,18 +3,21 @@ using Xunit;
 
 public class FileManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void CreateFile_WhenPathIsValid_ShouldCreateFile()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void OpenFile_WhenFileExists_ShouldReturnHandle()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DeleteFile_WhenFileIsInUse_ShouldThrow()
     {
@@ -22,6 +25,7 @@ public class FileManagerTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void CreateFile_WhenFileAlreadyExists_ShouldThrow()
     {
@@ -34,6 +38,7 @@ public class FileManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void CreateFile_WhenPhysicalCreationFails_ShouldNotRegisterFile()
     {
@@ -46,6 +51,7 @@ public class FileManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void OpenFile_WhenAccessModeConflicts_ShouldThrow()
     {
@@ -58,6 +64,7 @@ public class FileManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ReadPage_WhenFileIsClosed_ShouldThrow()
     {
@@ -70,12 +77,14 @@ public class FileManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void WritePage_WhenFileIsReadOnly_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void CloseFile_WhenFileIsOpen_ShouldCloseHandle()
     {
@@ -94,3 +103,4 @@ public class FileManagerTests
         throw new NotImplementedException();
     }
 }
+

@@ -1,8 +1,6 @@
-using System;
-using System.Collections.Generic;
-
 public class Schema
 {
+    public int Id { get; set; }
     public string Name { get; set; }
     public IReadOnlyCollection<Table> Tables { get; }
     public IReadOnlyCollection<View> Views { get; }
@@ -30,9 +28,10 @@ public class Schema
     public bool ContainsTable(string tableName) => throw new NotImplementedException();
     public bool ContainsObject(string objectName) => throw new NotImplementedException();
     public object ResolveObject(string objectName) => throw new NotImplementedException();
-    
+
     internal void RegisterView(View view) => throw new NotImplementedException();
     internal void UnregisterView(string viewName) => throw new NotImplementedException();
     internal bool IsObjectReferenced(string objectName) => throw new NotImplementedException();
     private bool IsTableReferencedByForeignKey(string tableName) => throw new NotImplementedException();
 }
+

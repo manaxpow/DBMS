@@ -3,18 +3,21 @@ using Xunit;
 
 public class StatisticsManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void UpdateStatistics_WhenDataChanges_ShouldRefreshStatistics()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void EstimateSelectivity_WhenStatisticsExist_ShouldReturnEstimate()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void EstimateSelectivity_WhenStatisticsAreMissing_ShouldUseFallback()
     {
@@ -22,6 +25,7 @@ public class StatisticsManagerTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void UpdateStatistics_WhenObjectDoesNotExist_ShouldThrow()
     {
@@ -34,3 +38,4 @@ public class StatisticsManagerTests
         throw new NotImplementedException();
     }
 }
+

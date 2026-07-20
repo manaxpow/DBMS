@@ -3,12 +3,14 @@ using Xunit;
 
 public class TransactionManagerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void BeginTransaction_ShouldReturnActiveTransaction()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Commit_WhenTransactionExists_ShouldCommitTransaction()
     {
@@ -22,6 +24,7 @@ public class TransactionManagerTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void BeginTransaction_ShouldAssignUniqueTransactionId()
     {
@@ -40,6 +43,7 @@ public class TransactionManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Rollback_WhenTransactionExists_ShouldAbortTransaction()
     {
@@ -52,9 +56,11 @@ public class TransactionManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Complete_WhenTransactionFinishes_ShouldRemoveFromActiveTransactions()
     {
         throw new NotImplementedException();
     }
 }
+

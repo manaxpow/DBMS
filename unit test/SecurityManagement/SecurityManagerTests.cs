@@ -28,6 +28,7 @@ public class SecurityManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Authenticate_WhenUserDoesNotExist_ShouldFail()
     {
@@ -58,3 +59,4 @@ public class SecurityManagerTests
         throw new NotImplementedException();
     }
 }
+

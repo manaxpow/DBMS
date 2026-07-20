@@ -483,30 +483,6 @@ sequenceDiagram
     deactivate BP
 ```
 
-## 6.2 Evict_WhenFrameIsUnpinned_ShouldFreeSpace
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as BufferPoolTests
-    participant BP as BufferPool
-
-    Test->>BP: Evict(frame)
-    activate BP
-
-    BP->>BP: CheckIfPinned(frame)
-    BP-->>BP: false
-
-    BP->>BP: FlushIfDirty(frame)
-    BP->>BP: RemoveFromPageTable(frame.PageId)
-    BP->>BP: MarkFrameAsAvailable(frame)
-
-    BP-->>Test: success
-
-    deactivate BP
-```
-
 ## 6.3 UpdateRecord_WhenSpaceIsSufficient_ShouldModifyRecord
 
 ```mermaid
@@ -556,25 +532,3 @@ sequenceDiagram
     deactivate SE
 ```
 
-## 6.5 CloseFile_WhenFileIsOpen_ShouldReleaseHandle
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as FileManagerTests
-    participant FM as FileManager
-
-    Test->>FM: CloseFile(path)
-    activate FM
-
-    FM->>FM: IsFileOpen(path)
-    FM-->>FM: true
-
-    FM->>FM: ReleaseFileHandle(path)
-    FM->>FM: RemoveFromOpenFiles(path)
-
-    FM-->>Test: success
-
-    deactivate FM
-```

@@ -12,6 +12,7 @@ public class BufferPoolTests
         _bufferPool = new BufferPool(10, _fileManager);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void FetchPage_WhenPageIsBuffered_ShouldReturnExistingFrame()
     {
@@ -34,12 +35,14 @@ public class BufferPoolTests
         _fileManager.DidNotReceive().ReadPage(Arg.Any<PageId>());
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void FetchPage_WhenSpaceIsAvailable_ShouldLoadPage()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void FetchPage_WhenAllFramesArePinned_ShouldThrow()
     {
@@ -47,6 +50,7 @@ public class BufferPoolTests
     }
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void FetchPage_WhenPageIsBuffered_ShouldIncrementPinCount()
     {
@@ -71,12 +75,14 @@ public class BufferPoolTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void FetchPage_WhenFileReadFails_ShouldNotRegisterPage()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Flush_WhenPageIsDirty_ShouldWriteToDisk()
     {
@@ -95,6 +101,7 @@ public class BufferPoolTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Unpin_WhenPageIsPinned_ShouldDecreasePinCount()
     {
@@ -119,9 +126,11 @@ public class BufferPoolTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Evict_WhenFrameIsPinned_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 }
+

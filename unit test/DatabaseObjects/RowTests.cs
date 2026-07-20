@@ -15,6 +15,7 @@ public class RowTests
         var values = new List<object> { 1, "Test" };
         _row = new Row(table, values);
     }
+    [Trait("Category", "Important")]
     [Fact]
     public void GetValue_WhenColumnExists_ShouldReturnValue()
     {
@@ -28,6 +29,7 @@ public class RowTests
         value.Should().Be("Test");
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void GetValue_WhenColumnDoesNotExist_ShouldThrow()
     {
@@ -41,6 +43,7 @@ public class RowTests
         act.Should().Throw<ColumnNotFoundException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void SetValue_WhenValueIsValid_ShouldUpdateValue()
     {
@@ -55,6 +58,7 @@ public class RowTests
         _row.GetValue(columnName).Should().Be(newValue);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void SetValue_WhenTypeDoesNotMatch_ShouldThrow()
     {
@@ -71,6 +75,7 @@ public class RowTests
 
 
 
+    [Trait("Category", "Important")]
     [Fact]
     public void SetValue_WhenColumnDoesNotExist_ShouldThrow()
     {
@@ -113,6 +118,7 @@ public class RowTests
         act.Should().Throw<InvalidColumnValueException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void SetValue_WhenValidationFails_ShouldPreserveExistingValue()
     {
@@ -130,3 +136,5 @@ public class RowTests
         _row.GetValue(columnName).Should().Be(originalValue);
     }
 }
+
+

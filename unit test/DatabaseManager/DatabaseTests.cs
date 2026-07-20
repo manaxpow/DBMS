@@ -3,18 +3,21 @@ using Xunit;
 
 public class DatabaseTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Open_WhenDatabaseIsClosed_ShouldOpenDatabase()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Close_WhenDatabaseIsOpen_ShouldCloseDatabase()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void AddSchema_WhenNameAlreadyExists_ShouldThrow()
     {
@@ -28,6 +31,7 @@ public class DatabaseTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Open_WhenStorageInitializationFails_ShouldRemainClosed()
     {
@@ -40,12 +44,14 @@ public class DatabaseTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void AddSchema_WhenSchemaIsValid_ShouldRegisterSchema()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DropSchema_WhenSchemaExists_ShouldRemoveSchema()
     {
@@ -70,3 +76,4 @@ public class DatabaseTests
         throw new NotImplementedException();
     }
 }
+

@@ -3,18 +3,21 @@ using Xunit;
 
 public class PageTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRecord_WhenSpaceIsAvailable_ShouldInsertRecord()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRecord_WhenSpaceIsInsufficient_ShouldFail()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void DeleteRecord_WhenRecordExists_ShouldUpdateSlotDirectory()
     {
@@ -28,6 +31,7 @@ public class PageTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void GetRecord_WhenSlotExists_ShouldReturnRecord()
     {
@@ -40,12 +44,14 @@ public class PageTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void UpdateRecord_WhenSpaceIsSufficient_ShouldModifyRecord()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void UpdateRecord_WhenSpaceIsInsufficient_ShouldPreserveOriginalRecord()
     {
@@ -64,15 +70,18 @@ public class PageTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Compact_WhenDeletedRecordsExist_ShouldReclaimSpace()
     {
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void InsertRecord_WhenDeletedSlotExists_ShouldReuseSlot()
     {
         throw new NotImplementedException();
     }
 }
+

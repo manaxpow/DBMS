@@ -3,6 +3,7 @@ using Xunit;
 
 public class LexerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Tokenize_WhenSQLIsValid_ShouldReturnTokens()
     {
@@ -15,6 +16,7 @@ public class LexerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Tokenize_WhenTokenIsInvalid_ShouldThrow()
     {
@@ -64,3 +66,4 @@ public class LexerTests
         throw new NotImplementedException();
     }
 }
+

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class Row
 {
+    public int Id { get; set; }
+
     public Table Table { get; set; }
     public IReadOnlyList<object> Values { get; }
 
@@ -19,3 +21,4 @@ public class Row
     public void SetValue(string columnName, object value) => throw new NotImplementedException();
     internal void RemoveValueAt(int columnIndex) => throw new NotImplementedException();
 }
+

@@ -9,6 +9,7 @@ public class ColumnTests
         _column = new Column("Id", typeof(int));
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Create_WhenDefinitionIsValid_ShouldCreateColumn()
     {
@@ -25,6 +26,7 @@ public class ColumnTests
         column.IsNullable.Should().BeFalse();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Create_WhenNameIsInvalid_ShouldThrow()
     {
@@ -53,6 +55,7 @@ public class ColumnTests
         act.Should().Throw<ArgumentNullException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ValidateValue_WhenTypeMatches_ShouldReturnTrue()
     {
@@ -66,6 +69,7 @@ public class ColumnTests
         isValid.Should().BeTrue();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ValidateValue_WhenTypeDoesNotMatch_ShouldReturnFalse()
     {
@@ -79,6 +83,7 @@ public class ColumnTests
         isValid.Should().BeFalse();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ValidateValue_WhenValueIsNullAndNullable_ShouldReturnTrue()
     {
@@ -93,6 +98,7 @@ public class ColumnTests
         isValid.Should().BeTrue();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void ValidateValue_WhenValueIsNullAndNotNullable_ShouldReturnFalse()
     {
@@ -107,3 +113,5 @@ public class ColumnTests
         isValid.Should().BeFalse();
     }
 }
+
+

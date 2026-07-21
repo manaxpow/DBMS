@@ -4,26 +4,26 @@ This document tracks the design patterns used across different modules in the DB
 
 ## 1. Database Objects
 
-| Status | Design Pattern | Feature | Reason / Context |
-| :---: | :--- | :--- | :--- |
-| `[ ]` | **Template Method** | Constraint | `Validate()` defines the workflow, each constraint only implements `Check()`. |
-| `[ ]` | **Strategy** | Referential Action | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting/updating. |
-| `[x]` | **Composite** | Schema Objects | Schema contains Tables, Views, Procedures and manages them uniformly. |
-| `[ ]` | **Command** | DDL Command | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into commands. |
-| `[ ]` | **State** | Object Status | Table transitions between states like Creating, Available, Dropping, Dropped. |
+| Status | Design Pattern      | Feature            | Reason / Context                                                                        |
+| :----: | :------------------ | :----------------- | :-------------------------------------------------------------------------------------- |
+| `[x]`  | **Template Method** | Constraint         | `Validate()` defines the workflow, each constraint only implements `Check()`.           |
+| `[x]`  | **Strategy**        | Referential Action | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting/updating.      |
+| `[x]`  | **Composite**       | Schema Objects     | Schema contains Tables, Views, Procedures and manages them uniformly.                   |
+| `[x]`  | **Command**         | DDL Command        | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into commands. |
+| `[ ]`  | **State**           | Object Status      | Table transitions between states like Creating, Available, Dropping, Dropped.           |
 
 ## 2. Database Management
 
-| Status | Design Pattern | Feature | Reason / Context |
-| :---: | :--- | :--- | :--- |
-| `[ ]` | **Facade** | DatabaseManager | Provides a single unified API to create, open, close, and drop databases. |
-| `[ ]` | **Factory Method** | Database Creation | Creates a Database along with its dependencies like SystemCatalog, Schema, and Storage. |
-| `[ ]` | **Command** | Database Operations | `CreateDatabase`, `DropDatabase`, and `RenameDatabase` are encapsulated as commands. |
-| `[ ]` | **State** | Database Lifecycle | Database transitions between states such as Offline, Online, ReadOnly, and Recovering. |
-| `[ ]` | **Observer** | Database Events | Monitoring systems receive events for Create, Drop, Backup, and Restore. |
-| `[ ]` | **Template Method** | Backup/Restore | Provides a fixed backup workflow, while differentiating between Full and Incremental backup implementations. |
+| Status | Design Pattern      | Feature             | Reason / Context                                                                                             |
+| :----: | :------------------ | :------------------ | :----------------------------------------------------------------------------------------------------------- |
+| `[ ]`  | **Facade**          | DatabaseManager     | Provides a single unified API to create, open, close, and drop databases.                                    |
+| `[ ]`  | **Factory Method**  | Database Creation   | Creates a Database along with its dependencies like SystemCatalog, Schema, and Storage.                      |
+| `[ ]`  | **Command**         | Database Operations | `CreateDatabase`, `DropDatabase`, and `RenameDatabase` are encapsulated as commands.                         |
+| `[ ]`  | **State**           | Database Lifecycle  | Database transitions between states such as Offline, Online, ReadOnly, and Recovering.                       |
+| `[ ]`  | **Observer**        | Database Events     | Monitoring systems receive events for Create, Drop, Backup, and Restore.                                     |
+| `[ ]`  | **Template Method** | Backup/Restore      | Provides a fixed backup workflow, while differentiating between Full and Incremental backup implementations. |
 
-*Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress.*
+_Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress._
 
 ## 3. Pattern Implementation Details
 
@@ -34,28 +34,28 @@ The **Template Method** pattern is used in the `Constraint` class. The base clas
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     participant Client
     participant BaseConstraint as Constraint (Base)
     participant ConcreteConstraint as UniqueConstraint (Subclass)
 
     Client->>BaseConstraint: Validate(row)
     activate BaseConstraint
-    
+
     Note over BaseConstraint: Common workflow step
     BaseConstraint->>BaseConstraint: Check if IsEnabled
-    
+
     alt IsEnabled == false
         BaseConstraint-->>Client: true (Skip validation)
     else IsEnabled == true
         Note over BaseConstraint: Defers to subclass
         BaseConstraint->>ConcreteConstraint: Check(row)
         activate ConcreteConstraint
-        
+
         Note over ConcreteConstraint: Subclass specific logic<br/>(e.g., duplicate check)
         ConcreteConstraint-->>BaseConstraint: validationResult
         deactivate ConcreteConstraint
-        
+
         BaseConstraint-->>Client: validationResult
     end
     deactivate BaseConstraint
@@ -68,7 +68,7 @@ The **Strategy** pattern is used to handle foreign key referential actions (`ON 
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     participant Client
     participant FK as ForeignKeyConstraint (Context)
     participant Strategy as IReferentialAction (Strategy)
@@ -76,11 +76,11 @@ sequenceDiagram
 
     Client->>FK: OnParentRowDeleted(parentRow)
     activate FK
-    
+
     Note over FK: Context delegates the behavior<br/>to the configured strategy
     FK->>Strategy: Execute(parentRow, childTable)
     activate Strategy
-    
+
     alt is CascadeAction
         Strategy->>ChildTable: DeleteRow(childRow)
     else is SetNullAction
@@ -88,10 +88,10 @@ sequenceDiagram
     else is RestrictAction
         Strategy-->>FK: throws ReferentialIntegrityException
     end
-    
+
     Strategy-->>FK: result
     deactivate Strategy
-    
+
     FK-->>Client: result
     deactivate FK
 ```
@@ -155,4 +155,44 @@ sequenceDiagram
     end
 
     deactivate Manager
+```
+
+### 3.4. Command (DDL Command)
+
+The **Command** pattern is used to encapsulate DDL operations (like `CreateTable`, `DropTable`, and `AlterTable`) into standalone command objects. This allows the system to parameterize clients with different requests, queue or log requests, and support undoable operations. The `DDLCommandExecutor` acts as the invoker that executes the concrete `IDDLCommand`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Client
+    participant Executor as DDLCommandExecutor
+    participant Command as IDDLCommand
+    participant Concrete as CreateTableCommand
+    participant Schema
+    participant Table
+
+    Client->>Executor: Execute(createTableCommand)
+    activate Executor
+
+    Executor->>Command: Execute()
+    Command->>Concrete: Execute()
+    activate Concrete
+
+    Concrete->>Schema: ContainsTable(tableName)
+    Schema-->>Concrete: false
+
+    Concrete->>Table: new Table(tableName)
+    Table-->>Concrete: table
+
+    Concrete->>Schema: AddTable(table)
+    Schema-->>Concrete: success
+
+    Concrete-->>Command: DDLResult.Success
+    deactivate Concrete
+
+    Command-->>Executor: DDLResult.Success
+    Executor-->>Client: DDLResult.Success
+
+    deactivate Executor
 ```

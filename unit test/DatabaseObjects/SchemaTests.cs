@@ -208,4 +208,21 @@ public class SchemaTests
         action.Should()
             .Throw<SchemaNotEmptyException>();
     }
+    
+    [Trait("Category", "Important")]
+    [Fact]
+    public void DropSchema_WhenCascadeIsTrue_ShouldDropAllSchemaObjectsAndNotThrow()
+    {
+        // Arrange
+        var schema = new Schema("TestSchema");
+        schema.RegisterObject(new Table("TestTable"));
+
+        var schemaManager = new SchemaManager();
+
+        // Act
+        schemaManager.DropSchema(schema, cascade: true);
+
+        // Assert
+        schema.Objects.Should().BeEmpty();
+    }
 }

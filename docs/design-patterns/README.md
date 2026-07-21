@@ -194,6 +194,40 @@ sequenceDiagram
     deactivate Executor
 ```
 
+For updating an existing table, the flow for `AlterTableCommand` works similarly:
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Client
+    participant Executor as DDLCommandExecutor
+    participant Command as IDDLCommand
+    participant Concrete as AlterTableCommand
+    participant Schema
+
+    Client->>Executor: Execute(alterTableCommand)
+    activate Executor
+
+    Executor->>Command: Execute()
+    Command->>Concrete: Execute()
+    activate Concrete
+
+    Concrete->>Schema: ContainsTable(tableName)
+    Schema-->>Concrete: true
+
+    Concrete->>Schema: AlterTable(tableName, newTable)
+    Schema-->>Concrete: success
+
+    Concrete-->>Command: DDLResult.Success
+    deactivate Concrete
+
+    Command-->>Executor: DDLResult.Success
+    Executor-->>Client: DDLResult.Success
+
+    deactivate Executor
+```
+
 ### 3.5. Facade (DatabaseServer)
 
 The **Facade** pattern is used in `DatabaseServer` to provide a single, unified interface for starting and stopping the database system. Instead of the client interacting with multiple complex subsystems (such as `StorageEngine`, `TransactionManager`, `QueryProcessor`, and `NetworkServer`), the `DatabaseServer` coordinates their initialization and startup sequences in the correct order.

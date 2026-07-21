@@ -1,7 +1,16 @@
 using System;
 
-public class TransactionManager
+public class TransactionManager : IServerComponent
 {
+    public void Start(object config)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Stop()
+    {
+        throw new NotImplementedException();
+    }
     public Transaction BeginTransaction()
     {
         throw new NotImplementedException();

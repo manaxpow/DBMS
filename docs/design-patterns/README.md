@@ -10,18 +10,15 @@ This document tracks the design patterns used across different modules in the DB
 | `[x]`  | **Strategy**        | Referential Action | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting/updating.      |
 | `[x]`  | **Composite**       | Schema Objects     | Schema contains Tables, Views, Procedures and manages them uniformly.                   |
 | `[x]`  | **Command**         | DDL Command        | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into commands. |
-| `[ ]`  | **State**           | Object Status      | Table transitions between states like Creating, Available, Dropping, Dropped.           |
 
 ## 2. Database Management
 
-| Status | Design Pattern      | Feature             | Reason / Context                                                                                             |
-| :----: | :------------------ | :------------------ | :----------------------------------------------------------------------------------------------------------- |
-| `[ ]`  | **Facade**          | DatabaseManager     | Provides a single unified API to create, open, close, and drop databases.                                    |
-| `[ ]`  | **Factory Method**  | Database Creation   | Creates a Database along with its dependencies like SystemCatalog, Schema, and Storage.                      |
-| `[ ]`  | **Command**         | Database Operations | `CreateDatabase`, `DropDatabase`, and `RenameDatabase` are encapsulated as commands.                         |
-| `[ ]`  | **State**           | Database Lifecycle  | Database transitions between states such as Offline, Online, ReadOnly, and Recovering.                       |
-| `[ ]`  | **Observer**        | Database Events     | Monitoring systems receive events for Create, Drop, Backup, and Restore.                                     |
-| `[ ]`  | **Template Method** | Backup/Restore      | Provides a fixed backup workflow, while differentiating between Full and Incremental backup implementations. |
+| Status | Design Pattern      | Feature            | Reason / Context                                                                                             |
+| :----: | :------------------ | :----------------- | :----------------------------------------------------------------------------------------------------------- |
+| `[x]`  | **Facade**          | DatabaseServer     | Provides a single unified API to start, stop and configure database server.                                  |
+| `[ ]`  | **State**           | Database Lifecycle | Database transitions between states such as Offline, Online, ReadOnly, and Recovering.                       |
+| `[ ]`  | **Observer**        | Database Events    | Monitoring systems receive events for Create, Drop, Backup, and Restore.                                     |
+| `[ ]`  | **Template Method** | Backup/Restore     | Provides a fixed backup workflow, while differentiating between Full and Incremental backup implementations. |
 
 _Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress._
 
@@ -195,4 +192,42 @@ sequenceDiagram
     Executor-->>Client: DDLResult.Success
 
     deactivate Executor
+```
+
+### 3.5. Facade (DatabaseServer)
+
+The **Facade** pattern is used in `DatabaseServer` to provide a single, unified interface for starting and stopping the database system. Instead of the client interacting with multiple complex subsystems (such as `StorageEngine`, `TransactionManager`, `QueryProcessor`, and `NetworkServer`), the `DatabaseServer` coordinates their initialization and startup sequences in the correct order.
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Client
+    participant Server as DatabaseServer
+    participant Storage as StorageEngine
+    participant Transaction as TransactionManager
+    participant Query as QueryProcessor
+    participant Network as NetworkServer
+
+    Client->>Server: Start(config)
+    activate Server
+
+    Server->>Server: Check IsRunning
+
+    Server->>Storage: Start(config)
+    Storage-->>Server: success
+
+    Server->>Transaction: Start(config)
+    Transaction-->>Server: success
+
+    Server->>Query: Start(config)
+    Query-->>Server: success
+
+    Server->>Network: Start(config)
+    Network-->>Server: success
+
+    Server->>Server: _isRunning = true
+    Server-->>Client: success
+
+    deactivate Server 
 ```

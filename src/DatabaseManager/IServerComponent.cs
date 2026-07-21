@@ -2,6 +2,6 @@ using System;
 
 public interface IServerComponent
 {
-    void Initialize(object config);
-    void Shutdown();
+    void Start(object config);
+    void Stop();
 }

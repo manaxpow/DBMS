@@ -7,13 +7,12 @@ This document tracks the design patterns used across different modules in the DB
 |  Priority | Status | Design Pattern      | Feature                 | Reason / Context                                                                                      |
 | :-------: | :----: | :------------------ | :---------------------- | :---------------------------------------------------------------------------------------------------- |
 |  🔴 High  |  `[x]` | **Template Method** | Constraint              | `Validate()` defines the workflow, while each concrete constraint only implements `Check()`.          |
-|  🔴 High  |  `[ ]` | **Factory Method**  | Constraint Creation     | Creates `PrimaryKey`, `ForeignKey`, `Unique`, and `CheckConstraint` objects from metadata.            |
+|  🔴 High  |  `[x]` | **Factory Method**  | Constraint Creation     | Creates `PrimaryKey`, `ForeignKey`, `Unique`, and `CheckConstraint` objects from metadata.            |
 |  🔴 High  |  `[x]` | **Strategy**        | Referential Action      | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting or updating referenced rows. |
 |  🔴 High  |  `[x]` | **Composite**       | Schema Objects          | Schema contains Tables, Views, and Stored Procedures and manages them uniformly as `ISchemaObject`.   |
 |  🔴 High  |  `[x]` | **Command**         | DDL Command             | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into command objects.        |
 | 🟡 Medium |  `[ ]` | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
 | 🟡 Medium |  `[ ]` | **Visitor**         | Schema Operations       | Backup, Export, Validation, and Dependency Analysis can operate on all schema object types.           |
-| 🟡 Medium |  `[ ]` | **State**           | Object Status           | Table transitions between `Creating`, `Available`, `Dropping`, and `Dropped`.                         |
 | 🟡 Medium |  `[ ]` | **Builder**         | Table Definition        | Builds a Table step by step from columns, constraints, indexes, and partitions.                       |
 |   🟢 Low  |  `[ ]` | **Prototype**       | Schema Object Cloning   | Clones schema objects for migration, temporary objects, or schema duplication.                        |
 |   🟢 Low  |  `[ ]` | **Decorator**       | Constraint Extension    | Adds logging, metrics, or auditing without modifying existing constraints.                            |
@@ -23,21 +22,7 @@ This document tracks the design patterns used across different modules in the DB
 
 ## 2. Database Management
 
-|  Priority | Status | Design Pattern       | Feature                    | Reason / Context                                                                                         |
-| :-------: | :----: | :------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
-|  🔴 High  |  `[x]` | **Facade**           | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.                 |
-|  🔴 High  |  `[ ]` | **Abstract Factory** | Database Components        | Creates compatible families of Database, Catalog, Schema, Storage, Transaction, and Recovery components. |
-|  🔴 High  |  `[ ]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
-|  🔴 High  |  `[ ]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
-| 🟡 Medium |  `[ ]` | **Factory Method**   | Database Creation          | Allows different Database implementations to be instantiated by subclasses or providers.                 |
-| 🟡 Medium |  `[ ]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
-| 🟡 Medium |  `[ ]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
-| 🟡 Medium |  `[ ]` | **Adapter**          | External Storage           | Adapts operating-system or cloud-storage APIs to DBMS storage interfaces.                                |
-|   🟢 Low  |  `[ ]` | **Builder**          | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.                      |
-|   🟢 Low  |  `[ ]` | **Proxy**            | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.                      |
-|   🟢 Low  |  `[ ]` | **Bridge**           | Database Storage           | Separates Database abstraction from different storage implementations.                                   |
-|   🟢 Low  |  `[ ]` | **Mediator**         | Subsystem Coordination     | Coordinates Storage, Catalog, Transaction, Recovery, Security, and Monitoring modules.                   |
-|   🟢 Low  |  `[ ]` | **Decorator**        | Database Service Extension | Adds metrics, tracing, caching, or auditing without changing the core service.                           |
+For Database Management patterns, please see [Database Management Patterns](./database-managment/README.md).
 
 _Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress._
 
@@ -285,57 +270,23 @@ classDiagram
 sequenceDiagram
     autonumber
 
-    participant Client
-    participant Manager as SchemaManager
+    actor Client
     participant Schema
-    participant Catalog as SystemCatalog
-    participant Storage as StorageEngine
+    participant Child as ISchemaObject
 
-    Client->>Manager: DropSchema(schema, cascade)
-    activate Manager
-
-    Manager->>Schema: Objects
+    Client->>Schema: Drop()
     activate Schema
-    Schema-->>Manager: schemaObjects
-    deactivate Schema
 
-    alt Schema contains objects and cascade = false
-        Manager-->>Client: throw SchemaNotEmptyException
-    else Schema is empty or cascade = true
-
-        opt cascade = true
-            loop for each schemaObject
-                Manager->>Manager: DropObject(schema, schemaObject)
-
-                alt schemaObject is Table
-                    Manager->>Manager: Check table dependencies
-                    Manager->>Catalog: UnregisterTable(schemaObject.Name)
-                    Catalog-->>Manager: success
-                    Manager->>Storage: DropTableStorage(schemaObject.Id)
-                    Storage-->>Manager: success
-
-                else schemaObject is View
-                    Manager->>Manager: Check view dependencies
-                    Manager->>Catalog: UnregisterView(schemaObject.Name)
-                    Catalog-->>Manager: success
-
-                else schemaObject is StoredProcedure
-                    Manager->>Catalog: UnregisterProcedure(schemaObject.Name)
-                    Catalog-->>Manager: success
-                end
-
-                Manager->>Schema: UnregisterObject(schemaObject.Name)
-                Schema-->>Manager: removedObject
-            end
-        end
-
-        Manager->>Catalog: UnregisterSchema(schema.Name)
-        Catalog-->>Manager: success
-
-        Manager-->>Client: success
+    loop for each child in _objects
+        Schema->>Child: Drop()
+        activate Child
+        Note over Child: Concrete objects (Table, View) <br/> handle their own drop logic.
+        Child-->>Schema: success
+        deactivate Child
     end
 
-    deactivate Manager
+    Schema-->>Client: success
+    deactivate Schema
 ```
 
 ### 3.5. Command (DDL Command)
@@ -415,69 +366,57 @@ sequenceDiagram
     deactivate Executor
 ```
 
-For updating an existing table, the flow for `AlterTableCommand` works similarly:
+### 3.6. Iterator (Schema Object Traversal)
 
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Client
-    participant Executor as DDLCommandExecutor
-    participant Command as IDDLCommand
-    participant Concrete as AlterTableCommand
-    participant Schema
-
-    Client->>Executor: Execute(alterTableCommand)
-    activate Executor
-
-    Executor->>Command: Execute()
-    Command->>Concrete: Execute()
-    activate Concrete
-
-    Concrete->>Schema: ContainsTable(tableName)
-    Schema-->>Concrete: true
-
-    Concrete->>Schema: AlterTable(tableName, newTable)
-    Schema-->>Concrete: success
-
-    Concrete-->>Command: DDLResult.Success
-    deactivate Concrete
-
-    Command-->>Executor: DDLResult.Success
-    Executor-->>Client: DDLResult.Success
-
-    deactivate Executor
-```
-
-### 3.6. Facade (DatabaseServer)
-
-The **Facade** pattern is used in `DatabaseServer` to provide a single, unified interface for starting and stopping the database system. Instead of the client interacting with multiple complex subsystems (such as `StorageEngine`, `TransactionManager`, `QueryProcessor`, and `NetworkServer`), the `DatabaseServer` coordinates their initialization and startup sequences in the correct order.
+The **Iterator** pattern provides sequential access to schema objects without exposing the internal collection structures. The `Schema` class acts as the aggregate, providing a `CreateIterator()` method that returns an `ISchemaObjectIterator`. The client uses `HasNext()` and `Next()` to traverse through all `ISchemaObject` elements (like `Table`, `View`, and `StoredProcedure`).
 
 ```mermaid
 classDiagram
+    direction LR
+
     class Client
-    class DatabaseServer {
-        -bool _isRunning
-        +Start(config) success
-    }
-    class StorageEngine {
-        +Start(config) success
-    }
-    class TransactionManager {
-        +Start(config) success
-    }
-    class QueryProcessor {
-        +Start(config) success
-    }
-    class NetworkServer {
-        +Start(config) success
+
+    class Schema {
+        +CreateIterator() ISchemaObjectIterator
     }
 
-    Client --> DatabaseServer
-    DatabaseServer --> StorageEngine
-    DatabaseServer --> TransactionManager
-    DatabaseServer --> QueryProcessor
-    DatabaseServer --> NetworkServer
+    class ISchemaObjectIterator {
+        <<interface>>
+        +HasNext() bool
+        +Next() ISchemaObject
+    }
+
+    class SchemaObjectIterator {
+        -IReadOnlyList~ISchemaObject~ _objects
+        -int _position
+        +HasNext() bool
+        +Next() ISchemaObject
+    }
+
+    class ISchemaObject {
+        <<interface>>
+        +Name
+    }
+
+    class Table
+    class View
+    class StoredProcedure
+
+    Client --> Schema
+    Client --> ISchemaObjectIterator
+
+    Schema --> SchemaObjectIterator : creates
+    ISchemaObjectIterator <|.. SchemaObjectIterator
+
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
+
+    Schema o-- Table
+    Schema o-- View
+    Schema o-- StoredProcedure
+
+    SchemaObjectIterator --> ISchemaObject
 ```
 
 ```mermaid
@@ -485,31 +424,23 @@ sequenceDiagram
     autonumber
 
     actor Client
-    participant Server as DatabaseServer
-    participant Storage as StorageEngine
-    participant Transaction as TransactionManager
-    participant Query as QueryProcessor
-    participant Network as NetworkServer
+    participant Schema
+    participant Iterator as SchemaObjectIterator
+    participant Object as ISchemaObject
 
-    Client->>Server: Start(config)
-    activate Server
+    Client->>Schema: CreateIterator()
+    Schema-->>Client: iterator
 
-    Server->>Server: Check IsRunning
+    loop For each object
+        Client->>Iterator: HasNext()
+        Iterator-->>Client: true
 
-    Server->>Storage: Start(config)
-    Storage-->>Server: success
+        Client->>Iterator: Next()
+        Iterator-->>Client: schemaObject
 
-    Server->>Transaction: Start(config)
-    Transaction-->>Server: success
+        Client->>Object: Process object
+    end
 
-    Server->>Query: Start(config)
-    Query-->>Server: success
-
-    Server->>Network: Start(config)
-    Network-->>Server: success
-
-    Server->>Server: _isRunning = true
-    Server-->>Client: success
-
-    deactivate Server 
+    Client->>Iterator: HasNext()
+    Iterator-->>Client: false
 ```

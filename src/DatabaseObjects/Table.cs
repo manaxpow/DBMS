@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 
-public class Table
+public class Table : ISchemaObject
 {
     public int Id { get; set; }
 
     public string Name { get; set; }
+
+    public SchemaObjectType ObjectType => SchemaObjectType.Table;
 
     public IReadOnlyList<Column> Columns { get; }
     public IReadOnlyList<Row> Rows { get; }
@@ -42,6 +44,7 @@ public class Table
     public void InsertRow(Row row) => throw new NotImplementedException();
     public void UpdateRow(Row oldRow, Row newRow) => throw new NotImplementedException();
     public bool DeleteRow(Row row) => throw new NotImplementedException();
+    public void Drop() => throw new NotImplementedException();
     public bool ContainsColumn(string columnName) => throw new NotImplementedException();
     public bool ContainsRow(Row row) => throw new NotImplementedException();
     public Column GetColumn(string columnName) => throw new NotImplementedException();

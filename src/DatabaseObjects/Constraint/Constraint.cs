@@ -1,11 +1,9 @@
-using System;
-
 public abstract class Constraint
 {
     public int Id { get; set; }
 
     public string Name { get; set; }
-    public bool IsEnabled { get; set; }
+    public bool IsEnabled { get; private set; }
 
     protected Constraint()
     {
@@ -22,7 +20,11 @@ public abstract class Constraint
 
     public bool Validate(ConstraintContext context)
     {
-        throw new NotImplementedException();
+        if (!IsEnabled)
+        {
+            return true;
+        }
+        return Check(context);
     }
 
     public void Enable()

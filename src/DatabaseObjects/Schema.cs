@@ -1,25 +1,38 @@
-public class Schema
+public class Schema : ISchemaObject
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public IReadOnlyCollection<Table> Tables { get; }
-    public IReadOnlyCollection<View> Views { get; }
-    public IReadOnlyCollection<StoredProcedure> StoredProcedures { get; }
+    private readonly Dictionary<string, ISchemaObject> _objects;
 
-    private Dictionary<string, Table> _tables;
-    private Dictionary<string, View> _views;
-    private Dictionary<string, StoredProcedure> _storedProcedures;
+    public SchemaObjectType ObjectType => SchemaObjectType.Schema;
+
+    public IReadOnlyCollection<ISchemaObject> Objects =>
+        _objects.Values;
+
+    public IReadOnlyCollection<Table> Tables =>
+        _objects.Values.OfType<Table>().ToList().AsReadOnly();
+
+    public IReadOnlyCollection<View> Views =>
+        _objects.Values.OfType<View>().ToList().AsReadOnly();
+
+    public IReadOnlyCollection<StoredProcedure> StoredProcedures =>
+        _objects.Values
+            .OfType<StoredProcedure>()
+            .ToList()
+            .AsReadOnly();
+
+
 
     public Schema(string name)
     {
         Name = name;
-        _tables = new Dictionary<string, Table>();
-        _views = new Dictionary<string, View>();
-        _storedProcedures = new Dictionary<string, StoredProcedure>();
-        Tables = _tables.Values;
-        Views = _views.Values;
-        StoredProcedures = _storedProcedures.Values;
+        _objects = new Dictionary<string, ISchemaObject>();
     }
+
+    public void RegisterObject(ISchemaObject obj) => throw new NotImplementedException();
+
+    public ISchemaObject UnregisterObject(string name) => throw new NotImplementedException();
+    public void Drop() => throw new NotImplementedException();
 
     public void AddTable(Table table) => throw new NotImplementedException();
     public void DropTable(string tableName) => throw new NotImplementedException();

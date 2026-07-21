@@ -1,4 +1,5 @@
 using FluentAssertions;
+using DBMS.Exceptions;
 
 public class SchemaTests
 {
@@ -129,7 +130,8 @@ public class SchemaTests
         _schema.AddTable(referencedTable);
         _schema.AddTable(childTable);
 
-        childTable.AddConstraint(new ForeignKeyConstraint("FK_TestTable_TableReferenced", "ForeignKeyId", "TableReferenced", "Id"));
+        var foreignKey = new ForeignKeyConstraint("FK_TestTable_TableReferenced", "ForeignKeyId", "TableReferenced", "Id", new RestrictAction(), new RestrictAction());
+        childTable.AddConstraint(foreignKey);
 
         // Act & Assert
         Action action = () => _schema.DropTable("TableReferenced");
@@ -178,7 +180,32 @@ public class SchemaTests
         // Assert
         action.Should().Throw<TableNotFoundException>();
     }
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Drop_WhenSchemaIsEmpty_ShouldNotThrow()
+    {
+        // Act
+        Action action = () => _schema.Drop();
+
+        // Assert
+        action.Should().NotThrow();
+    }
+
+    [Fact]
+    public void DropSchema_WhenSchemaContainsObjects_ShouldThrow()
+    {
+        // Arrange
+        var schema = new Schema("TestSchema");
+        schema.RegisterObject(new Table("TestTable"));
+
+        var schemaManager = new SchemaManager();
+
+        // Act
+        Action action = () =>
+            schemaManager.DropSchema(schema, cascade: false);
+
+        // Assert
+        action.Should()
+            .Throw<SchemaNotEmptyException>();
+    }
 }
-
-
-

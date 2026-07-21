@@ -27,7 +27,7 @@ public class ForeignKeyConstraintTests
         var (schema, parentTable, childTable) = CreateSchema();
         parentTable.InsertRow(new Row(parentTable, new List<object> { 1 }));
 
-        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id");
+        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id", new RestrictAction(), new RestrictAction());
 
         var candidateRow = new Row(childTable, new List<object> { 1 });
         var context = new ConstraintContext(candidateRow, childTable, schema);
@@ -46,7 +46,7 @@ public class ForeignKeyConstraintTests
         // Arrange
         var (schema, parentTable, childTable) = CreateSchema(); // No rows inserted into parentTable
 
-        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id");
+        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id", new RestrictAction(), new RestrictAction());
 
         var candidateRow = new Row(childTable, new List<object> { 99 });
         var context = new ConstraintContext(candidateRow, childTable, schema);
@@ -65,7 +65,7 @@ public class ForeignKeyConstraintTests
         // Arrange
         var (schema, parentTable, childTable) = CreateSchema();
 
-        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id") { IsNullable = true };
+        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "Id", new RestrictAction(), new RestrictAction()) { IsNullable = true };
 
         var candidateRow = new Row(childTable, new List<object> { null });
         var context = new ConstraintContext(candidateRow, childTable, schema);
@@ -88,7 +88,7 @@ public class ForeignKeyConstraintTests
         childTable.AddColumn(new Column("ParentId", typeof(int)));
         schema.AddTable(childTable);
 
-        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "NonExistentTable", "Id");
+        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "NonExistentTable", "Id", new RestrictAction(), new RestrictAction());
 
         var candidateRow = new Row(childTable, new List<object> { 1 });
         var context = new ConstraintContext(candidateRow, childTable, schema);
@@ -108,7 +108,7 @@ public class ForeignKeyConstraintTests
         // Arrange
         var (schema, parentTable, childTable) = CreateSchema();
 
-        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "NonExistentColumn");
+        var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "ParentTable", "NonExistentColumn", new RestrictAction(), new RestrictAction());
 
         var candidateRow = new Row(childTable, new List<object> { 1 });
         var context = new ConstraintContext(candidateRow, childTable, schema);

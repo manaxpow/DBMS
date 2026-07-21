@@ -370,6 +370,15 @@ classDiagram
         +DropSchema(string name) void
     }
 
+    class SchemaManager {
+        -CatalogManager _catalogManager
+        -StorageEngine _storageEngine
+        +DropSchema(Schema schema, bool cascade) void
+        -DropObject(Schema schema, ISchemaObject schemaObject) void
+        -CheckTableDependencies() void
+        -CheckViewDependencies() void
+    }
+
     class CatalogManager {
         -Dictionary~string, ICatalogObject~ _store
         +Register(ICatalogObject obj) void
@@ -401,9 +410,12 @@ classDiagram
         +IReadOnlyCollection~Table~ Tables
         +IReadOnlyCollection~View~ Views
         +IReadOnlyCollection~StoredProcedure~ StoredProcedures
+        +IEnumerable~ISchemaObject~ Objects
         -Dictionary~string, Table~ _tables
         -Dictionary~string, View~ _views
         -Dictionary~string, StoredProcedure~ _storedProcedures
+        +RegisterObject(ISchemaObject obj) void
+        +UnregisterObject(string name) ISchemaObject
         +AddTable(Table table) void
         +DropTable(string tableName) void
         +AlterTable(string tableName, Table newTable) void
@@ -415,6 +427,7 @@ classDiagram
         ~UnregisterView(string viewName) void
         ~IsObjectReferenced(string objectName) bool
         -IsTableReferencedByForeignKey(string tableName) bool
+        +Drop() void
     }
 
     class Table {
@@ -501,10 +514,28 @@ classDiagram
         +string ChildColumnName
         +string ReferencedTableName
         +string ReferencedColumnName
-        +ReferentialAction OnDelete
-        +ReferentialAction OnUpdate
+        +IReferentialAction OnDelete
+        +IReferentialAction OnUpdate
         +bool IsNullable
+        +OnParentRowDeleted(Row parentRow, Table childTable) void
         #Check(ConstraintContext context) bool
+    }
+
+    class IReferentialAction {
+        <<interface>>
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class CascadeAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class RestrictAction {
+        +Execute(Row parentRow, Table childTable) void
+    }
+
+    class SetNullAction {
+        +Execute(Row parentRow, Table childTable) void
     }
 
     class Index {
@@ -558,7 +589,7 @@ classDiagram
         -Schema _schema
         +Create(string name, string query, Schema schema) View
         +AlterView(string newQuery) void
-        +DropView() void
+        +Drop() void
         +Resolve(Schema schema) object
         -ValidateQuery(string query) void
         -GetDependencies(string query) IReadOnlyList~string~
@@ -573,7 +604,7 @@ classDiagram
         -TransactionManager _transactionManager
         +Execute(object parameters) object
         +AlterProcedure(ProcedureBody newBody) void
-        +DropProcedure() void
+        +Drop() void
         -ValidateParameters(object parameters) bool
         -ValidateBody(ProcedureBody newBody) bool
     }
@@ -605,15 +636,33 @@ classDiagram
     Table *-- Index
     Table *-- Partition
 
-    Constraint <|-- ForeignKey
+    Constraint <|-- ForeignKeyConstraint
     Row --> Table
     Row --> Column
-    ForeignKey --> Schema
-    ForeignKey --> Table
-    ForeignKey --> Index
+    ForeignKeyConstraint --> Schema
+    ForeignKeyConstraint --> Table
+    ForeignKeyConstraint --> Index
     Partition --> PartitionRange
     StoredProcedure --> TransactionManager
     StoredProcedure --> ProcedureBody
+
+    IReferentialAction <|.. CascadeAction
+    IReferentialAction <|.. RestrictAction
+    IReferentialAction <|.. SetNullAction
+    ForeignKeyConstraint *-- IReferentialAction
+    
+    class ISchemaObject {
+        <<interface>>
+        +int Id
+        +string Name
+        +Drop() void
+    }
+    
+    ISchemaObject <|.. Schema
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
+    Schema *-- ISchemaObject
 ```
 
 ### 8. Replication and Cluster

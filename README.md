@@ -619,6 +619,48 @@ classDiagram
         +Execute(object parameters, object transaction) object
     }
 
+    class DDLCommandExecutor {
+        +Execute(IDDLCommand) DDLResult
+    }
+    class IDDLCommand {
+        <<interface>>
+        +Execute() DDLResult
+    }
+    class CreateTableCommand {
+        +Execute() DDLResult
+    }
+    class AlterTableCommand {
+        +Execute() DDLResult
+    }
+    class DropTableCommand {
+        +Execute() DDLResult
+    }
+    class DDLResult {
+        <<enumeration>>
+        Success
+        Failure
+    }
+
+    class ConstraintCreatorRegistry {
+        +GetCreator(metadataType) ConstraintCreator
+    }
+    class ConstraintCreator {
+        <<abstract>>
+        +CreateConstraint(ConstraintMetadata metadata) Constraint
+    }
+    class PrimaryKeyConstraintCreator {
+        +CreateConstraint(ConstraintMetadata metadata) Constraint
+    }
+    class ForeignKeyConstraintCreator {
+        +CreateConstraint(ConstraintMetadata metadata) Constraint
+    }
+    class UniqueConstraintCreator {
+        +CreateConstraint(ConstraintMetadata metadata) Constraint
+    }
+    class CheckConstraintCreator {
+        +CreateConstraint(ConstraintMetadata metadata) Constraint
+    }
+
     Schema *-- Table
     Schema *-- View
     Schema *-- StoredProcedure
@@ -663,6 +705,26 @@ classDiagram
     ISchemaObject <|.. View
     ISchemaObject <|.. StoredProcedure
     Schema *-- ISchemaObject
+
+    DDLCommandExecutor o--> IDDLCommand : invokes
+    IDDLCommand <|.. CreateTableCommand
+    IDDLCommand <|.. AlterTableCommand
+    IDDLCommand <|.. DropTableCommand
+    CreateTableCommand --> Schema : receiver
+    CreateTableCommand --> Table : creates
+    AlterTableCommand --> Schema : receiver
+    DropTableCommand --> Schema : receiver
+
+    ConstraintCreatorRegistry ..> ConstraintCreator : returns
+    ConstraintCreator <|-- PrimaryKeyConstraintCreator
+    ConstraintCreator <|-- ForeignKeyConstraintCreator
+    ConstraintCreator <|-- UniqueConstraintCreator
+    ConstraintCreator <|-- CheckConstraintCreator
+    
+    PrimaryKeyConstraintCreator ..> PrimaryKeyConstraint : creates
+    ForeignKeyConstraintCreator ..> ForeignKeyConstraint : creates
+    UniqueConstraintCreator ..> UniqueConstraint : creates
+    CheckConstraintCreator ..> CheckConstraint : creates
 ```
 
 ### 8. Replication and Cluster

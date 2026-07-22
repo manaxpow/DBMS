@@ -474,6 +474,7 @@ sequenceDiagram
     deactivate Schema
 ```
 
+
 ## 3. Table Tests
 
 ### 3.1 AddColumn_WhenColumnIsValid_ShouldAddColumn
@@ -785,6 +786,7 @@ sequenceDiagram
     Table-->>Test: throws ColumnNotFoundException
     deactivate Table
 ```
+
 
 ## 4. Column Tests
 
@@ -1574,3 +1576,82 @@ sequenceDiagram
     deactivate Index
 ```
 
+## 12. Visit_Schema_ShouldValidateSchema
+
+```mermaid
+sequenceDiagram
+    autonumber
+    
+    participant Test as ValidationVisitorTests
+    participant VV as ValidationVisitor
+    participant Schema as Schema (Mock)
+    
+    Test->>VV: new ValidationVisitor()
+    Test->>VV: Visit(Schema)
+    activate VV
+    VV->>Schema: Get Objects
+    Schema-->>VV: Objects
+    VV->>VV: Validate each object
+    VV-->>Test: success
+    deactivate VV
+```
+
+### 12.2 Visit_Table_ShouldValidateTable
+
+```mermaid
+sequenceDiagram
+    autonumber
+    
+    participant Test as ValidationVisitorTests
+    participant VV as ValidationVisitor
+    participant Table as Table (Mock)
+    
+    Test->>VV: new ValidationVisitor()
+    Test->>VV: Visit(Table)
+    activate VV
+    VV->>Table: Get Columns/Constraints
+    Table-->>VV: Structure info
+    VV->>VV: Validate table structure
+    VV-->>Test: success
+    deactivate VV
+```
+
+### 12.3 Visit_View_ShouldValidateView
+
+```mermaid
+sequenceDiagram
+    autonumber
+    
+    participant Test as ValidationVisitorTests
+    participant VV as ValidationVisitor
+    participant View as View (Mock)
+    
+    Test->>VV: new ValidationVisitor()
+    Test->>VV: Visit(View)
+    activate VV
+    VV->>View: Get Query/Dependencies
+    View-->>VV: Query info
+    VV->>VV: Validate view query
+    VV-->>Test: success
+    deactivate VV
+```
+
+### 12.4 Visit_StoredProcedure_ShouldValidateStoredProcedure
+
+```mermaid
+sequenceDiagram
+    autonumber
+    
+    participant Test as ValidationVisitorTests
+    participant VV as ValidationVisitor
+    participant SP as StoredProcedure (Mock)
+    
+    Test->>VV: new ValidationVisitor()
+    Test->>VV: Visit(SP)
+    activate VV
+    VV->>SP: Get Body/Parameters
+    SP-->>VV: Procedure info
+    VV->>VV: Validate procedure logic
+    VV-->>Test: success
+    deactivate VV
+```

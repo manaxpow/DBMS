@@ -17,7 +17,7 @@ public class Schema : ISchemaObject
 
     public void RegisterObject(ISchemaObject obj) => throw new NotImplementedException();
 
-    public ISChemaObjectIterator CreateIterator() => throw new NotImplementedException();
+    public ISchemaObjectIterator CreateIterator() => throw new NotImplementedException();
     public ISchemaObject UnregisterObject(string name) => throw new NotImplementedException();
     public void Drop() => throw new NotImplementedException();
 
@@ -33,5 +33,11 @@ public class Schema : ISchemaObject
     internal void UnregisterView(string viewName) => throw new NotImplementedException();
     internal bool IsObjectReferenced(string objectName) => throw new NotImplementedException();
     private bool IsTableReferencedByForeignKey(string tableName) => throw new NotImplementedException();
+
+    public void Accept(ISchemaVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+
 }
 

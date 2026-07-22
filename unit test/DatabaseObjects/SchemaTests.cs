@@ -25,7 +25,6 @@ public class SchemaTests
         _schema.GetTable("TestTable").Should().BeSameAs(table);
     }
 
-
     [Fact]
     public void AddTable_WhenTableIsNull_ShouldThrow()
     {
@@ -208,7 +207,7 @@ public class SchemaTests
         action.Should()
             .Throw<SchemaNotEmptyException>();
     }
-    
+
     [Trait("Category", "Important")]
     [Fact]
     public void DropSchema_WhenCascadeIsTrue_ShouldDropAllSchemaObjectsAndNotThrow()

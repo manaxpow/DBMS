@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 public class Table : ISchemaObject
 {
     public int Id { get; set; }
@@ -57,6 +54,10 @@ public class Table : ISchemaObject
     private bool ValidateRowValues(Row row) => throw new NotImplementedException();
     private bool IsColumnReferencedByConstraint(string columnName) => throw new NotImplementedException();
     private void RemoveColumnValues(int columnIndex) => throw new NotImplementedException();
+
+    public void Accept(ISchemaVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+
 }
-
-

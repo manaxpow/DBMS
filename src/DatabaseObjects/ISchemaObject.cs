@@ -1,5 +1,3 @@
-using System;
-
 public interface ISchemaObject
 {
     int Id { get; }
@@ -7,4 +5,5 @@ public interface ISchemaObject
 
     SchemaObjectType ObjectType { get; }
     void Drop();
+    void Accept(ISchemaVisitor visitor);
 }

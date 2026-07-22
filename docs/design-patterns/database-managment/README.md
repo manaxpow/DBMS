@@ -5,9 +5,8 @@
 |  Priority | Status | Design Pattern       | Feature                    | Reason / Context                                                                                         |
 | :-------: | :----: | :------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
 |  🔴 High  |  `[x]` | **Facade**           | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.                 |
-|  🔴 High  |  `[ ]` | **Abstract Factory** | Database Components        | Creates compatible families of Database, Catalog, Schema, Storage, Transaction, and Recovery components. |
 |  🔴 High  |  `[ ]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
-|  🔴 High  |  `[ ]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
+|  🔴 High  |  `[x]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
 | 🟡 Medium |  `[ ]` | **Factory Method**   | Database Creation          | Allows different Database implementations to be instantiated by subclasses or providers.                 |
 | 🟡 Medium |  `[ ]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
 | 🟡 Medium |  `[ ]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
@@ -20,7 +19,7 @@
 
 ## 3. Pattern Implementation Details
 
-### 3.6. Facade (DatabaseServer)
+### 3.1. Facade (DatabaseServer)
 
 The **Facade** pattern is used in `DatabaseServer` to provide a single, unified interface for starting and stopping the database system. Instead of the client interacting with multiple complex subsystems (such as `StorageEngine`, `TransactionManager`, `QueryProcessor`, and `NetworkServer`), the `DatabaseServer` coordinates their initialization and startup sequences in the correct order.
 
@@ -83,4 +82,98 @@ sequenceDiagram
     Server-->>Client: success
 
     deactivate Server 
+```
+
+
+### 3.2. Observer (Database Events)
+
+The **Observer** pattern is used to notify various subsystems (like Monitoring, Logging, and Replication) about database lifecycle events. When an event occurs (e.g., `DatabaseCreated`), the `DatabaseEventPublisher` notifies all registered `IDatabaseEventObserver` instances.
+
+```mermaid
+classDiagram
+    direction TB
+
+    class DatabaseEventPublisher {
+        -List~IDatabaseEventObserver~ _observers
+        +Subscribe(IDatabaseEventObserver observer) void
+        +Unsubscribe(IDatabaseEventObserver observer) void
+        +Notify(DatabaseEvent event) void
+    }
+
+    class IDatabaseEventObserver {
+        <<interface>>
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class MonitoringObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class LoggingObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class ReplicationObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class DatabaseEvent {
+        +DatabaseEventType Type
+        +string DatabaseName
+        +DateTime Timestamp
+    }
+
+    class DatabaseEventType {
+        <<enumeration>>
+        Created
+        Dropped
+        BackupCompleted
+        Restored
+        StateChanged
+    }
+
+    DatabaseEventPublisher o-- IDatabaseEventObserver : observers
+
+    IDatabaseEventObserver <|.. MonitoringObserver
+    IDatabaseEventObserver <|.. LoggingObserver
+    IDatabaseEventObserver <|.. ReplicationObserver
+
+    DatabaseEventPublisher ..> DatabaseEvent : publishes
+    DatabaseEvent --> DatabaseEventType
+```
+
+#### Sequence Diagram: Database Event Notification
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Client
+    participant DM as DatabaseManager
+    participant EP as DatabaseEventPublisher
+    participant LO as LoggingObserver
+    participant MO as MonitoringObserver
+    participant RO as ReplicationObserver
+
+    Client->>DM: CreateDatabase("ShopDB")
+
+    DM->>DM: Create database
+
+    DM->>EP: Notify(DatabaseCreated)
+
+    EP->>LO: OnDatabaseEvent(DatabaseCreated)
+    LO->>LO: Write log
+    LO-->>EP: Completed
+
+    EP->>MO: OnDatabaseEvent(DatabaseCreated)
+    MO->>MO: Update metrics
+    MO-->>EP: Completed
+
+    EP->>RO: OnDatabaseEvent(DatabaseCreated)
+    RO->>RO: Replicate metadata
+    RO-->>EP: Completed
+
+    EP-->>DM: Notification completed
+
+    DM-->>Client: Database created
 ```

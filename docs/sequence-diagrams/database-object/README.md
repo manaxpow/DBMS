@@ -474,25 +474,6 @@ sequenceDiagram
     deactivate Schema
 ```
 
-### 2.13 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as SchemaTests
-    participant Schema as Schema
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>Schema: Accept(visitor)
-    activate Schema
-    Schema->>Visitor: Visit(this)
-    Visitor-->>Schema: success
-    Schema-->>Test: success
-    deactivate Schema
-    Test->>Visitor: Verify Visit(schema) called
-```
 
 ## 3. Table Tests
 
@@ -806,25 +787,6 @@ sequenceDiagram
     deactivate Table
 ```
 
-### 3.18 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as TableTests
-    participant Table as Table
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>Table: Accept(visitor)
-    activate Table
-    Table->>Visitor: Visit(this)
-    Visitor-->>Table: success
-    Table-->>Test: success
-    deactivate Table
-    Test->>Visitor: Verify Visit(table) called
-```
 
 ## 4. Column Tests
 
@@ -1614,98 +1576,7 @@ sequenceDiagram
     deactivate Index
 ```
 
-## 12. View Tests
-
-### 12.1 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as ViewTests
-    participant View as View
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>View: Accept(visitor)
-    activate View
-    View->>Visitor: Visit(this)
-    Visitor-->>View: success
-    View-->>Test: success
-    deactivate View
-    Test->>Visitor: Verify Visit(view) called
-```
-
-## 13. StoredProcedure Tests
-
-### 13.1 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as StoredProcedureTests
-    participant SP as StoredProcedure
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>SP: Accept(visitor)
-    activate SP
-    SP->>Visitor: Visit(this)
-    Visitor-->>SP: success
-    SP-->>Test: success
-    deactivate SP
-    Test->>Visitor: Verify Visit(procedure) called
-```
-
-## 12. View Tests
-
-### 12.1 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as ViewTests
-    participant View as View
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>View: Accept(visitor)
-    activate View
-    View->>Visitor: Visit(this)
-    Visitor-->>View: success
-    View-->>Test: success
-    deactivate View
-    Test->>Visitor: Verify Visit(view) called
-```
-
-## 13. StoredProcedure Tests
-
-### 13.1 Accept_ShouldCallVisitOnVisitor
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    participant Test as StoredProcedureTests
-    participant SP as StoredProcedure
-    participant Visitor as ISchemaVisitor (Mock)
-    
-    Test->>Visitor: Create mock visitor
-    Test->>SP: Accept(visitor)
-    activate SP
-    SP->>Visitor: Visit(this)
-    Visitor-->>SP: success
-    SP-->>Test: success
-    deactivate SP
-    Test->>Visitor: Verify Visit(procedure) called
-```
-
-
-## 14. ValidationVisitor Tests
-
-### 14.1 Visit_Schema_ShouldValidateSchema
+## 12. Visit_Schema_ShouldValidateSchema
 
 ```mermaid
 sequenceDiagram
@@ -1725,7 +1596,7 @@ sequenceDiagram
     deactivate VV
 ```
 
-### 14.2 Visit_Table_ShouldValidateTable
+### 12.2 Visit_Table_ShouldValidateTable
 
 ```mermaid
 sequenceDiagram
@@ -1745,7 +1616,7 @@ sequenceDiagram
     deactivate VV
 ```
 
-### 14.3 Visit_View_ShouldValidateView
+### 12.3 Visit_View_ShouldValidateView
 
 ```mermaid
 sequenceDiagram
@@ -1765,7 +1636,7 @@ sequenceDiagram
     deactivate VV
 ```
 
-### 14.4 Visit_StoredProcedure_ShouldValidateStoredProcedure
+### 12.4 Visit_StoredProcedure_ShouldValidateStoredProcedure
 
 ```mermaid
 sequenceDiagram

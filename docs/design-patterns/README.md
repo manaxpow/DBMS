@@ -372,79 +372,172 @@ The **Iterator** pattern provides sequential access to schema objects without ex
 
 ```mermaid
 classDiagram
-    direction LR
+    direction TB
 
-    class Client
+    %% =========================
+    %% SCHEMA OBJECTS
+    %% =========================
+
+    class ISchemaObject {
+        <<interface>>
+        +int Id
+        +string Name
+        +Drop() void
+    }
 
     class Schema {
-        +CreateIterator() ISchemaObjectIterator
+        +int Id
+        +string Name
+        +IEnumerable~ISchemaObject~ Objects
+
+        +CreateTableIterator() ISchemaObjectIterator
+        +CreateViewIterator() ISchemaObjectIterator
+        +CreateStoredProcedureIterator() ISchemaObjectIterator
+        +CreateAllObjectsIterator() ISchemaObjectIterator
+
+        +Drop() void
     }
+
+    class Table {
+        +int Id
+        +string Name
+        +Drop() void
+    }
+
+    class View {
+        +int Id
+        +string Name
+        +Drop() void
+    }
+
+    class StoredProcedure {
+        +int Id
+        +string Name
+        +Drop() void
+    }
+
+    ISchemaObject <|.. Schema
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
+
+    Schema *-- Table : contains
+    Schema *-- View : contains
+    Schema *-- StoredProcedure : contains
+
+
+    %% =========================
+    %% ITERATOR
+    %% =========================
 
     class ISchemaObjectIterator {
         <<interface>>
         +HasNext() bool
         +Next() ISchemaObject
+        +Reset() void
     }
 
-    class SchemaObjectIterator {
+
+    %% =========================
+    %% CONCRETE ITERATORS
+    %% =========================
+
+    class TableIterator {
         -IReadOnlyList~ISchemaObject~ _objects
         -int _position
         +HasNext() bool
         +Next() ISchemaObject
+        +Reset() void
     }
 
-    class ISchemaObject {
-        <<interface>>
-        +Name
+    class ViewIterator {
+        -IReadOnlyList~ISchemaObject~ _objects
+        -int _position
+        +HasNext() bool
+        +Next() ISchemaObject
+        +Reset() void
     }
 
-    class Table
-    class View
-    class StoredProcedure
+    class StoredProcedureIterator {
+        -IReadOnlyList~ISchemaObject~ _objects
+        -int _position
+        +HasNext() bool
+        +Next() ISchemaObject
+        +Reset() void
+    }
 
-    Client --> Schema
-    Client --> ISchemaObjectIterator
+    class SchemaObjectsIterator {
+        -IReadOnlyList~ISchemaObject~ _objects
+        -int _position
+        +HasNext() bool
+        +Next() ISchemaObject
+        +Reset() void
+    }
 
-    Schema --> SchemaObjectIterator : creates
-    ISchemaObjectIterator <|.. SchemaObjectIterator
 
-    ISchemaObject <|.. Table
-    ISchemaObject <|.. View
-    ISchemaObject <|.. StoredProcedure
+    %% =========================
+    %% ITERATOR IMPLEMENTATIONS
+    %% =========================
 
-    Schema o-- Table
-    Schema o-- View
-    Schema o-- StoredProcedure
+    ISchemaObjectIterator <|.. TableIterator
+    ISchemaObjectIterator <|.. ViewIterator
+    ISchemaObjectIterator <|.. StoredProcedureIterator
+    ISchemaObjectIterator <|.. SchemaObjectsIterator
 
-    SchemaObjectIterator --> ISchemaObject
+
+    %% =========================
+    %% ITERATOR TARGETS
+    %% =========================
+
+    TableIterator --> Table : returns only
+    ViewIterator --> View : returns only
+    StoredProcedureIterator --> StoredProcedure : returns only
+
+    SchemaObjectsIterator --> ISchemaObject : returns all
+
+    Schema --> ISchemaObjectIterator : creates
 ```
 
 ```mermaid
 sequenceDiagram
     autonumber
 
-    actor Client
-    participant Schema
-    participant Iterator as SchemaObjectIterator
-    participant Object as ISchemaObject
+    participant Test as IteratorTests
+    participant Schema as Schema
+    participant TI as TableIterator
 
-    Client->>Schema: CreateIterator()
-    Schema-->>Client: iterator
+    Test->>Schema: CreateTableIterator()
+    activate Schema
 
-    loop For each object
-        Client->>Iterator: HasNext()
-        Iterator-->>Client: true
+    Schema->>Schema: Get Objects
+    Schema->>TI: new TableIterator(Objects)
+    TI-->>Schema: iterator
+    Schema-->>Test: iterator
 
-        Client->>Iterator: Next()
-        Iterator-->>Client: schemaObject
+    deactivate Schema
 
-        Client->>Object: Process object
+    loop while HasNext()
+        Test->>TI: HasNext()
+        activate TI
+
+        TI->>TI: Find next Table from _position
+        TI-->>Test: true
+
+        deactivate TI
+
+        Test->>TI: Next()
+        activate TI
+
+        TI->>TI: Get next Table
+        TI->>TI: Advance _position
+        TI-->>Test: Table as ISchemaObject
+
+        deactivate TI
     end
 
-    Client->>Iterator: HasNext()
-    Iterator-->>Client: false
+    Test->>TI: HasNext()
+    TI-->>Test: false
 ```
-
 ### 3.7. Visitor (Schema Operations)
 
 The **Visitor** pattern is used for schema operations like backup, export, and validation. It allows defining new operations on schema objects (Table, View, StoredProcedure, Schema) without modifying their classes.

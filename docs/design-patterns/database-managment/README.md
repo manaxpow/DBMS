@@ -8,7 +8,7 @@
 |  🔴 High  |  `[ ]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
 |  🔴 High  |  `[x]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
 | 🟡 Medium |  `[ ]` | **Factory Method**   | Database Creation          | Allows different Database implementations to be instantiated by subclasses or providers.                 |
-| 🟡 Medium |  `[ ]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
+| 🟡 Medium |  `[x]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
 | 🟡 Medium |  `[ ]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
 | 🟡 Medium |  `[ ]` | **Adapter**          | External Storage           | Adapts operating-system or cloud-storage APIs to DBMS storage interfaces.                                |
 |   🟢 Low  |  `[ ]` | **Builder**          | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.                      |
@@ -176,4 +176,113 @@ sequenceDiagram
     EP-->>DM: Notification completed
 
     DM-->>Client: Database created
+```
+
+### 3.3. State (Database Lifecycle)
+
+The **State** pattern is used to manage the database lifecycle. The database transitions between different states such as Offline, Online, ReadOnly, Recovering, and Dropped. Each state encapsulates the behavior specific to that state.
+
+#### Class Diagram: Database State
+
+```mermaid
+classDiagram
+    class Database {
+        -IDatabaseState state
+        +Database(initialState)
+        +ChangeState(state)
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class IDatabaseState {
+        <<interface>>
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class OfflineState {
+        -Database context
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class OnlineState {
+        -Database context
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class ReadOnlyState {
+        -Database context
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class RecoveringState {
+        -Database context
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    class DroppedState {
+        -Database context
+        +Open()
+        +SetReadOnly()
+        +Recover()
+        +Drop()
+    }
+
+    Database o--> IDatabaseState : current state
+
+    IDatabaseState <|.. OfflineState
+    IDatabaseState <|.. OnlineState
+    IDatabaseState <|.. ReadOnlyState
+    IDatabaseState <|.. RecoveringState
+    IDatabaseState <|.. DroppedState
+
+    OfflineState --> Database : context
+    OnlineState --> Database : context
+    ReadOnlyState --> Database : context
+    RecoveringState --> Database : context
+    DroppedState --> Database : context
+```
+
+#### Sequence Diagram: Database Open
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant DB as Database
+    participant Offline as OfflineState
+    participant Online as OnlineState
+
+    Client->>DB: Open()
+
+    Note over DB: Current state = OfflineState
+
+    DB->>Offline: Open()
+
+    Offline->>Offline: Perform opening logic
+
+    Offline->>Online: new OnlineState(DB)
+    Online-->>Offline: OnlineState
+
+    Offline->>DB: ChangeState(OnlineState)
+
+    Note over DB: Current state = OnlineState
+
+    DB-->>Client: Database is now Online
+```
 ```

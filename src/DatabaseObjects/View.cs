@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-
 public class View : ISchemaObject
 {
     public int Id { get; set; }
 
     public string Name { get; set; }
-    
+
     public SchemaObjectType ObjectType => SchemaObjectType.View;
     public string Query { get; set; }
     public bool IsDropped { get; set; }
@@ -29,4 +26,10 @@ public class View : ISchemaObject
     private void ValidateQuery(string query) => throw new NotImplementedException();
     private IReadOnlyList<string> GetDependencies(string query) => throw new NotImplementedException();
     private void EnsureDependenciesExist(Schema schema, IReadOnlyList<string> dependencies) => throw new NotImplementedException();
+
+    public void Accept(ISchemaVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+
 }

@@ -33,5 +33,9 @@ public class Schema : ISchemaObject
     internal void UnregisterView(string viewName) => throw new NotImplementedException();
     internal bool IsObjectReferenced(string objectName) => throw new NotImplementedException();
     private bool IsTableReferencedByForeignKey(string tableName) => throw new NotImplementedException();
-}
 
+    public void Accept(ISchemaVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+}

@@ -11,8 +11,8 @@ This document tracks the design patterns used across different modules in the DB
 |  🔴 High  |  `[x]` | **Strategy**        | Referential Action      | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting or updating referenced rows. |
 |  🔴 High  |  `[x]` | **Composite**       | Schema Objects          | Schema contains Tables, Views, and Stored Procedures and manages them uniformly as `ISchemaObject`.   |
 |  🔴 High  |  `[x]` | **Command**         | DDL Command             | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into command objects.        |
-| 🟡 Medium |  `[ ]` | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
-| 🟡 Medium |  `[ ]` | **Visitor**         | Schema Operations       | Backup, Export, Validation, and Dependency Analysis can operate on all schema object types.           |
+| 🟡 Medium |  `[x]` | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
+| 🟡 Medium |  `[x]` | **Visitor**         | Schema Operations       | Backup, Export, and Validation can operate on all schema object types.                                |
 | 🟡 Medium |  `[ ]` | **Builder**         | Table Definition        | Builds a Table step by step from columns, constraints, indexes, and partitions.                       |
 |   🟢 Low  |  `[ ]` | **Prototype**       | Schema Object Cloning   | Clones schema objects for migration, temporary objects, or schema duplication.                        |
 |   🟢 Low  |  `[ ]` | **Decorator**       | Constraint Extension    | Adds logging, metrics, or auditing without modifying existing constraints.                            |
@@ -443,4 +443,142 @@ sequenceDiagram
 
     Client->>Iterator: HasNext()
     Iterator-->>Client: false
+```
+
+### 3.7. Visitor (Schema Operations)
+
+The **Visitor** pattern is used for schema operations like backup, export, and validation. It allows defining new operations on schema objects (Table, View, StoredProcedure, Schema) without modifying their classes.
+
+```mermaid
+classDiagram
+    direction TB
+
+    %% =========================
+    %% VISITOR
+    %% =========================
+
+    class ISchemaVisitor {
+        <<interface>>
+        +Visit(Schema schema) void
+        +Visit(Table table) void
+        +Visit(View view) void
+        +Visit(StoredProcedure procedure) void
+    }
+
+    class BackupVisitor {
+        +Visit(Schema schema) void
+        +Visit(Table table) void
+        +Visit(View view) void
+        +Visit(StoredProcedure procedure) void
+    }
+
+    class ExportVisitor {
+        +Visit(Schema schema) void
+        +Visit(Table table) void
+        +Visit(View view) void
+        +Visit(StoredProcedure procedure) void
+    }
+
+    class ValidationVisitor {
+        +Visit(Schema schema) void
+        +Visit(Table table) void
+        +Visit(View view) void
+        +Visit(StoredProcedure procedure) void
+    }
+
+    %% =========================
+    %% ELEMENT
+    %% =========================
+
+    class ISchemaObject {
+        <<interface>>
+        +int Id
+        +string Name
+        +Accept(ISchemaVisitor visitor) void
+    }
+
+    class Schema {
+        +string Name
+        +IEnumerable~ISchemaObject~ Objects
+        +Accept(ISchemaVisitor visitor) void
+    }
+
+    class Table {
+        +string Name
+        +IReadOnlyList~Column~ Columns
+        +IReadOnlyList~Constraint~ Constraints
+        +IReadOnlyList~Index~ Indexes
+        +Accept(ISchemaVisitor visitor) void
+    }
+
+    class View {
+        +string Name
+        +string Query
+        +IReadOnlyList~string~ Dependencies
+        +Accept(ISchemaVisitor visitor) void
+    }
+
+    class StoredProcedure {
+        +string Name
+        +ProcedureBody Body
+        +Accept(ISchemaVisitor visitor) void
+    }
+
+    %% =========================
+    %% CLIENT / MANAGERS
+    %% =========================
+
+    class SchemaManager {
+        +Validate(Schema schema) void
+    }
+
+    %% Visitor implementations
+    ISchemaVisitor <|.. BackupVisitor
+    ISchemaVisitor <|.. ExportVisitor
+    ISchemaVisitor <|.. ValidationVisitor
+
+    %% Element implementations
+    ISchemaObject <|.. Schema
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
+
+    %% Schema contains schema objects
+    Schema *-- ISchemaObject : contains
+
+    %% Clients create/use visitors
+    SchemaManager ..> ValidationVisitor : creates
+
+    %% Visitors operate on elements
+    BackupVisitor ..> ISchemaObject : visits
+    ExportVisitor ..> ISchemaObject : visits
+    ValidationVisitor ..> ISchemaObject : visits
+```
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant BV as BackupVisitor
+    participant T as Table
+
+    Client->>BV: new BackupVisitor()
+    Client->>T: Accept(backupVisitor)
+
+    T->>BV: Visit(this)
+
+    Note over T,BV: this = Table<br/>selects Visit(Table)
+
+    BV->>T: Get Columns
+    T-->>BV: Columns
+
+    BV->>T: Get Constraints
+    T-->>BV: Constraints
+
+    BV->>T: Get Indexes
+    T-->>BV: Indexes
+
+    BV->>BV: Backup table structure and data
+
+    BV-->>T: Completed
+    T-->>Client: Completed
 ```

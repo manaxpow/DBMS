@@ -1,5 +1,3 @@
-using System;
-
 public class StoredProcedure : ISchemaObject
 {
     public int Id { get; set; }
@@ -17,10 +15,22 @@ public class StoredProcedure : ISchemaObject
     {
     }
 
+    public StoredProcedure(string name, string body)
+    {
+        Name = name;
+        Body = new ProcedureBody();
+    }
+
     public object Execute(object parameters) => throw new NotImplementedException();
     public void AlterProcedure(ProcedureBody newBody) => throw new NotImplementedException();
     public void Drop() => throw new NotImplementedException();
 
     private bool ValidateParameters(object parameters) => throw new NotImplementedException();
     private bool ValidateBody(ProcedureBody newBody) => throw new NotImplementedException();
+
+    public void Accept(ISchemaVisitor visitor)
+    {
+        throw new NotImplementedException();
+    }
+
 }

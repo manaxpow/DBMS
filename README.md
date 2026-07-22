@@ -354,6 +354,7 @@ classDiagram
     class DatabaseManager {
         -CatalogManager _catalog
         -Dictionary~string, Database~ _databases
+        -DatabaseEventPublisher _eventPublisher
         +CreateDatabase(string name) void
         +GetDatabase(string name) Database
         +DropDatabase(string name) void
@@ -363,11 +364,103 @@ classDiagram
         +string Name
         -StorageEngine _storage
         -SchemaManager _schemaManager
-        -bool _isOpen
+        -IDatabaseState _state
+        +Database(initialState)
+        +ChangeState(state) void
         +Open() void
         +Close() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
         +AddSchema(Schema schema) void
         +DropSchema(string name) void
+    }
+
+    class IDatabaseState {
+        <<interface>>
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class OfflineState {
+        -Database context
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class OnlineState {
+        -Database context
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class ReadOnlyState {
+        -Database context
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class RecoveringState {
+        -Database context
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class DroppedState {
+        -Database context
+        +Open() void
+        +SetReadOnly() void
+        +Recover() void
+        +Drop() void
+    }
+
+    class DatabaseEventPublisher {
+        -List~IDatabaseEventObserver~ _observers
+        +Subscribe(IDatabaseEventObserver observer) void
+        +Unsubscribe(IDatabaseEventObserver observer) void
+        +Notify(DatabaseEvent event) void
+    }
+
+    class IDatabaseEventObserver {
+        <<interface>>
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class MonitoringObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class LoggingObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class ReplicationObserver {
+        +OnDatabaseEvent(DatabaseEvent event) void
+    }
+
+    class DatabaseEvent {
+        +DatabaseEventType Type
+        +string DatabaseName
+        +DateTime Timestamp
+    }
+
+    class DatabaseEventType {
+        <<enumeration>>
+        Created
+        Dropped
+        BackupCompleted
+        Restored
+        StateChanged
     }
 
     class SchemaManager {
@@ -397,6 +490,27 @@ classDiagram
     DatabaseServer *-- CatalogManager
     DatabaseManager *-- Database
     CatalogManager *-- StatisticsManager
+
+    Database o-- IDatabaseState : current state
+    IDatabaseState <|.. OfflineState
+    IDatabaseState <|.. OnlineState
+    IDatabaseState <|.. ReadOnlyState
+    IDatabaseState <|.. RecoveringState
+    IDatabaseState <|.. DroppedState
+
+    OfflineState --> Database : context
+    OnlineState --> Database : context
+    ReadOnlyState --> Database : context
+    RecoveringState --> Database : context
+    DroppedState --> Database : context
+
+    DatabaseManager --> DatabaseEventPublisher : uses
+    DatabaseEventPublisher o-- IDatabaseEventObserver : observers
+    IDatabaseEventObserver <|.. MonitoringObserver
+    IDatabaseEventObserver <|.. LoggingObserver
+    IDatabaseEventObserver <|.. ReplicationObserver
+    DatabaseEventPublisher ..> DatabaseEvent : publishes
+    DatabaseEvent --> DatabaseEventType
 ```
 
 ### 7. Database Objects
@@ -756,7 +870,7 @@ classDiagram
 
 | Module                 | Classes | Test cases |
 | ---------------------- | ------: | ---------: |
-| Database Manager       |       5 |         43 |
+| Database Manager       |       7 |         51 |
 | Database Objects       |      10 |        101 |
 | Transaction Management |       3 |         29 |
 | Storage Engine         |       4 |         51 |
@@ -765,7 +879,7 @@ classDiagram
 | Security Management    |       4 |         32 |
 | Replication & Cluster  |       2 |         19 |
 | Monitoring             |       1 |         10 |
-| **Total**              |  **39** |    **367** |
+| **Total**              |  **41** |    **375** |
 
 ---
 
@@ -879,6 +993,40 @@ flowchart LR
     classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
     class Database_Manager_StatisticsManager classNode
     class Database_Manager_StatisticsManager_T1,Database_Manager_StatisticsManager_T2,Database_Manager_StatisticsManager_T3,Database_Manager_StatisticsManager_T4,Database_Manager_StatisticsManager_T5 testNode
+```
+
+### 1.6 `DatabaseEventPublisher` — 3 cases
+
+```mermaid
+flowchart LR
+    Database_Manager_DatabaseEventPublisher["DatabaseEventPublisher"]
+
+    Database_Manager_DatabaseEventPublisher --> Database_Manager_DatabaseEventPublisher_T1["Subscribe_WhenObserverIsValid_ShouldAddObserver"]
+    Database_Manager_DatabaseEventPublisher --> Database_Manager_DatabaseEventPublisher_T2["Unsubscribe_WhenObserverExists_ShouldRemoveObserver"]
+    Database_Manager_DatabaseEventPublisher --> Database_Manager_DatabaseEventPublisher_T3["Notify_WhenEventOccurs_ShouldNotifyAllObservers"]
+
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
+    class Database_Manager_DatabaseEventPublisher classNode
+    class Database_Manager_DatabaseEventPublisher_T1,Database_Manager_DatabaseEventPublisher_T2,Database_Manager_DatabaseEventPublisher_T3 testNode
+```
+
+### 1.7 `DatabaseState` — 5 cases
+
+```mermaid
+flowchart LR
+    Database_Manager_DatabaseState["DatabaseState"]
+
+    Database_Manager_DatabaseState --> Database_Manager_DatabaseState_T1["ChangeState_WhenStateIsValid_ShouldUpdateCurrentState"]
+    Database_Manager_DatabaseState --> Database_Manager_DatabaseState_T2["OfflineState_Open_ShouldTransitionToOnlineState"]
+    Database_Manager_DatabaseState --> Database_Manager_DatabaseState_T3["OnlineState_SetReadOnly_ShouldTransitionToReadOnlyState"]
+    Database_Manager_DatabaseState --> Database_Manager_DatabaseState_T4["OnlineState_Drop_ShouldTransitionToDroppedState"]
+    Database_Manager_DatabaseState --> Database_Manager_DatabaseState_T5["ReadOnlyState_Open_ShouldThrowInvalidOperationException"]
+
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef testNode fill:#f8fafc,stroke:#94a3b8,color:#111827
+    class Database_Manager_DatabaseState classNode
+    class Database_Manager_DatabaseState_T1,Database_Manager_DatabaseState_T2,Database_Manager_DatabaseState_T3,Database_Manager_DatabaseState_T4,Database_Manager_DatabaseState_T5 testNode
 ```
 
 ---

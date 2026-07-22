@@ -1,14 +1,12 @@
-public class CreateTableCommand : IDDLCommand
+public class DropTableCommand : IDDLCommand
 {
     private readonly Schema _schema;
     private readonly string _tableName;
-    private ITableBuilder _tableBuilder;
 
-    public CreateTableCommand(Schema schema, string tableName, ITableBuilder tableBuilder)
+    public DropTableCommand(Schema schema, string tableName)
     {
         _schema = schema;
         _tableName = tableName;
-        _tableBuilder = tableBuilder;
     }
 
     public DDLResult Execute()

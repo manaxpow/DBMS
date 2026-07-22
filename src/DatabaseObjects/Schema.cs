@@ -17,7 +17,7 @@ public class Schema : ISchemaObject
 
     public void RegisterObject(ISchemaObject obj) => throw new NotImplementedException();
 
-    public ISChemaObjectIterator CreateIterator() => throw new NotImplementedException();
+    public ISchemaObjectIterator CreateIterator() => throw new NotImplementedException();
     public ISchemaObject UnregisterObject(string name) => throw new NotImplementedException();
     public void Drop() => throw new NotImplementedException();
 

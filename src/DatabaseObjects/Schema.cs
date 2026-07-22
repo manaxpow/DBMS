@@ -9,20 +9,6 @@ public class Schema : ISchemaObject
     public IReadOnlyCollection<ISchemaObject> Objects =>
         _objects.Values;
 
-    public IReadOnlyCollection<Table> Tables =>
-        _objects.Values.OfType<Table>().ToList().AsReadOnly();
-
-    public IReadOnlyCollection<View> Views =>
-        _objects.Values.OfType<View>().ToList().AsReadOnly();
-
-    public IReadOnlyCollection<StoredProcedure> StoredProcedures =>
-        _objects.Values
-            .OfType<StoredProcedure>()
-            .ToList()
-            .AsReadOnly();
-
-
-
     public Schema(string name)
     {
         Name = name;
@@ -31,6 +17,7 @@ public class Schema : ISchemaObject
 
     public void RegisterObject(ISchemaObject obj) => throw new NotImplementedException();
 
+    public ISChemaObjectIterator CreateIterator() => throw new NotImplementedException();
     public ISchemaObject UnregisterObject(string name) => throw new NotImplementedException();
     public void Drop() => throw new NotImplementedException();
 

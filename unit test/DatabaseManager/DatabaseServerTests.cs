@@ -37,7 +37,7 @@ public class DatabaseServerTests
         server.Start(config);
 
         // Assert
-        components.Received(1).Initialize(config);
+        components.Received(1).Start(config);
         server.IsRunning.Should().Be(true);
     }
 
@@ -48,7 +48,7 @@ public class DatabaseServerTests
         // Arrange
         var components = Substitute.For<IServerComponent>();
         components
-            .When(c => c.Initialize(Arg.Any<object>()))
+            .When(c => c.Start(Arg.Any<object>()))
             .Do(x => throw new ComponentInitializationException());
 
         var server = new DatabaseServer(new List<IServerComponent> { components });
@@ -77,7 +77,7 @@ public class DatabaseServerTests
         server.Stop();
 
         // Assert
-        components.Received(1).Shutdown();
+        components.Received(1).Stop();
         server.IsRunning.Should().Be(false);
     }
 
@@ -102,12 +102,12 @@ public class DatabaseServerTests
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Stop_WhenComponentShutdownFails_ShouldReportFailureAndRemainConsistent()
+    public void Stop_WhenComponentStopFails_ShouldReportFailureAndRemainConsistent()
     {
         // Arrange
         var components = Substitute.For<IServerComponent>();
         components
-            .When(c => c.Shutdown())
+            .When(c => c.Stop())
             .Do(x => throw new ComponentShutdownException());
 
         var config = new { Port = 5432, MaxConnections = 100 };
@@ -118,7 +118,7 @@ public class DatabaseServerTests
         Action act = () => server.Stop();
 
         // Assert
-        components.Received(1).Shutdown();
+        components.Received(1).Stop();
         act.Should().Throw<ComponentShutdownException>();
     }
 }

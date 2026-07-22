@@ -47,6 +47,37 @@ classDiagram
         +EstimateSelectivity(Predicate predicate) double
     }
 
+    class IServerComponent {
+        <<interface>>
+        +Start(object config) void
+        +Stop() void
+    }
+
+    class StorageEngine {
+        +Start(object config) void
+        +Stop() void
+    }
+
+    class TransactionManager {
+        +Start(object config) void
+        +Stop() void
+    }
+
+    class QueryProcessor {
+        +Start(object config) void
+        +Stop() void
+    }
+
+    class NetworkServer {
+        +Start(object config) void
+        +Stop() void
+    }
+
+    IServerComponent <|.. StorageEngine
+    IServerComponent <|.. TransactionManager
+    IServerComponent <|.. QueryProcessor
+    IServerComponent <|.. NetworkServer
+    DatabaseServer --> IServerComponent
     DatabaseServer --> DatabaseManager
     DatabaseManager --> Database
     DatabaseManager --> CatalogManager

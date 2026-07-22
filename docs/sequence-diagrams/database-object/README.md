@@ -241,6 +241,32 @@ classDiagram
     ISchemaObject <|.. View
     ISchemaObject <|.. StoredProcedure
     Schema *-- ISchemaObject
+
+    class IDDLCommand {
+        <<interface>>
+        +Execute() DDLResult
+    }
+
+    class DDLResult {
+        <<enumeration>>
+        Success
+        Failure
+    }
+
+    class CreateTableCommand {
+        -Schema _schema
+        -string _tableName
+        +Execute() DDLResult
+    }
+
+    class DDLCommandExecutor {
+        +Execute(IDDLCommand command) DDLResult
+    }
+
+    IDDLCommand <|.. CreateTableCommand
+    DDLCommandExecutor --> IDDLCommand
+    CreateTableCommand --> Schema
+    CreateTableCommand --> Table
 ```
 
 ## 2. Schema Tests

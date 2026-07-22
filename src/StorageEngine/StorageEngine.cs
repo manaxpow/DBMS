@@ -2,11 +2,11 @@ using System;
 
 
 
-public class StorageEngine
+public class StorageEngine : IServerComponent
 {
     public EngineState State { get; set; }
 
-    public void Initialize(object configuration)
+    public void Start(object configuration)
     {
         throw new NotImplementedException();
     }
@@ -31,7 +31,7 @@ public class StorageEngine
         throw new NotImplementedException();
     }
 
-    public void Shutdown()
+    public void Stop()
     {
         throw new NotImplementedException();
     }

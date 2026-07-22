@@ -5,7 +5,7 @@ public class StorageEngineTests
 {
     [Trait("Category", "Important")]
     [Fact]
-    public void Initialize_WhenConfigurationIsValid_ShouldInitializeComponents()
+    public void Start_WhenConfigurationIsValid_ShouldInitializeComponents()
     {
         throw new NotImplementedException();
     }
@@ -19,21 +19,21 @@ public class StorageEngineTests
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Shutdown_ShouldFlushDirtyPagesAndCloseFiles()
+    public void Stop_ShouldFlushDirtyPagesAndCloseFiles()
     {
         throw new NotImplementedException();
     }
 
 
     [Fact]
-    public void Initialize_WhenConfigurationIsInvalid_ShouldThrow()
+    public void Start_WhenConfigurationIsInvalid_ShouldThrow()
     {
         throw new NotImplementedException();
     }
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Initialize_WhenComponentFails_ShouldCleanUpInitializedComponents()
+    public void Start_WhenComponentFails_ShouldCleanUpInitializedComponents()
     {
         throw new NotImplementedException();
     }
@@ -46,14 +46,14 @@ public class StorageEngineTests
     }
 
     [Fact]
-    public void Shutdown_WhenEngineIsNotInitialized_ShouldRemainStopped()
+    public void Stop_WhenEngineIsNotInitialized_ShouldRemainStopped()
     {
         throw new NotImplementedException();
     }
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Shutdown_WhenFlushFails_ShouldPropagateFailure()
+    public void Stop_WhenFlushFails_ShouldPropagateFailure()
     {
         throw new NotImplementedException();
     }

@@ -20,21 +20,104 @@ This document tracks the design patterns used across different modules in the DB
 
 ---
 
-## 2. Database Management
+## 2. Pattern Implementation Details
 
-For Database Management patterns, please see [Database Management Patterns](./database-managment/README.md).
-
-_Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress._
-
-## 3. Pattern Implementation Details
-
-### 3.1. Template Method (Constraint)
+### 2.1. Template Method (Constraint)
 
 The **Template Method** pattern is used in the `Constraint` class.
 
 - Define a template method with **multiple steps**.
 
 - Delegate subclass implement how each step work.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class AbstractClass {
+        <<abstract>>
+        +TemplateMethod() void
+        +Step1() void
+        +Step2() bool
+        +Step3()* void
+        +Step4()* void
+    }
+
+    class ConcreteClass1 {
+        +Step3() void
+        +Step4() void
+    }
+
+    class ConcreteClass2 {
+        +Step1() void
+        +Step2() bool
+        +Step3() void
+        +Step4() void
+    }
+
+    AbstractClass <|-- ConcreteClass1
+    AbstractClass <|-- ConcreteClass2
+
+    note for AbstractClass "TemplateMethod()
+    Step1()
+    if (Step2())
+        Step3()
+    else
+        Step4()"
+```
+
+#### Example code
+
+```csharp
+// Abstract class
+public abstract class Constraint
+{
+public bool IsEnaled;
+
+    protected abstract bool Check (Context context);
+
+    public bool Validate(Context context)
+    {
+        if(!IsEnabled)
+        {
+            return true;
+        }
+        return Check(context);
+    }
+
+}
+
+// Concrete Class
+public class UniqueConstraint : Constraint
+{
+    protected override bool Check(Context context)
+    {
+        foreach(Row row in context.rows)
+        {
+            if(IsDouplicate(row, context))
+                return false;
+        }
+        return true;
+    }
+}
+
+public class PrimaryConstraint : Constraint
+{
+    protected override bool Check(Context context)
+    {
+        foreach(Row row in context.rows)
+        {
+            if(HasNullKey(row) || IsDouplicate(row,context))
+                return false;
+        }
+        return true;
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -89,12 +172,90 @@ sequenceDiagram
     deactivate BaseConstraint
 ```
 
-### 3.2. Factory Method (Constraint Creation)
+### 2.2. Factory Method (Constraint Creation)
 
 The **Factory Method** pattern uses for creating `Constraint`.
 
 - Define a abstract **Factory Method**
 - Delegate object creations to **Concrete Creator** through Polymorphism.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction LR
+
+    class Product {
+        <<interface>>
+    }
+
+    class ConcreteProduct
+
+    class Creator {
+        <<abstract>>
+        +FactoryMethod()* Product
+    }
+
+    class ConcreteCreator {
+        +FactoryMethod() Product
+    }
+
+    Product <|.. ConcreteProduct
+    Creator <|-- ConcreteCreator
+
+    ConcreteCreator ..> ConcreteProduct : creates
+```
+
+#### Example code
+
+```csharp
+// Creator
+public abstract class ConstraintCreator
+{
+    public abstract Constraint FactoryMethod();
+}
+
+// Concrete Creator
+public class ForeignKeyConstraintCreator : ConstraintCreator
+{
+    public override Constraint FactoryMethod()
+    {
+        return new ForeignKey();
+    }
+}
+
+public class PrimaryKeyConstraintCreator : ConstraintCreator
+{
+    public override Constraint FactoryMethod()
+    {
+        return new PrimaryKey();
+    }
+}
+
+// Product
+public interface Constraint
+{
+    void DoSomething();
+}
+
+// Concrete Product
+public class ForeignKey : Constraint
+{
+    public void DoSomething()
+    {
+        // Do foreign key work
+    }
+}
+public class PrimaryKey : Constraint
+{
+    public void DoSomething()
+    {
+        // Do primary key work
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -177,11 +338,76 @@ sequenceDiagram
     deactivate Creator
 ```
 
-### 3.3. Strategy (Referential Action)
+### 2.3. Strategy (Referential Action)
 
 The **Strategy** pattern is used to implemnt Referential Action of FK.
 
 - **Using Polymorphism to dispatch appropriate algorithm** (runtime).
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Strategy {
+        <<interface>>
+        +Algorithm()
+    }
+    class ConcreteStrategyA {
+        +Algorithm()
+    }
+    class ConcreteStrategyB {
+        +Algorithm()
+    }
+    class Context {
+        -Strategy strategy
+        +SetStrategy(Strategy)
+        +ExecuteStrategy()
+    }
+    Strategy <|.. ConcreteStrategyA
+    Strategy <|.. ConcreteStrategyB
+    Context o--> Strategy
+```
+
+#### Example code
+
+```csharp
+// Strategy
+public interface IReferentialAction
+{
+    void Execute(Row parentRow, Table childTable);
+}
+
+// Concrete Strategy
+public class CascadeAction : IReferentialAction
+{
+    public void Execute(Row parentRow, Table childTable)
+    {
+        // Delete all row related
+        foreach(Row row in childTable.rows)
+        {
+            row.Remove();
+        }
+    }
+}
+
+// Context
+public class ForeingKey
+{
+    private IReferentialAction _strategy;
+
+    public void SetStrategy(IStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+
+    public void ExecuteStrategy()
+    {
+        _strategy.Execute(parentRow, childTable);
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -248,10 +474,73 @@ sequenceDiagram
     deactivate FK
 ```
 
-### 3.4. Composite (Schema Objects)
+### 2.4. Composite (Schema Objects)
 
 The **Composite** pattern is used to treat individual database objects (`Table`, `View`, `StoredProcedure`) and groups of objects uniformly.
 The `Schema` class acts as the composite node that manages collections of these leaf objects. When a high-level lifecycle operation such as `Drop()` is performed on the `Schema`, it delegates the operation to all of its child components.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Component {
+        <<interface>>
+        +Operation()
+    }
+    class Leaf {
+        +Operation()
+    }
+    class Composite {
+        -List~Component~ children
+        +Add(Component)
+        +Remove(Component)
+        +Operation()
+    }
+    Component <|.. Leaf
+    Component <|.. Composite
+    Composite o--> Component
+```
+
+#### Example code
+
+```csharp
+
+// Component
+public interface ISchemaObject
+{
+    void Drop();
+}
+
+// Leaft
+public class Table : ISchemaObject
+{
+    public void Drop()
+    {
+        // Table Drop
+    }
+}
+
+// Composite
+public class Schema : ISchemaObject
+{
+    private readonly List<ISchemaObject> _children = new List<ISchemaObject>();
+
+    public void Add(ISchemaObject component)
+    {
+        _children.Add(component);
+    }
+
+    public void Drop()
+    {
+        foreach(ISchemaObject child in _children)
+        {
+            _children.Drop();
+        }
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -307,10 +596,88 @@ sequenceDiagram
     deactivate Schema
 ```
 
-### 3.5. Command (DDL Command)
+### 2.5. Command (DDL Command)
 
 The **Command** pattern is used to encapsulate DDL operations (like `CreateTable`, `DropTable`, and `AlterTable`) into standalone command objects.
 This allows the system to parameterize clients with different requests, queue or log requests, and support undoable operations. The `DDLCommandExecutor` acts as the invoker that executes the concrete `IDDLCommand`.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Command {
+        <<interface>>
+        +Execute()
+    }
+    class ConcreteCommand {
+        -Receiver receiver
+        +Execute()
+    }
+    class Receiver {
+        +Action()
+    }
+    class Invoker {
+        -Command command
+        +SetCommand(Command)
+        +ExecuteCommand()
+    }
+    Command <|.. ConcreteCommand
+    ConcreteCommand --> Receiver
+    Invoker o--> Command
+```
+
+#### Example code
+
+```csharp
+// Command
+public interface IDDLCommand
+{
+    void Execute();
+}
+
+// Concrete IDDLCommand
+public class CreateTableCommand : IDDLCommand
+{
+    private readonly Table _table;
+
+    public ConcreteCommand(Table table)
+    {
+        _table = table;
+    }
+
+    public void Execute()
+    {
+        _table.Create();
+    }
+}
+
+// Receiver
+public class Table
+{
+    public void Create()
+    {
+        // Create table
+    }
+}
+
+// Invoker
+public class DDLCommandExecutor
+{
+    private IDDLCommand _command;
+
+    public void SetCommand(IDDLCommand command)
+    {
+        _command = command;
+    }
+
+    public void ExecuteCommand()
+    {
+        _command.Execute();
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -387,12 +754,94 @@ sequenceDiagram
     deactivate Executor
 ```
 
-### 3.6. Iterator (Schema Object Traversal)
+### 2.6. Iterator (Schema Object Traversal)
 
 The **Iterator** pattern provides sequential access to schema objects without exposing the internal collection structures
 
 - Encapsulates the traversal logic inside an Iterator.
 - Allow client traverse a collection without knowing about how it's stored.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Iterator {
+        <<interface>>
+        +GetNext()
+        +HasMore() bool
+    }
+    class IterableCollection {
+        <<interface>>
+        +CreateIterator() Iterator
+    }
+    class ConcreteIterator {
+        -ConcreteCollection collection
+        +GetNext()
+        +HasMore() bool
+    }
+    class ConcreteCollection {
+        +CreateIterator() Iterator
+    }
+    Iterator <|.. ConcreteIterator
+    IterableCollection <|.. ConcreteCollection
+    ConcreteCollection <.. ConcreteIterator
+    ConcreteIterator ..> ConcreteCollection
+```
+
+#### Example code
+
+```csharp
+
+// Iterator
+public interface ISchemaObjectIterator
+{
+    ISchemaObject GetNext();
+    bool HasMore();
+}
+
+// Concrete Iterator
+public class SchemaObjectIterator : ISchemaObjectIterator
+{
+    private readonly List<ISchemaObject> _collection;
+    private int _position;
+
+    public SchemaObjectIterator(List<ISchemaObject> collection, int position)
+    {
+        _collection = collection;
+        _position = position;
+    }
+
+    public ISchemaObject GetNext()
+    {
+        return _collection[_position++];
+    }
+
+    public bool HasMore()
+    {
+        return _collection.Length() < _postion;
+    }
+}
+
+// Iterable Collection
+public interface ISchemaObjectCollection
+{
+    ISchemaObjectIterator CreateIterator();
+}
+
+// Concrete Collection
+public class Schema : ISchemaObjectCollection
+{
+    private readonly List<ISchemaObject> _objects = new();
+    public ISchemaObjectIterator CreateIterator()
+    {
+        return new SchemaObjectIterator(_object);
+    }
+}
+
+
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -565,11 +1014,93 @@ sequenceDiagram
     TI-->>Test: false
 ```
 
-### 3.7. Visitor (Schema Operations)
+### 2.7. Visitor (Schema Operations)
 
 The **Visitor** pattern is used for schema operations like backup, export, and validation.
 
 - It allows **defining new operations** on schema objects (Table, View, StoredProcedure, Schema) **without modifying their classes**.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Visitor {
+        <<interface>>
+        +VisitElementA(ElementA)
+        +VisitElementB(ElementB)
+    }
+    class ConcreteVisitor {
+        +VisitElementA(ElementA)
+        +VisitElementB(ElementB)
+    }
+    class Element {
+        <<interface>>
+        +Accept(Visitor)
+    }
+    class ElementA {
+        +Accept(Visitor)
+    }
+    class ElementB {
+        +Accept(Visitor)
+    }
+    Visitor <|.. ConcreteVisitor
+    Element <|.. ElementA
+    Element <|.. ElementB
+    ConcreteVisitor ..> ElementA
+    ConcreteVisitor ..> ElementB
+```
+
+#### Example code
+
+```csharp
+
+// Visitor
+public interface ISchemaVistor
+{
+    void Visit(Schema element);
+    void Visit(Table element);
+}
+
+
+// Concrete Visitor
+public class BackupVisitor : ISchemaVistor
+{
+    public void Visit(Schema element)
+    {
+        // Visit Schema
+    }
+
+    public void Visit(Table element)
+    {
+        // Visit Table
+    }
+}
+
+// Element
+public interface ISchemaObject
+{
+    void Accept(ISchemaVistor visitor);
+}
+
+// Concrete Element
+public class Table : ISchemaObject
+{
+    public void Accept(IVisitor visitor)
+    {
+        vistor.Visit(this);
+    }
+}
+
+public class Schema : ISchemaObject
+{
+    public void Accept(IVisitor visitor)
+    {
+        vistor.Visit(this);
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -707,9 +1238,98 @@ sequenceDiagram
     T-->>Client: Completed
 ```
 
-### 3.8. Builder (Table Definition)
+### 2.8. Builder (Table Definition)
 
 The **Builder** pattern is used to construct complex `Table` objects step by step. This encapsulates the construction logic of columns, constraints, indexes, and partitions, keeping the `Table` constructor clean and preventing partially initialized tables.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Builder {
+        <<interface>>
+        +BuildPartA()
+        +BuildPartB()
+        +GetResult() Product
+    }
+    class ConcreteBuilder {
+        -Product product
+        +BuildPartA()
+        +BuildPartB()
+        +GetResult() Product
+    }
+    class Director {
+        -Builder builder
+        +Construct()
+    }
+    class Product {
+    }
+    Builder <|.. ConcreteBuilder
+    ConcreteBuilder ..> Product
+    Director o--> Builder
+```
+
+#### Example code
+
+```csharp
+// Product
+public class Table
+{
+    // Table details
+}
+
+// Builder
+public interface ITableBuilder
+{
+    ITableBuilder SetName(string name);
+    ITableBuilder SetForeignKey(List<ForeignKey> fk);
+    ITableBuilder SetPrimaryKey(List<PrimaryKey> pk);
+    Table Build();
+}
+
+// Concrete Builder
+public class TableBuilder : ITableBuilder
+{
+    private Table _table = new Table();
+
+    public  ITableBuilder SetName(string name)
+    {
+        _table.SetName(name);
+    }
+
+    public ITableBuilder SetPrimaryKey(List<PrimaryKey> pk)
+    {
+        _table.SetPrimaryKey(pk);
+    }
+    public ITableBuilder SetForeignKey(List<ForeignKey> fk)
+    {
+        _table.SetPForeignKey(fk);
+    }
+
+    public Table Build()
+    {
+        return _table;
+    }
+}
+
+// Director
+public class Director
+{
+    private readonly ITableBuilder _builder;
+
+    public Director(ITableBuilder builder)
+    {
+        _builder = builder;
+    }
+
+    public void Construct()
+    {
+
+    }
+}
+```
+
+#### Class diagram
 
 ```mermaid
 classDiagram
@@ -756,40 +1376,40 @@ classDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    
+
     actor Client
     participant TB as TableBuilder
     participant T as Table
-    
+
     Client->>TB: SetName("Users")
     TB-->>Client: ITableBuilder
-    
+
     loop For each Column
         Client->>TB: AddColumn(col)
         TB-->>Client: ITableBuilder
     end
-    
+
     loop For each Constraint
         Client->>TB: AddConstraint(const)
         TB-->>Client: ITableBuilder
     end
-    
+
     loop For each Index
         Client->>TB: AddIndex(idx)
         TB-->>Client: ITableBuilder
     end
-    
+
     loop For each Partition
         Client->>TB: AddPartition(part)
         TB-->>Client: ITableBuilder
     end
-    
+
     Client->>TB: Build()
     activate TB
-    
+
     TB->>T: new Table(...)
     T-->>TB: Table
-    
+
     TB-->>Client: Table
     deactivate TB
 ```

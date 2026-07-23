@@ -29,7 +29,7 @@ flowchart LR
     %% =========================================================
 
     Mgmt_F["🔴 Facade ☑<br/>DatabaseServer"] --> DBMgmt["Database Management"]
-    Mgmt_Cmd["🔴 Command ☐<br/>Database Operations"] --> DBMgmt
+    Mgmt_Cmd["🔴 Command ☑<br/>Database Operations"] --> DBMgmt
     Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
     Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
 
@@ -363,6 +363,7 @@ flowchart LR
     Facade["Facade"]
     Observer["Observer"]
     State["State"]
+    Command["Command"]
 
     %% Facade Files & Methods
     Facade --> Fac_DST["DatabaseServerTests.cs"]
@@ -410,10 +411,31 @@ flowchart LR
     St_DT --> St_DT_4["Close_WhenFlushFails_ShouldNotReportSuccessfulClose"]
     St_DT --> St_DT_5["Open_WhenDatabaseIsAlreadyOpen_ShouldRemainOpen"]
     St_DT --> St_DT_6["Close_WhenDatabaseIsAlreadyClosed_ShouldRemainClosed"]
+
+    %% Command Files & Methods
+    Command["Command"]
+    
+    Command --> Cmd_CDC["CreateDatabaseCommandTests.cs"]
+    Cmd_CDC --> Cmd_CDC_1["Execute_WhenDatabaseDoesNotExist_ShouldAddDatabaseAndReturnSuccess"]
+    Cmd_CDC --> Cmd_CDC_2["Execute_WhenDatabaseAlreadyExists_ShouldReturnFailure"]
+
+    Command --> Cmd_DDC["DropDatabaseCommandTests.cs"]
+    Cmd_DDC --> Cmd_DDC_1["Execute_WhenDatabaseExists_ShouldDropDatabaseAndReturnSuccess"]
+    Cmd_DDC --> Cmd_DDC_2["Execute_WhenDatabaseDoesNotExist_ShouldReturnFailure"]
+
+    Command --> Cmd_RDC["RenameDatabaseCommandTests.cs"]
+    Cmd_RDC --> Cmd_RDC_1["Execute_WhenDatabaseExists_ShouldRenameDatabaseAndReturnSuccess"]
+    Cmd_RDC --> Cmd_RDC_2["Execute_WhenDatabaseDoesNotExist_ShouldReturnFailure"]
+    Cmd_RDC --> Cmd_RDC_3["Execute_WhenNewNameAlreadyExists_ShouldReturnFailure"]
+
+    Command --> Cmd_DCE["DDLCommandExecutorTests.cs"]
+    Cmd_DCE --> Cmd_DCE_1["Execute_WhenCommandIsValid_ShouldInvokeCommandAndReturnResult"]
 ```
 
 ## 3. Query Processor
 
 *(Implementation and pattern class diagrams are currently pending)*
+
+
 
 

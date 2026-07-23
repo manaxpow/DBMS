@@ -1,795 +1,419 @@
-# Database Design Patterns
+﻿# Database Design Patterns
 
 This document tracks the design patterns used across different modules in the DBMS and their current implementation status.
 
+```mermaid
+flowchart LR
+
+    %% =========================================================
+    %% LEFT SIDE — DATABASE OBJECTS
+    %% =========================================================
+
+    Obj_TM["🔴 Template Method ☑<br/>Constraint Validation"] --> DBObj["Database Objects"]
+    Obj_FM["🔴 Factory Method ☑<br/>Constraint Creation"] --> DBObj
+    Obj_S["🔴 Strategy ☑<br/>Referential Actions"] --> DBObj
+    Obj_C["🔴 Composite ☑<br/>Schema Objects"] --> DBObj
+    Obj_Cmd["🔴 Command ☑<br/>DDL Operations"] --> DBObj
+
+    Obj_I["🟡 Iterator ☑<br/>Schema Traversal"] --> DBObj
+    Obj_V["🟡 Visitor ☑<br/>Schema Operations"] --> DBObj
+    Obj_B["🟡 Builder ☑<br/>Table Definition"] --> DBObj
+
+    Obj_P["🟢 Prototype ☐<br/>Object Cloning"] --> DBObj
+    Obj_D["🟢 Decorator ☐<br/>Constraint Extension"] --> DBObj
+    Obj_M["🟢 Mediator ☐<br/>Dependency Coordination"] --> DBObj
+
+
+    %% =========================================================
+    %% LEFT SIDE — DATABASE MANAGEMENT
+    %% =========================================================
+
+    Mgmt_F["🔴 Facade ☑<br/>DatabaseServer"] --> DBMgmt["Database Management"]
+    Mgmt_Cmd["🔴 Command ☐<br/>Database Operations"] --> DBMgmt
+    Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
+    Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
+
+    Mgmt_FM["🟡 Factory Method ☐<br/>Database Creation"] --> DBMgmt
+    Mgmt_TM["🟡 Template Method ☐<br/>Lifecycle Workflow"] --> DBMgmt
+
+    Mgmt_B["🟢 Builder ☐<br/>Database Configuration"] --> DBMgmt
+    Mgmt_M["🟢 Mediator ☐<br/>Subsystem Coordination"] --> DBMgmt
+
+
+    %% =========================================================
+    %% LEFT SIDE — STORAGE ENGINE
+    %% =========================================================
+
+    SE_Str["🔴 Strategy ☐<br/>Page Replacement"] --> SE["Storage Engine"]
+    SE_F["🔴 Facade ☐<br/>Storage API"] --> SE
+    SE_A["🔴 Adapter ☐<br/>Physical File System"] --> SE
+
+    SE_TM["🟡 Template Method ☐<br/>Page Operations"] --> SE
+    SE_FM["🟡 Factory Method ☐<br/>Page Creation"] --> SE
+    SE_P["🟡 Proxy ☐<br/>Buffered Page Access"] --> SE
+
+    SE_S["🟢 State ☐<br/>Engine Lifecycle"] --> SE
+    SE_D["🟢 Decorator ☐<br/>Storage Instrumentation"] --> SE
+
+
+    %% =========================================================
+    %% LEFT SIDE — TRANSACTION MANAGEMENT
+    %% =========================================================
+
+    TM_F["🔴 Facade ☐<br/>Transaction API"] --> TM["Transaction Management"]
+    TM_Str["🔴 Strategy ☐<br/>Concurrency Control"] --> TM
+    TM_S["🔴 State ☐<br/>Transaction Lifecycle"] --> TM
+    TM_CoR["🔴 Chain of Responsibility ☐<br/>Lock Compatibility"] --> TM
+
+    TM_Cmd["🟡 Command ☐<br/>Transactional Operations"] --> TM
+    TM_O["🟡 Observer ☐<br/>Transaction Events"] --> TM
+    TM_TM["🟡 Template Method ☐<br/>Commit / Rollback Workflow"] --> TM
+
+    TM_FM["🟢 Factory Method ☐<br/>Transaction Creation"] --> TM
+
+
+    %% =========================================================
+    %% LEFT SIDE — RECOVERY MANAGEMENT
+    %% =========================================================
+
+    RM_TM["🔴 Template Method ☐<br/>Recovery Workflow"] --> RM["Recovery Management"]
+    RM_Cmd["🔴 Command ☐<br/>WAL Log Records"] --> RM
+    RM_Str["🔴 Strategy ☐<br/>Recovery / Backup Strategy"] --> RM
+
+    RM_O["🟡 Observer ☐<br/>Recovery Events"] --> RM
+    RM_B["🟡 Builder ☐<br/>Backup Construction"] --> RM
+    RM_CoR["🟡 Chain of Responsibility ☐<br/>Recovery Phases"] --> RM
+
+    RM_FM["🟢 Factory Method ☐<br/>Log Record Creation"] --> RM
+
+
+    %% =========================================================
+    %% LEFT MODULES → ROOT
+    %% =========================================================
+
+    DBObj --- Root["DBMS<br/>Design Patterns"]
+    DBMgmt --- Root
+    SE --- Root
+    TM --- Root
+    RM --- Root
+
+
+    %% =========================================================
+    %% ROOT → RIGHT MODULES
+    %% =========================================================
+
+    Root --- QP["Query Processor"]
+    Root --- CM["Catalog Management"]
+    Root --- SM["Security Management"]
+    Root --- RepM["Replication Management"]
+    Root --- MonM["Monitoring Management"]
+
+
+    %% =========================================================
+    %% RIGHT SIDE — QUERY PROCESSOR
+    %% =========================================================
+
+    QP --> QP_Int["🔴 Interpreter ☐<br/>SQL / AST Evaluation"]
+    QP --> QP_Vis["🔴 Visitor ☐<br/>AST Processing"]
+    QP --> QP_Str["🔴 Strategy ☐<br/>Query Optimization"]
+    QP --> QP_FM["🔴 Factory Method ☐<br/>Physical Operator Creation"]
+    QP --> QP_Comp["🔴 Composite ☐<br/>Query Plan Tree"]
+    QP --> QP_Iter["🔴 Iterator ☐<br/>Volcano Execution"]
+
+    QP --> QP_CoR["🟡 Chain of Responsibility ☐<br/>Optimization Pipeline"]
+    QP --> QP_Cmd["🟡 Command ☐<br/>SQL Statement Execution"]
+    QP --> QP_Bld["🟡 Builder ☐<br/>Query Plan Construction"]
+
+    QP --> QP_TM["🟢 Template Method ☐<br/>Operator Lifecycle"]
+
+
+    %% =========================================================
+    %% RIGHT SIDE — CATALOG MANAGEMENT
+    %% =========================================================
+
+    CM --> CM_R["🔴 Repository ☐<br/>Catalog Object Registry"]
+    CM --> CM_O["🔴 Observer ☐<br/>Metadata Synchronization"]
+    CM --> CM_Str["🔴 Strategy ☐<br/>Selectivity Estimation"]
+
+    CM --> CM_V["🟡 Visitor ☐<br/>Metadata Operations"]
+    CM --> CM_FM["🟡 Factory Method ☐<br/>Catalog Entry Creation"]
+    CM --> CM_C["🟡 Composite ☐<br/>Metadata Hierarchy"]
+
+    CM --> CM_D["🟢 Decorator ☐<br/>Metadata Cache"]
+
+
+    %% =========================================================
+    %% RIGHT SIDE — SECURITY MANAGEMENT
+    %% =========================================================
+
+    SM --> SM_CoR["🔴 Chain of Responsibility ☐<br/>Authentication / Authorization"]
+    SM --> SM_Comp["🔴 Composite ☐<br/>Role / Permission Hierarchy"]
+    SM --> SM_P["🔴 Proxy ☐<br/>Protected Resource Access"]
+
+    SM --> SM_Str["🟡 Strategy ☐<br/>Authentication Strategy"]
+    SM --> SM_O["🟡 Observer ☐<br/>Security Audit Events"]
+
+    SM --> SM_FM["🟢 Factory Method ☐<br/>Principal Creation"]
+    SM --> SM_D["🟢 Decorator ☐<br/>Audit Extension"]
+
+
+    %% =========================================================
+    %% RIGHT SIDE — REPLICATION MANAGEMENT
+    %% =========================================================
+
+    RepM --> Rep_Str["🔴 Strategy ☐<br/>Replication Mode"]
+    RepM --> Rep_O["🔴 Observer ☐<br/>Database Change Events"]
+    RepM --> Rep_S["🔴 State ☐<br/>Cluster Node Lifecycle"]
+
+    RepM --> Rep_Cmd["🟡 Command ☐<br/>Replication Messages"]
+    RepM --> Rep_M["🟡 Mediator ☐<br/>Cluster Coordination"]
+
+    RepM --> Rep_CoR["🟢 Chain of Responsibility ☐<br/>Replication Pipeline"]
+
+
+    %% =========================================================
+    %% RIGHT SIDE — MONITORING MANAGEMENT
+    %% =========================================================
+
+    MonM --> Mon_O["🔴 Observer ☐<br/>System Events"]
+    MonM --> Mon_Str["🔴 Strategy ☐<br/>Metric Collection"]
+
+    MonM --> Mon_D["🟡 Decorator ☐<br/>Instrumentation"]
+    MonM --> Mon_V["🟡 Visitor ☐<br/>Component Inspection"]
+
+    MonM --> Mon_A["🟢 Adapter ☐<br/>External Monitoring Export"]
+
+
+    %% =========================================================
+    %% STYLES
+    %% =========================================================
+
+    classDef root fill:#dbeafe,stroke:#1d4ed8,stroke-width:5px,color:#111827,font-weight:bold,font-size:18px;
+
+    classDef main_module fill:#8b5cf6,stroke:#5b21b6,stroke-width:4px,color:#ffffff,font-weight:bold,font-size:17px;
+
+    classDef module fill:#fbbf24,stroke:#b45309,stroke-width:3px,color:#111827,font-weight:bold,font-size:15px;
+
+    classDef implemented fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#111827;
+
+    classDef high fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#111827;
+
+    classDef medium fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#111827;
+
+    classDef low fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#111827;
+
+
+    %% ROOT
+    class Root root;
+
+
+    %% MODULES
+    class DBObj,DBMgmt main_module;
+    class SE,TM,RM,QP,CM,SM,RepM,MonM module;
+
+
+%% HIGH PRIORITY
+    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,QP_Comp,QP_Iter,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
+
+
+    %% MEDIUM PRIORITY
+    class Obj_I,Obj_V,Obj_B,Mgmt_FM,Mgmt_TM,SE_TM,SE_FM,SE_P,TM_Cmd,TM_O,TM_TM,RM_O,RM_B,RM_CoR,QP_CoR,QP_Cmd,QP_Bld,CM_V,CM_FM,CM_C,SM_Str,SM_O,Rep_Cmd,Rep_M,Mon_D,Mon_V medium;
+
+
+    %% LOW PRIORITY
+    class Obj_P,Obj_D,Obj_M,Mgmt_B,Mgmt_M,SE_S,SE_D,TM_FM,RM_FM,QP_TM,CM_D,SM_FM,SM_D,Rep_CoR,Mon_A low;
+```
+
+
 ## 1. Database Objects
 
-| Priority  | Status | Design Pattern      | Feature                 | Reason / Context                                                                                      |
-| :-------: | :----: | :------------------ | :---------------------- | :---------------------------------------------------------------------------------------------------- |
-|  🔴 High  | `[x]`  | **Template Method** | Constraint              | `Validate()` defines the workflow, while each concrete constraint only implements `Check()`.          |
-|  🔴 High  | `[x]`  | **Factory Method**  | Constraint Creation     | Creates `PrimaryKey`, `ForeignKey`, `Unique`, and `CheckConstraint` objects from metadata.            |
-|  🔴 High  | `[x]`  | **Strategy**        | Referential Action      | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting or updating referenced rows. |
-|  🔴 High  | `[x]`  | **Composite**       | Schema Objects          | Schema contains Tables, Views, and Stored Procedures and manages them uniformly as `ISchemaObject`.   |
-|  🔴 High  | `[x]`  | **Command**         | DDL Command             | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into command objects.        |
-| 🟡 Medium | `[x]`  | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
-| 🟡 Medium | `[x]`  | **Visitor**         | Schema Operations       | Backup, Export, and Validation can operate on all schema object types.                                |
-| 🟡 Medium | `[x]`  | **Builder**         | Table Definition        | Builds a Table step by step from columns, constraints, indexes, and partitions.                       |
-|  🟢 Low   | `[ ]`  | **Prototype**       | Schema Object Cloning   | Clones schema objects for migration, temporary objects, or schema duplication.                        |
-|  🟢 Low   | `[ ]`  | **Decorator**       | Constraint Extension    | Adds logging, metrics, or auditing without modifying existing constraints.                            |
-|  🟢 Low   | `[ ]`  | **Mediator**        | Dependency Management   | Coordinates interactions among Tables, Views, Procedures, and Foreign Keys.                           |
+### Design Patterns & Unit Tests Flowchart
 
----
+```mermaid
+flowchart LR
+    %% Patterns
+    TM["Template Method"]
+    FM["Factory Method"]
+    S["Strategy"]
+    C["Composite"]
+    Cmd["Command"]
+    I["Iterator"]
+    V["Visitor"]
+    B["Builder"]
+
+    %% Template Method Files & Methods
+    TM --> TM_CT["ConstraintTests.cs"]
+    TM_CT --> TM_CT_1["Validate_WhenConstraintIsEnabled_ShouldCallCheck"]
+    TM_CT --> TM_CT_2["Validate_WhenCheckReturnsTrue_ShouldReturnTrue"]
+    TM_CT --> TM_CT_3["Validate_WhenCheckReturnsFalse_ShouldReturnFalse"]
+    TM_CT --> TM_CT_4["Validate_WhenConstraintIsDisabled_ShouldSkipCheck"]
+    TM_CT --> TM_CT_5["Disable_WhenConstraintIsEnabled_ShouldDisable"]
+    TM_CT --> TM_CT_6["Enable_WhenConstraintIsDisabled_ShouldEnable"]
+
+    TM --> TM_UC["UniqueConstraintTests.cs"]
+    TM_UC --> TM_UC_1["Validate_WhenKeyIsUnique_ShouldReturnTrue"]
+    TM_UC --> TM_UC_2["Validate_WhenDuplicateKeyExists_ShouldReturnFalse"]
+    TM_UC --> TM_UC_3["Validate_WhenUpdatingSameRow_ShouldIgnoreExistingRow"]
+    TM_UC --> TM_UC_4["Validate_WhenCompositeKeyAlreadyExists_ShouldReturnFalse"]
+
+    TM --> TM_PC["PrimaryKeyConstraintTests.cs"]
+    TM_PC --> TM_PC_1["Validate_WhenKeyIsUniqueAndNotNull_ShouldReturnTrue"]
+    TM_PC --> TM_PC_2["Validate_WhenKeyContainsNull_ShouldReturnFalse"]
+    TM_PC --> TM_PC_3["Validate_WhenDuplicateKeyExists_ShouldReturnFalse"]
+    TM_PC --> TM_PC_4["Validate_WhenUpdatingSameRow_ShouldIgnoreExistingRow"]
+
+    TM --> TM_CC["CheckConstraintTests.cs"]
+    TM_CC --> TM_CC_1["Validate_WhenPredicateReturnsTrue_ShouldReturnTrue"]
+    TM_CC --> TM_CC_2["Validate_WhenPredicateReturnsFalse_ShouldReturnFalse"]
+    TM_CC --> TM_CC_3["Validate_WhenPredicateUsesMultipleColumns_ShouldEvaluateCandidateRow"]
+
+    TM --> TM_FC["ForeignKeyConstraintTests.cs"]
+    TM_FC --> TM_FC_1["Validate_WhenReferencedValueExists_ShouldReturnTrue"]
+    TM_FC --> TM_FC_2["Validate_WhenReferencedValueDoesNotExist_ShouldReturnFalse"]
+    TM_FC --> TM_FC_3["Validate_WhenForeignKeyValueIsNull_ShouldSkipReferenceCheck"]
+    TM_FC --> TM_FC_4["Validate_WhenReferencedTableDoesNotExist_ShouldThrow"]
+    TM_FC --> TM_FC_5["Validate_WhenReferencedColumnDoesNotExist_ShouldThrow"]
+
+    %% Factory Method Files & Methods
+    FM --> FM_CCT["ConstrainCreatorTests.cs"]
+    FM_CCT --> FM_CCT_1["CreateConstraint_ShouldReturnValidConstraint"]
+
+    FM --> FM_CCR["ContraintCreatorRegistryTests.cs"]
+    FM_CCR --> FM_CCR_1["Register_ShouldAddCreator"]
+    FM_CCR --> FM_CCR_2["GetCreator_ShouldReturnRegisteredCreator"]
+
+    %% Strategy Files & Methods
+    S --> S_RAT["ReferentialActionTests.cs"]
+    S_RAT --> S_RAT_1["ForeignKeyConstraint_OnParentRowDeleted_WhenRestrictStrategy_ShouldThrowReferentialIntegrityException"]
+    S_RAT --> S_RAT_2["ForeignKeyConstraint_OnParentRowDeleted_WhenCascadeStrategy_ShouldDelegateToStrategy"]
+    S_RAT --> S_RAT_3["ForeignKeyConstraint_OnParentRowDeleted_WhenSetNullStrategy_ShouldDelegateToStrategy"]
+
+    %% Composite Files & Methods
+    C --> C_ST["SchemaTests.cs"]
+    C_ST --> C_ST_1["AddTable_WhenTableIsValid_ShouldRegisterTable"]
+    C_ST --> C_ST_2["AddTable_WhenTableIsNull_ShouldThrow"]
+    C_ST --> C_ST_3["AddTable_WhenNameAlreadyExists_ShouldThrow"]
+    C_ST --> C_ST_4["GetTable_WhenTableExists_ShouldReturnTable"]
+    C_ST --> C_ST_5["GetTable_WhenTableDoesNotExist_ShouldReturnNull"]
+    C_ST --> C_ST_6["ContainsTable_WhenTableExists_ShouldReturnTrue"]
+    C_ST --> C_ST_7["ContainsTable_WhenTableDoesNotExist_ShouldReturnFalse"]
+    C_ST --> C_ST_8["DropTable_WhenTableIsNotReferenced_ShouldRemoveTable"]
+    C_ST --> C_ST_9["DropTable_WhenTableIsReferencedByForeignKey_ShouldThrow"]
+    C_ST --> C_ST_10["DropTable_WhenTableDoesNotExist_ShouldThrow"]
+    C_ST --> C_ST_11["AlterTable_WhenTableExists_ShouldUpdateTable"]
+    C_ST --> C_ST_12["AlterTable_WhenTableDoesNotExist_ShouldThrow"]
+    C_ST --> C_ST_13["Drop_WhenSchemaIsEmpty_ShouldNotThrow"]
+    C_ST --> C_ST_14["DropSchema_WhenSchemaContainsObjects_ShouldThrow"]
+    C_ST --> C_ST_15["DropSchema_WhenCascadeIsTrue_ShouldDropAllSchemaObjectsAndNotThrow"]
+
+    %% Command Files & Methods
+    Cmd --> Cmd_CTC["CreateTableCommandTests.cs"]
+    Cmd_CTC --> Cmd_CTC_1["Execute_WhenTableDoesNotExist_ShouldAddTableAndReturnSuccess"]
+    Cmd_CTC --> Cmd_CTC_2["Execute_WhenTableAlreadyExists_ShouldThrowTableAlreadyExistsException"]
+
+    Cmd --> Cmd_DTC["DropTableCommandTests.cs"]
+    Cmd_DTC --> Cmd_DTC_1["Execute_ShouldDropTableFromSchema"]
+
+    Cmd --> Cmd_ATC["AlterTableCommandTests.cs"]
+    Cmd_ATC --> Cmd_ATC_1["Execute_ShouldAlterTableInSchema"]
+
+    Cmd --> Cmd_DDL["DDLCommandExecutorTests.cs"]
+    Cmd_DDL --> Cmd_DDL_1["Execute_WhenCommandIsValid_ShouldReturnCommandResult"]
+
+    %% Iterator Files & Methods
+    I --> I_ST["SchemaTests.cs (Iterator)"]
+    I_ST --> I_ST_1["(Covered by SchemaTests.cs composite operations)"]
+
+    %% Visitor Files & Methods
+    V --> V_BV["BackupVisitorTests.cs"]
+    V_BV --> V_BV_1["Visit_Schema_ShouldBackupSchema"]
+    V_BV --> V_BV_2["Visit_Table_ShouldBackupTable"]
+    V_BV --> V_BV_3["Visit_View_ShouldBackupView"]
+    V_BV --> V_BV_4["Visit_StoredProcedure_ShouldBackupStoredProcedure"]
+
+    V --> V_EV["ExportVisitorTests.cs"]
+    V_EV --> V_EV_1["Visit_Schema_ShouldExportSchema"]
+    V_EV --> V_EV_2["Visit_Table_ShouldExportTable"]
+    V_EV --> V_EV_3["Visit_View_ShouldExportView"]
+    V_EV --> V_EV_4["Visit_StoredProcedure_ShouldExportStoredProcedure"]
+
+    V --> V_VV["ValidationVisitorTests.cs"]
+    V_VV --> V_VV_1["Visit_Schema_ShouldValidateSchema"]
+    V_VV --> V_VV_2["Visit_Table_ShouldValidateTable"]
+    V_VV --> V_VV_3["Visit_View_ShouldValidateView"]
+    V_VV --> V_VV_4["Visit_StoredProcedure_ShouldValidateStoredProcedure"]
+
+    %% Builder Files & Methods
+    B --> B_TB["TableBuilderTests.cs"]
+    B_TB --> B_TB_1["SetName_ShouldReturnBuilder_AndSetTableName"]
+    B_TB --> B_TB_2["AddColumn_ShouldReturnBuilder_AndAddColumn"]
+    B_TB --> B_TB_3["AddConstraint_ShouldReturnBuilder_AndAddConstraint"]
+    B_TB --> B_TB_4["AddIndex_ShouldReturnBuilder_AndAddIndex"]
+    B_TB --> B_TB_5["AddPartition_ShouldReturnBuilder_AndAddPartition"]
+    B_TB --> B_TB_6["Build_ShouldReturnTable_WithAllPropertiesSet"]
+```
 
 ## 2. Database Management
 
-For Database Management patterns, please see [Database Management Patterns](./database-managment/README.md).
-
-_Note: Update the status column to `[x]` when a pattern is implemented in the source code to manage progress._
-
-## 3. Pattern Implementation Details
-
-### 3.1. Template Method (Constraint)
-
-The **Template Method** pattern is used in the `Constraint` class.
-
-- Define a template method with **multiple steps**.
-
-- Delegate subclass implement how each step work.
+### Design Patterns & Unit Tests Flowchart
 
 ```mermaid
-classDiagram
-    class Client
-    class Constraint {
-        <<abstract>>
-        +bool IsEnabled
-        +Validate(row) validationResult
-        #Check(row)* validationResult
-    }
-    class UniqueConstraint {
-        #Check(row) validationResult
-    }
-    class PrimaryKeyConstraint {
-        #Check(row) validationResult
-    }
+flowchart LR
+    %% Patterns
+    Facade["Facade"]
+    Observer["Observer"]
+    State["State"]
 
-    Client --> Constraint
-    Constraint <|-- UniqueConstraint
-    Constraint <|-- PrimaryKeyConstraint
+    %% Facade Files & Methods
+    Facade --> Fac_DST["DatabaseServerTests.cs"]
+    Fac_DST --> Fac_DST_1["Start_WhenConfigurationIsValid_ShouldStartServer"]
+    Fac_DST --> Fac_DST_2["Start_WhenServerIsAlreadyRunning_ShouldNotInitializeComponentsAgain"]
+    Fac_DST --> Fac_DST_3["Start_WhenComponentInitializationFails_ShouldRemainStopped"]
+    Fac_DST --> Fac_DST_4["Stop_WhenServerIsRunning_ShouldStopAllComponents"]
+    Fac_DST --> Fac_DST_5["Start_WhenPortIsUnavailable_ShouldThrow"]
+    Fac_DST --> Fac_DST_6["Start_WhenConfigurationIsInvalid_ShouldThrow"]
+    Fac_DST --> Fac_DST_7["Stop_WhenServerIsNotRunning_ShouldRemainStopped"]
+    Fac_DST --> Fac_DST_8["Stop_WhenComponentStopFails_ShouldReportFailureAndRemainConsistent"]
+
+    %% Observer Files & Methods
+    Observer --> Obs_DMT["DatabaseManagerTests.cs"]
+    Obs_DMT --> Obs_DMT_1["CreateDatabase_WhenNameIsValid_ShouldRegisterDatabase"]
+    Obs_DMT --> Obs_DMT_2["CreateDatabase_WhenNameAlreadyExists_ShouldThrow"]
+    Obs_DMT --> Obs_DMT_3["CreateDatabase_WhenCreationFails_ShouldNotRegisterDatabase"]
+    Obs_DMT --> Obs_DMT_4["GetDatabase_WhenDatabaseExists_ShouldReturnDatabase"]
+    Obs_DMT --> Obs_DMT_5["DropDatabase_WhenDatabaseExists_ShouldRemoveDatabase"]
+    Obs_DMT --> Obs_DMT_6["DropDatabase_WhenDatabaseDoesNotExist_ShouldThrow"]
+    Obs_DMT --> Obs_DMT_7["CreateDatabase_WhenNameIsInvalid_ShouldThrow"]
+    Obs_DMT --> Obs_DMT_8["GetDatabase_WhenDatabaseDoesNotExist_ShouldReturnNull"]
+
+    Observer --> Obs_DT["DatabaseTests.cs (Observer)"]
+    Obs_DT --> Obs_DT_1["AddSchema_WhenSchemaIsValid_ShouldRegisterSchema"]
+    Obs_DT --> Obs_DT_2["AddSchema_WhenNameAlreadyExists_ShouldThrow"]
+    Obs_DT --> Obs_DT_3["DropSchema_WhenSchemaExists_ShouldRemoveSchema"]
+    Obs_DT --> Obs_DT_4["DropSchema_WhenSchemaIsReferenced_ShouldThrow"]
+    Obs_DT --> Obs_DT_5["DropSchema_WhenSchemaDoesNotExist_ShouldThrow"]
+    Obs_DT --> Obs_DT_6["AlterSchema_WhenSchemaExists_ShouldUpdateSchema"]
+    Obs_DT --> Obs_DT_7["AlterSchema_WhenSchemaDoesNotExist_ShouldThrow"]
+
+    %% State Files & Methods
+    State --> St_DST["DatabaseStateTests.cs"]
+    St_DST --> St_DST_1["ChangeState_WhenStateIsValid_ShouldUpdateCurrentState"]
+    St_DST --> St_DST_2["OfflineState_Open_ShouldTransitionToOnlineState"]
+    St_DST --> St_DST_3["OnlineState_SetReadOnly_ShouldTransitionToReadOnlyState"]
+    St_DST --> St_DST_4["OnlineState_Drop_ShouldTransitionToDroppedState"]
+    St_DST --> St_DST_5["ReadOnlyState_Open_ShouldThrowInvalidOperationException"]
+
+    State --> St_DT["DatabaseTests.cs (State)"]
+    St_DT --> St_DT_1["Open_WhenDatabaseIsClosed_ShouldOpenDatabase"]
+    St_DT --> St_DT_2["Open_WhenStorageInitializationFails_ShouldRemainClosed"]
+    St_DT --> St_DT_3["Close_WhenDatabaseIsOpen_ShouldCloseDatabase"]
+    St_DT --> St_DT_4["Close_WhenFlushFails_ShouldNotReportSuccessfulClose"]
+    St_DT --> St_DT_5["Open_WhenDatabaseIsAlreadyOpen_ShouldRemainOpen"]
+    St_DT --> St_DT_6["Close_WhenDatabaseIsAlreadyClosed_ShouldRemainClosed"]
 ```
 
-#### Sequence Diagram: Constraint Validation Workflow
+## 3. Query Processor
 
-```mermaid
-sequenceDiagram
-    autonumber
+*(Implementation and pattern class diagrams are currently pending)*
 
-    participant Client
-    participant BaseConstraint as Constraint (Base)
-    participant ConcreteConstraint as UniqueConstraint (Subclass)
 
-    Client->>BaseConstraint: Validate(row)
-    activate BaseConstraint
-
-    Note over BaseConstraint: Common workflow step
-    BaseConstraint->>BaseConstraint: Check if IsEnabled
-
-    alt IsEnabled == false
-        BaseConstraint-->>Client: true (Skip validation)
-    else IsEnabled == true
-        Note over BaseConstraint: Defers to subclass
-        BaseConstraint->>ConcreteConstraint: Check(row)
-        activate ConcreteConstraint
-
-        Note over ConcreteConstraint: Subclass specific logic<br/>(e.g., duplicate check)
-        ConcreteConstraint-->>BaseConstraint: validationResult
-        deactivate ConcreteConstraint
-
-        BaseConstraint-->>Client: validationResult
-    end
-    deactivate BaseConstraint
-```
-
-### 3.2. Factory Method (Constraint Creation)
-
-The **Factory Method** pattern uses for creating `Constraint`.
-
-- Define a abstract **Factory Method**
-- Delegate object creations to **Concrete Creator** through Polymorphism.
-
-```mermaid
-classDiagram
-    direction LR
-
-    class ConstraintCreatorRegistry {
-        +GetCreator(metadataType) ConstraintCreator
-    }
-
-    %% Constraint Creators
-    class ConstraintCreator {
-        <<abstract>>
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class PrimaryKeyConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class ForeignKeyConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class UniqueConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class CheckConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-
-    ConstraintCreatorRegistry ..> ConstraintCreator : returns
-
-    ConstraintCreator <|-- PrimaryKeyConstraintCreator
-    ConstraintCreator <|-- ForeignKeyConstraintCreator
-    ConstraintCreator <|-- UniqueConstraintCreator
-    ConstraintCreator <|-- CheckConstraintCreator
-
-    %% Constraints
-    class Constraint {
-        <<abstract>>
-        +string Name
-        +bool IsEnabled
-    }
-    class PrimaryKeyConstraint
-    class ForeignKeyConstraint
-    class UniqueConstraint
-    class CheckConstraint
-
-    Constraint <|-- PrimaryKeyConstraint
-    Constraint <|-- ForeignKeyConstraint
-    Constraint <|-- UniqueConstraint
-    Constraint <|-- CheckConstraint
-
-    %% Factory Relationships
-    PrimaryKeyConstraintCreator ..> PrimaryKeyConstraint : creates
-    ForeignKeyConstraintCreator ..> ForeignKeyConstraint : creates
-    UniqueConstraintCreator ..> UniqueConstraint : creates
-    CheckConstraintCreator ..> CheckConstraint : creates
-```
-
-#### Sequence Diagram: Constraint Instantiation
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Client
-    participant Registry as ConstraintCreatorRegistry
-    participant Creator as PrimaryKeyConstraintCreator
-    participant Constraint as PrimaryKeyConstraint
-
-    Client->>Registry: GetCreator(metadata.Type)
-    Registry-->>Client: creator
-
-    Client->>Creator: CreateConstraint(metadata)
-    activate Creator
-
-    Note right of Creator: Factory Method
-    Creator->>Constraint: new PrimaryKeyConstraint(...)
-    Constraint-->>Creator: constraint
-
-    Creator-->>Client: constraint
-    deactivate Creator
-```
-
-### 3.3. Strategy (Referential Action)
-
-The **Strategy** pattern is used to implemnt Referential Action of FK.
-
-- **Using Polymorphism to dispatch appropriate algorithm** (runtime).
-
-```mermaid
-classDiagram
-    class Client
-    class ForeignKeyConstraint {
-        -IReferentialAction _strategy
-        +OnParentRowDeleted(parentRow) result
-    }
-    class IReferentialAction {
-        <<interface>>
-        +Execute(parentRow, childTable) result
-    }
-    class CascadeAction {
-        +Execute(parentRow, childTable) result
-    }
-    class RestrictAction {
-        +Execute(parentRow, childTable) result
-    }
-    class SetNullAction {
-        +Execute(parentRow, childTable) result
-    }
-    class SetDefaultAction {
-        +Execute(parentRow, childTable) result
-    }
-
-    Client --> ForeignKeyConstraint
-    ForeignKeyConstraint o--> IReferentialAction : delegates to
-    IReferentialAction <|.. CascadeAction
-    IReferentialAction <|.. RestrictAction
-    IReferentialAction <|.. SetNullAction
-    IReferentialAction <|.. SetDefaultAction
-```
-
-#### Sequence Diagram: Referential Action Execution
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Client
-    participant FK as ForeignKeyConstraint (Context)
-    participant Strategy as IReferentialAction (Strategy)
-    participant ChildTable as Table (Child)
-
-    Client->>FK: OnParentRowDeleted(parentRow)
-    activate FK
-
-    Note over FK: Context delegates the behavior<br/>to the configured strategy
-    FK->>Strategy: Execute(parentRow, childTable)
-    activate Strategy
-
-    alt is CascadeAction
-        Strategy->>ChildTable: DeleteRow(childRow)
-    else is SetNullAction
-        Strategy->>ChildTable: UpdateRow(childRow, null)
-    else is RestrictAction
-        Strategy-->>FK: throws ReferentialIntegrityException
-    end
-
-    Strategy-->>FK: result
-    deactivate Strategy
-
-    FK-->>Client: result
-    deactivate FK
-```
-
-### 3.4. Composite (Schema Objects)
-
-The **Composite** pattern is used to treat individual database objects (`Table`, `View`, `StoredProcedure`) and groups of objects uniformly.
-The `Schema` class acts as the composite node that manages collections of these leaf objects. When a high-level lifecycle operation such as `Drop()` is performed on the `Schema`, it delegates the operation to all of its child components.
-
-```mermaid
-classDiagram
-    class ISchemaObject {
-        <<interface>>
-        +Drop()
-    }
-    class Schema {
-        -List~ISchemaObject~ _objects
-        +Drop()
-        +AddObject(ISchemaObject)
-        +RemoveObject(ISchemaObject)
-    }
-    class Table {
-        +Drop()
-    }
-    class View {
-        +Drop()
-    }
-    class StoredProcedure {
-        +Drop()
-    }
-
-    ISchemaObject <|.. Schema
-    ISchemaObject <|.. Table
-    ISchemaObject <|.. View
-    ISchemaObject <|.. StoredProcedure
-    Schema o--> ISchemaObject : children
-```
-
-#### Sequence Diagram: Recursive Drop Operation
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Client
-    participant Schema
-    participant Child as ISchemaObject
-
-    Client->>Schema: Drop()
-    activate Schema
-
-    loop for each child in _objects
-        Schema->>Child: Drop()
-        activate Child
-        Note over Child: Concrete objects (Table, View) <br/> handle their own drop logic.
-        Child-->>Schema: success
-        deactivate Child
-    end
-
-    Schema-->>Client: success
-    deactivate Schema
-```
-
-### 3.5. Command (DDL Command)
-
-The **Command** pattern is used to encapsulate DDL operations (like `CreateTable`, `DropTable`, and `AlterTable`) into standalone command objects.
-This allows the system to parameterize clients with different requests, queue or log requests, and support undoable operations. The `DDLCommandExecutor` acts as the invoker that executes the concrete `IDDLCommand`.
-
-```mermaid
-classDiagram
-    class Client
-    class DDLCommandExecutor {
-        +Execute(IDDLCommand) DDLResult
-    }
-    class IDDLCommand {
-        <<interface>>
-        +Execute() DDLResult
-    }
-    class CreateTableCommand {
-        +Execute() DDLResult
-    }
-    class AlterTableCommand {
-        +Execute() DDLResult
-    }
-    class DropTableCommand {
-        +Execute() DDLResult
-    }
-    class Schema {
-        +ContainsTable(tableName)
-        +AddTable(table)
-        +AlterTable(tableName, newTable)
-    }
-    class Table
-
-    Client --> DDLCommandExecutor
-    Client ..> CreateTableCommand : creates
-    DDLCommandExecutor o--> IDDLCommand : invokes
-    IDDLCommand <|.. CreateTableCommand
-    IDDLCommand <|.. AlterTableCommand
-    IDDLCommand <|.. DropTableCommand
-    CreateTableCommand --> Schema : receiver
-    CreateTableCommand --> Table : creates
-    AlterTableCommand --> Schema : receiver
-```
-
-#### Sequence Diagram: DDL Command Execution
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    actor Client
-    participant Executor as DDLCommandExecutor
-    participant Command as IDDLCommand
-    participant Concrete as CreateTableCommand
-    participant Schema
-    participant Table
-
-    Client->>Executor: Execute(createTableCommand)
-    activate Executor
-
-    Executor->>Command: Execute()
-    Command->>Concrete: Execute()
-    activate Concrete
-
-    Concrete->>Schema: ContainsTable(tableName)
-    Schema-->>Concrete: false
-
-    Concrete->>Table: new Table(tableName)
-    Table-->>Concrete: table
-
-    Concrete->>Schema: AddTable(table)
-    Schema-->>Concrete: success
-
-    Concrete-->>Command: DDLResult.Success
-    deactivate Concrete
-
-    Command-->>Executor: DDLResult.Success
-    Executor-->>Client: DDLResult.Success
-
-    deactivate Executor
-```
-
-### 3.6. Iterator (Schema Object Traversal)
-
-The **Iterator** pattern provides sequential access to schema objects without exposing the internal collection structures
-
-- Encapsulates the traversal logic inside an Iterator.
-- Allow client traverse a collection without knowing about how it's stored.
-
-```mermaid
-classDiagram
-    direction TB
-
-    %% =========================
-    %% SCHEMA OBJECTS
-    %% =========================
-
-    class ISchemaObject {
-        <<interface>>
-        +int Id
-        +string Name
-        +Drop() void
-    }
-
-    class Schema {
-        +int Id
-        +string Name
-        +IEnumerable~ISchemaObject~ Objects
-
-        +CreateTableIterator() ISchemaObjectIterator
-        +CreateViewIterator() ISchemaObjectIterator
-        +CreateStoredProcedureIterator() ISchemaObjectIterator
-        +CreateAllObjectsIterator() ISchemaObjectIterator
-
-        +Drop() void
-    }
-
-    class Table {
-        +int Id
-        +string Name
-        +Drop() void
-    }
-
-    class View {
-        +int Id
-        +string Name
-        +Drop() void
-    }
-
-    class StoredProcedure {
-        +int Id
-        +string Name
-        +Drop() void
-    }
-
-    ISchemaObject <|.. Schema
-    ISchemaObject <|.. Table
-    ISchemaObject <|.. View
-    ISchemaObject <|.. StoredProcedure
-
-    Schema *-- Table : contains
-    Schema *-- View : contains
-    Schema *-- StoredProcedure : contains
-
-
-    %% =========================
-    %% ITERATOR
-    %% =========================
-
-    class ISchemaObjectIterator {
-        <<interface>>
-        +HasNext() bool
-        +Next() ISchemaObject
-        +Reset() void
-    }
-
-
-    %% =========================
-    %% CONCRETE ITERATORS
-    %% =========================
-
-    class TableIterator {
-        -IReadOnlyList~ISchemaObject~ _objects
-        -int _position
-        +HasNext() bool
-        +Next() ISchemaObject
-        +Reset() void
-    }
-
-    class ViewIterator {
-        -IReadOnlyList~ISchemaObject~ _objects
-        -int _position
-        +HasNext() bool
-        +Next() ISchemaObject
-        +Reset() void
-    }
-
-    class StoredProcedureIterator {
-        -IReadOnlyList~ISchemaObject~ _objects
-        -int _position
-        +HasNext() bool
-        +Next() ISchemaObject
-        +Reset() void
-    }
-
-    class SchemaObjectsIterator {
-        -IReadOnlyList~ISchemaObject~ _objects
-        -int _position
-        +HasNext() bool
-        +Next() ISchemaObject
-        +Reset() void
-    }
-
-
-    %% =========================
-    %% ITERATOR IMPLEMENTATIONS
-    %% =========================
-
-    ISchemaObjectIterator <|.. TableIterator
-    ISchemaObjectIterator <|.. ViewIterator
-    ISchemaObjectIterator <|.. StoredProcedureIterator
-    ISchemaObjectIterator <|.. SchemaObjectsIterator
-
-
-    %% =========================
-    %% ITERATOR TARGETS
-    %% =========================
-
-    TableIterator --> Table : returns only
-    ViewIterator --> View : returns only
-    StoredProcedureIterator --> StoredProcedure : returns only
-
-    SchemaObjectsIterator --> ISchemaObject : returns all
-
-    Schema --> ISchemaObjectIterator : creates
-```
-
-#### Sequence Diagram: Schema Object Traversal
-
-```mermaid
-sequenceDiagram
-    autonumber
-
-    participant Test as IteratorTests
-    participant Schema as Schema
-    participant TI as TableIterator
-
-    Test->>Schema: CreateTableIterator()
-    activate Schema
-
-    Schema->>Schema: Get Objects
-    Schema->>TI: new TableIterator(Objects)
-    TI-->>Schema: iterator
-    Schema-->>Test: iterator
-
-    deactivate Schema
-
-    loop while HasNext()
-        Test->>TI: HasNext()
-        activate TI
-
-        TI->>TI: Find next Table from _position
-        TI-->>Test: true
-
-        deactivate TI
-
-        Test->>TI: Next()
-        activate TI
-
-        TI->>TI: Get next Table
-        TI->>TI: Advance _position
-        TI-->>Test: Table as ISchemaObject
-
-        deactivate TI
-    end
-
-    Test->>TI: HasNext()
-    TI-->>Test: false
-```
-
-### 3.7. Visitor (Schema Operations)
-
-The **Visitor** pattern is used for schema operations like backup, export, and validation.
-
-- It allows **defining new operations** on schema objects (Table, View, StoredProcedure, Schema) **without modifying their classes**.
-
-```mermaid
-classDiagram
-    direction TB
-
-    %% =========================
-    %% VISITOR
-    %% =========================
-
-    class ISchemaVisitor {
-        <<interface>>
-        +Visit(Schema schema) void
-        +Visit(Table table) void
-        +Visit(View view) void
-        +Visit(StoredProcedure procedure) void
-    }
-
-    class BackupVisitor {
-        +Visit(Schema schema) void
-        +Visit(Table table) void
-        +Visit(View view) void
-        +Visit(StoredProcedure procedure) void
-    }
-
-    class ExportVisitor {
-        +Visit(Schema schema) void
-        +Visit(Table table) void
-        +Visit(View view) void
-        +Visit(StoredProcedure procedure) void
-    }
-
-    class ValidationVisitor {
-        +Visit(Schema schema) void
-        +Visit(Table table) void
-        +Visit(View view) void
-        +Visit(StoredProcedure procedure) void
-    }
-
-    %% =========================
-    %% ELEMENT
-    %% =========================
-
-    class ISchemaObject {
-        <<interface>>
-        +int Id
-        +string Name
-        +Accept(ISchemaVisitor visitor) void
-    }
-
-    class Schema {
-        +string Name
-        +IEnumerable~ISchemaObject~ Objects
-        +Accept(ISchemaVisitor visitor) void
-    }
-
-    class Table {
-        +string Name
-        +IReadOnlyList~Column~ Columns
-        +IReadOnlyList~Constraint~ Constraints
-        +IReadOnlyList~Index~ Indexes
-        +Accept(ISchemaVisitor visitor) void
-    }
-
-    class View {
-        +string Name
-        +string Query
-        +IReadOnlyList~string~ Dependencies
-        +Accept(ISchemaVisitor visitor) void
-    }
-
-    class StoredProcedure {
-        +string Name
-        +ProcedureBody Body
-        +Accept(ISchemaVisitor visitor) void
-    }
-
-    %% =========================
-    %% CLIENT / MANAGERS
-    %% =========================
-
-    class SchemaManager {
-        +Validate(Schema schema) void
-    }
-
-    %% Visitor implementations
-    ISchemaVisitor <|.. BackupVisitor
-    ISchemaVisitor <|.. ExportVisitor
-    ISchemaVisitor <|.. ValidationVisitor
-
-    %% Element implementations
-    ISchemaObject <|.. Schema
-    ISchemaObject <|.. Table
-    ISchemaObject <|.. View
-    ISchemaObject <|.. StoredProcedure
-
-    %% Schema contains schema objects
-    Schema *-- ISchemaObject : contains
-
-    %% Clients create/use visitors
-    SchemaManager ..> ValidationVisitor : creates
-
-    %% Visitors operate on elements
-    BackupVisitor ..> ISchemaObject : visits
-    ExportVisitor ..> ISchemaObject : visits
-    ValidationVisitor ..> ISchemaObject : visits
-```
-
-#### Sequence Diagram: Visitor Dispatch Workflow
-
-```mermaid
-sequenceDiagram
-    actor Client
-    participant BV as BackupVisitor
-    participant T as Table
-
-    Client->>BV: new BackupVisitor()
-    Client->>T: Accept(backupVisitor)
-
-    T->>BV: Visit(this)
-
-    Note over T,BV: this = Table<br/>selects Visit(Table)
-
-    BV->>T: Get Columns
-    T-->>BV: Columns
-
-    BV->>T: Get Constraints
-    T-->>BV: Constraints
-
-    BV->>T: Get Indexes
-    T-->>BV: Indexes
-
-    BV->>BV: Backup table structure and data
-
-    BV-->>T: Completed
-    T-->>Client: Completed
-```
-
-### 3.8. Builder (Table Definition)
-
-The **Builder** pattern is used to construct complex `Table` objects step by step. This encapsulates the construction logic of columns, constraints, indexes, and partitions, keeping the `Table` constructor clean and preventing partially initialized tables.
-
-```mermaid
-classDiagram
-    direction LR
-
-    class Client {
-        +CreateTable() Table
-    }
-
-    class ITableBuilder {
-        <<interface>>
-        +SetName(string name) ITableBuilder
-        +AddColumn(Column column) ITableBuilder
-        +AddConstraint(Constraint constraint) ITableBuilder
-        +AddIndex(Index index) ITableBuilder
-        +AddPartition(Partition partition) ITableBuilder
-        +Build() Table
-    }
-
-    class TableBuilder {
-        +SetName(string name) ITableBuilder
-        +AddColumn(Column column) ITableBuilder
-        +AddConstraint(Constraint constraint) ITableBuilder
-        +AddIndex(Index index) ITableBuilder
-        +AddPartition(Partition partition) ITableBuilder
-        +Build() Table
-    }
-
-    class Table {
-        +string Name
-        +Columns
-        +Constraints
-        +Indexes
-        +Partitions
-    }
-
-    Client --> ITableBuilder : uses
-    ITableBuilder <|.. TableBuilder
-    TableBuilder ..> Table : builds
-```
-
-#### Sequence Diagram: Step-by-Step Table Construction
-
-```mermaid
-sequenceDiagram
-    autonumber
-    
-    actor Client
-    participant TB as TableBuilder
-    participant T as Table
-    
-    Client->>TB: SetName("Users")
-    TB-->>Client: ITableBuilder
-    
-    loop For each Column
-        Client->>TB: AddColumn(col)
-        TB-->>Client: ITableBuilder
-    end
-    
-    loop For each Constraint
-        Client->>TB: AddConstraint(const)
-        TB-->>Client: ITableBuilder
-    end
-    
-    loop For each Index
-        Client->>TB: AddIndex(idx)
-        TB-->>Client: ITableBuilder
-    end
-    
-    loop For each Partition
-        Client->>TB: AddPartition(part)
-        TB-->>Client: ITableBuilder
-    end
-    
-    Client->>TB: Build()
-    activate TB
-    
-    TB->>T: new Table(...)
-    T-->>TB: Table
-    
-    TB-->>Client: Table
-    deactivate TB
-```

@@ -5,11 +5,10 @@
 |  Priority | Status | Design Pattern       | Feature                    | Reason / Context                                                                                         |
 | :-------: | :----: | :------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
 |  🔴 High  |  `[x]` | **Facade**           | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.                 |
-|  🔴 High  |  `[ ]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
+|  🔴 High  |  `[x]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
 |  🔴 High  |  `[x]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
-| 🟡 Medium |  `[ ]` | **Factory Method**   | Database Creation          | Allows different Database implementations to be instantiated by subclasses or providers.                 |
 | 🟡 Medium |  `[x]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
-| 🟡 Medium |  `[ ]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
+| 🟡 Medium |  `[x]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
 | 🟡 Medium |  `[ ]` | **Adapter**          | External Storage           | Adapts operating-system or cloud-storage APIs to DBMS storage interfaces.                                |
 |   🟢 Low  |  `[ ]` | **Builder**          | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.                      |
 |   🟢 Low  |  `[ ]` | **Proxy**            | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.                      |
@@ -154,7 +153,7 @@ The **Observer** pattern is used to notify various subsystems (like Monitoring, 
 
 ```mermaid
 classDiagram
-    class Subject {
+    class Publisher {
         <<interface>>
         +Attach(Observer)
         +Detach(Observer)
@@ -164,7 +163,7 @@ classDiagram
         <<interface>>
         +Update()
     }
-    class ConcreteSubject {
+    class ConcretePublisher {
         -List~Observer~ observers
         +Attach(Observer)
         +Detach(Observer)
@@ -173,9 +172,9 @@ classDiagram
     class ConcreteObserver {
         +Update()
     }
-    Subject <|.. ConcreteSubject
+    Publisher <|.. ConcretePublisher
     Observer <|.. ConcreteObserver
-    ConcreteSubject o--> Observer
+    ConcretePublisher o--> Observer
 ```
 
 #### Example code
@@ -186,14 +185,14 @@ public interface IObserver
     void Update();
 }
 
-public interface ISubject
+public interface IPublisher
 {
     void Attach(IObserver observer);
     void Detach(IObserver observer);
     void Notify();
 }
 
-public class ConcreteSubject : ISubject
+public class ConcretePublisher : IPublisher
 {
     private readonly List<IObserver> _observers = new List<IObserver>();
 
@@ -361,9 +360,6 @@ public class Context
     }
 }
 ```
-
-
-#### Class diagram (already provided)
 
 
 #### Class diagram
@@ -547,9 +543,6 @@ public class Invoker
 ```
 
 
-#### Class diagram (already provided)
-
-
 #### Class diagram
 
 ```mermaid
@@ -659,3 +652,129 @@ sequenceDiagram
 
 
 
+
+
+
+
+### 3.5. Template Method (Backup/Restore)
+
+The **Template Method** pattern is used in Backup and Restore operations to define the skeleton of an algorithm in a base class, while letting subclasses override specific steps without changing the algorithm's structure. For example, `FullBackup` and `IncrementalBackup` follow the same core steps but differ in how data is extracted.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class AbstractClass {
+        <<abstract>>
+        +TemplateMethod() void
+        +Step1() void
+        +Step2() bool
+        +Step3()* void
+        +Step4()* void
+    }
+
+    class ConcreteClass1 {
+        +Step3() void
+        +Step4() void
+    }
+
+    class ConcreteClass2 {
+        +Step1() void
+        +Step2() bool
+        +Step3() void
+        +Step4() void
+    }
+
+    AbstractClass <|-- ConcreteClass1
+    AbstractClass <|-- ConcreteClass2
+```
+
+#### Example code
+
+```csharp
+public abstract class AbstractClass
+{
+    public void TemplateMethod()
+    {
+        Step1();
+        if (Step2())
+        {
+            Step3();
+        }
+        else
+        {
+            Step4();
+        }
+    }
+
+    protected void Step1() { throw new NotImplementedException(); }
+    protected virtual bool Step2() { throw new NotImplementedException(); }
+    protected abstract void Step3();
+    protected abstract void Step4();
+}
+
+public class ConcreteClass1 : AbstractClass
+{
+    protected override void Step3() { throw new NotImplementedException(); }
+    protected override void Step4() { throw new NotImplementedException(); }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    class DatabaseBackup {
+        <<abstract>>
+        +ExecuteBackup() void
+        #InitializeBackup() void
+        #ExtractData()* void
+        #CompressData() void
+        #FinalizeBackup()* void
+    }
+    
+    class FullBackup {
+        #ExtractData() void
+        #FinalizeBackup() void
+    }
+    
+    class IncrementalBackup {
+        #ExtractData() void
+        #FinalizeBackup() void
+    }
+    
+    DatabaseBackup <|-- FullBackup
+    DatabaseBackup <|-- IncrementalBackup
+```
+
+
+#### Sequence Diagram: Backup Execution Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Base as DatabaseBackup (Base)
+    participant Concrete as FullBackup (Subclass)
+
+    Client->>Base: ExecuteBackup()
+    activate Base
+    
+    Base->>Base: InitializeBackup()
+    
+    Note right of Base: Template method defers to subclass
+    Base->>Concrete: ExtractData()
+    activate Concrete
+    Concrete-->>Base: (data extracted)
+    deactivate Concrete
+    
+    Base->>Base: CompressData()
+    
+    Base->>Concrete: FinalizeBackup()
+    activate Concrete
+    Concrete-->>Base: (finalized)
+    deactivate Concrete
+    
+    Base-->>Client: (Success)
+    deactivate Base
+```

@@ -5,9 +5,8 @@ public class CreateTableCommandTests
     [Fact]
     public void Execute_WhenTableDoesNotExist_ShouldAddTableAndReturnSuccess()
     {
-        // Arrange
         var schema = new Schema("TestSchema");
-        var command = new CreateTableCommand(schema, "NewTable");
+        var command = new CreateTableCommand(schema, "NewTable", null);
 
         // Act
         var result = command.Execute();
@@ -22,7 +21,7 @@ public class CreateTableCommandTests
         // Arrange
         var schema = new Schema("TestSchema");
         schema.RegisterObject(new Table("ExistingTable"));
-        var command = new CreateTableCommand(schema, "ExistingTable");
+        var command = new CreateTableCommand(schema, "ExistingTable", null);
 
         // Act
         Action action = () => command.Execute();

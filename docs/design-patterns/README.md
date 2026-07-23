@@ -430,11 +430,28 @@ flowchart LR
 
     Command --> Cmd_DCE["DDLCommandExecutorTests.cs"]
     Cmd_DCE --> Cmd_DCE_1["Execute_WhenCommandIsValid_ShouldInvokeCommandAndReturnResult"]
+
+
+    %% Template Method Files & Methods
+    TemplateMethod["Template Method"]
+    
+    TemplateMethod --> TM_DBT["DatabaseBackupTests.cs"]
+    TM_DBT --> TM_DBT_1["ExecuteBackup_ShouldCallStepsInCorrectOrder"]
+
+    TemplateMethod --> TM_FBT["FullBackupTests.cs"]
+    TM_FBT --> TM_FBT_1["ExtractData_ShouldExtractAllData"]
+    TM_FBT --> TM_FBT_2["FinalizeBackup_ShouldSetFullBackupMetadata"]
+
+    TemplateMethod --> TM_IBT["IncrementalBackupTests.cs"]
+    TM_IBT --> TM_IBT_1["ExtractData_ShouldExtractOnlyChangedData"]
+    TM_IBT --> TM_IBT_2["FinalizeBackup_ShouldSetIncrementalBackupMetadata"]
+
 ```
 
 ## 3. Query Processor
 
 *(Implementation and pattern class diagrams are currently pending)*
+
 
 
 

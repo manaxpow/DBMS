@@ -1,4 +1,4 @@
-﻿# Database Design Patterns
+# Database Design Patterns
 
 This document tracks the design patterns used across different modules in the DBMS and their current implementation status.
 
@@ -21,7 +21,7 @@ flowchart LR
 
     Obj_P["🟢 Prototype ☐<br/>Object Cloning"] --> DBObj
     Obj_D["🟢 Decorator ☐<br/>Constraint Extension"] --> DBObj
-    Obj_M["🟢 Mediator ☐<br/>Dependency Coordination"] --> DBObj
+    Obj_M["🟢 Mediator ☑<br/>Dependency Coordination"] --> DBObj
 
 
     %% =========================================================
@@ -29,6 +29,7 @@ flowchart LR
     %% =========================================================
 
     Mgmt_F["🔴 Facade ☑<br/>DatabaseServer"] --> DBMgmt["Database Management"]
+    Mgmt_Sing["🔴 Singleton ☑<br/>DatabaseManager"] --> DBMgmt
     Mgmt_Cmd["🔴 Command ☑<br/>Database Operations"] --> DBMgmt
     Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
     Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
@@ -213,7 +214,7 @@ flowchart LR
 
 
 %% HIGH PRIORITY
-    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,QP_Comp,QP_Iter,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
+    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_Sing,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,QP_Comp,QP_Iter,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
 
 
     %% MEDIUM PRIORITY
@@ -361,9 +362,14 @@ flowchart LR
 flowchart LR
     %% Patterns
     Facade["Facade"]
+    Singleton["Singleton"]
     Observer["Observer"]
     State["State"]
     Command["Command"]
+
+    %% Singleton Files & Methods
+    Singleton --> Sing_DMT["DatabaseManagerTests.cs"]
+    Sing_DMT --> Sing_DMT_1["Instance_ShouldReturnSameInstance"]
 
     %% Facade Files & Methods
     Facade --> Fac_DST["DatabaseServerTests.cs"]

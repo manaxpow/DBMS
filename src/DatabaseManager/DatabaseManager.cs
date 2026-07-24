@@ -3,6 +3,8 @@ using DBMS.Exceptions;
 public class DatabaseManager
 {
     private CatalogManager _catalog;
+    private static DatabaseManager _instance;
+    public static DatabaseManager Instance => _instance ??= new DatabaseManager();
     private Dictionary<string, Database> _databases;
 
     public DatabaseManager()

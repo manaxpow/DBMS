@@ -119,6 +119,16 @@ public class DatabaseManagerTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Instance_ShouldReturnSameInstance()
+    {
+        // Act
+        var instance1 = DatabaseManager.Instance;
+        var instance2 = DatabaseManager.Instance;
 
+        // Assert
+        instance1.Should().NotBeNull();
+        instance1.Should().BeSameAs(instance2);
+    }
 }
-

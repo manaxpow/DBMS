@@ -1,15 +1,19 @@
-﻿# Database Management Patterns
+# Database Management Patterns
+
+Your current design has DatabaseServer owning DatabaseManager, and DatabaseManager centrally manages the collection of Database objects through CreateDatabase(), GetDatabase(), and DropDatabase().
+
+You could model it like this:
 
 ## 2. Database Management
 
 |  Priority | Status | Design Pattern       | Feature                    | Reason / Context                                                                                         |
 | :-------: | :----: | :------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
 |  🔴 High  |  `[x]` | **Facade**           | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.                 |
+|  🔴 High  |  `[x]` | **Singleton**        | DatabaseManager            | Ensures a single instance of DatabaseManager centrally manages all database objects.                     |
 |  🔴 High  |  `[x]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
 |  🔴 High  |  `[x]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
 | 🟡 Medium |  `[x]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
 | 🟡 Medium |  `[x]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
-| 🟡 Medium |  `[ ]` | **Adapter**          | External Storage           | Adapts operating-system or cloud-storage APIs to DBMS storage interfaces.                                |
 |   🟢 Low  |  `[ ]` | **Builder**          | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.                      |
 |   🟢 Low  |  `[ ]` | **Proxy**            | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.                      |
 |   🟢 Low  |  `[ ]` | **Bridge**           | Database Storage           | Separates Database abstraction from different storage implementations.                                   |
@@ -777,4 +781,68 @@ sequenceDiagram
     
     Base-->>Client: (Success)
     deactivate Base
+```
+
+### 3.6. Singleton (DatabaseManager)
+
+The **Singleton** pattern is used to ensure that only one instance of the `DatabaseManager` exists throughout the application lifecycle. This provides a centralized point of access for managing all database instances, avoiding conflicting state or duplicate database tracking.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Singleton {
+        -static Singleton instance
+        -Singleton()
+        +GetInstance()$ Singleton
+    }
+```
+
+#### Example code
+
+```csharp
+public sealed class Singleton
+{
+    private static readonly Singleton _instance = new Singleton();
+
+    private Singleton() { }
+
+    public static Singleton GetInstance()
+    {
+        return _instance;
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    class DatabaseManager {
+        -static DatabaseManager _instance
+        -Dictionary~string, Database~ _databases
+        -DatabaseManager()
+        +Instance$ DatabaseManager
+        +CreateDatabase(string name) void
+        +GetDatabase(string name) Database
+        +DropDatabase(string name) void
+    }
+```
+
+#### Sequence Diagram: Accessing DatabaseManager
+
+```mermaid
+sequenceDiagram
+    actor Client
+    participant DM as DatabaseManager
+
+    Client->>DM: Instance (static property)
+    
+    alt is first call
+        DM->>DM: DatabaseManager() (private constructor)
+        DM->>DM: Initialize _databases dictionary
+    end
+    
+    DM-->>Client: _instance
+    Client->>DM: GetDatabase("MyDb")
 ```

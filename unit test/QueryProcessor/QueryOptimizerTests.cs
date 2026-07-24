@@ -1,18 +1,41 @@
 using System;
 using Xunit;
+using FluentAssertions;
 
 public class QueryOptimizerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var optimizer = new QueryOptimizer();
+
+        var plan = new LogicalPlan();
+
+        // Act
+        var result = optimizer.Optimize(plan);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Cost.Should().Be(10);
+        result.OperatorType.Should().Be(PhysicalOperatorType.IndexScan);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
     public void Optimize_ShouldPreserveLogicalSemantics()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var optimizer = new QueryOptimizer();
+        var plan = new LogicalPlan();
+
+        // Act
+        var result = optimizer.Optimize(plan);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.EquivalentTo(plan).Should().BeTrue();
     }
 
     [Fact]
@@ -46,18 +69,6 @@ public class QueryOptimizerTests
         throw new NotImplementedException();
     }
 
-    [Fact]
-    public void Optimize_WhenIndexIsUnavailable_ShouldChooseTableScan()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenLogicalPlanIsInvalid_ShouldThrow()
-    {
-        throw new NotImplementedException();
-    }
-}
     [Fact]
     public void Optimize_WhenIndexIsUnavailable_ShouldChooseTableScan()
     {

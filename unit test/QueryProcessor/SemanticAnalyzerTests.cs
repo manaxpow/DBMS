@@ -4,6 +4,7 @@ using FluentAssertions;
 
 public class SemanticAnalyzerTests
 {
+    [Trait("Category", "Important")]
     [Fact]
     public void Analyze_WhenASTIsValid_ShouldReturnLogicalPlan()
     {
@@ -12,10 +13,11 @@ public class SemanticAnalyzerTests
         var ast = new AST();
 
         // Act
-        Action act = () => analyzer.Analyze(ast);
+        var plan = analyzer.Analyze(ast);
 
         // Assert
-        act.Should().Throw<NotImplementedException>();
+        plan.Should().NotBeNull();
+        plan.IsValidated.Should().BeTrue();
     }
 
     [Fact]
@@ -29,6 +31,6 @@ public class SemanticAnalyzerTests
         Action act = () => analyzer.Analyze(ast);
 
         // Assert
-        act.Should().Throw<NotImplementedException>();
+        act.Should().Throw<SemanticException>();
     }
 }

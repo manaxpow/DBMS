@@ -4,7 +4,7 @@ public class DatabaseManager
 {
     private CatalogManager _catalog;
     private static DatabaseManager _instance;
-    public static DatabaseManager Instance => _instance ??= new DatabaseManager();
+    public static DatabaseManager Instance => throw new NotImplementedException();
     private Dictionary<string, Database> _databases;
 
     public DatabaseManager()
@@ -15,16 +15,16 @@ public class DatabaseManager
 
     public void CreateDatabase(string name)
     {
-        throw new DatabaseAlreadyExistsException();
+        throw new NotImplementedException();
     }
 
     public Database GetDatabase(string name)
     {
-        throw new DatabaseNotFoundException();
+        throw new NotImplementedException();
     }
 
     public void DropDatabase(string name)
     {
-        throw new DatabaseNotFoundException();
+        throw new NotImplementedException();
     }
 }

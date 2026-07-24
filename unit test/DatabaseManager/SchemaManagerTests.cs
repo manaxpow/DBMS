@@ -6,6 +6,6 @@ public class SchemaManagerTests
     [Fact]
     public void Validate_ShouldCreateValidationVisitorAndAcceptSchema()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

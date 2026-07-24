@@ -8,10 +8,11 @@ public class OnlineState : IDatabaseState
     }
     public void Open() { }
     public void SetReadOnly() {
-        _database.ChangeState(new ReadOnlyState(_database));
+        throw new NotImplementedException();
     }
     public void Recovery() { }
     public void Drop() {
-        _database.ChangeState(new DroppedState(_database));
+        throw new NotImplementedException();
     }
 }
+

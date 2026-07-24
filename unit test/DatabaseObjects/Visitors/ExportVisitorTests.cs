@@ -6,24 +6,24 @@ public class ExportVisitorTests
     [Fact]
     public void Visit_Schema_ShouldExportSchema()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_Table_ShouldExportTable()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_View_ShouldExportView()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_StoredProcedure_ShouldExportStoredProcedure()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

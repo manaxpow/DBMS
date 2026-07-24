@@ -2,10 +2,7 @@ public abstract class DatabaseBackup
 {
     public void ExecuteBackup()
     {
-        InitializeBackup();
-        ExtractData();
-        CompressData();
-        FinalizeBackup();
+        throw new NotImplementedException();
     }
     public abstract void InitializeBackup();
     public abstract void ExtractData();

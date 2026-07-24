@@ -6,6 +6,6 @@ public class AlterTableCommandTests
     [Fact]
     public void Execute_ShouldAlterTableInSchema()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

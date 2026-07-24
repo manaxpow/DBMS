@@ -7,9 +7,10 @@ public class OfflineState : IDatabaseState
         _database = database;
     }
     public void Open() {
-        _database.ChangeState(new OnlineState(_database));
+        throw new NotImplementedException();
     }
     public void SetReadOnly() { }
     public void Recovery() { }
     public void Drop() { }
 }
+

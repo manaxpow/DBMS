@@ -10,6 +10,7 @@ public class DropDatabaseCommand : IDDLCommand
     }
     public DDLResult Execute()
     {
-        return DDLResult.Success;
+        throw new NotImplementedException();
     }
 }
+

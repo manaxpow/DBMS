@@ -1,5 +1,6 @@
 using System;
 using Xunit;
+using FluentAssertions;
 
 public class LexerTests
 {
@@ -7,7 +8,17 @@ public class LexerTests
     [Fact]
     public void Tokenize_WhenSQLIsValid_ShouldReturnTokens()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var lexer = new Lexer();
+        var sql = "SELECT * FROM table";
+
+        // Act
+        var tokens = lexer.Tokenize(sql);
+
+        // Assert
+        tokens.Should().NotBeNull();
+        tokens.Count.Should().BeGreaterThan(0);
+        tokens[0].Type.Should().Be(TokenType.Keyword);
     }
 
     [Fact]
@@ -20,9 +31,16 @@ public class LexerTests
     [Fact]
     public void Tokenize_WhenTokenIsInvalid_ShouldThrow()
     {
-        throw new NotImplementedException();
-    }
+        // Arrange
+        var lexer = new Lexer();
+        var sql = "SELECT @#$ FROM table";
 
+        // Act
+        Action act = () => lexer.Tokenize(sql);
+
+        // Assert
+        act.Should().Throw<LexerException>();
+    }
 
     [Fact]
     public void Tokenize_WhenInputContainsComments_ShouldIgnoreComments()
@@ -66,4 +84,3 @@ public class LexerTests
         throw new NotImplementedException();
     }
 }
-

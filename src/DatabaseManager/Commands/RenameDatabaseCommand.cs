@@ -10,6 +10,7 @@ public class RenameDatabaseCommand : IDDLCommand
     }
     public DDLResult Execute()
     {
-        return DDLResult.Success;
+        throw new NotImplementedException();
     }
 }
+

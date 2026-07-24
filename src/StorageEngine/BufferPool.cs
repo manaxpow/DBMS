@@ -44,9 +44,9 @@ public class BufferPool
     {
         if (PageTable.TryGetValue(pageId, out var frame))
         {
-            return frame;
+            throw new NotImplementedException();
         }
-        return null;
+        throw new NotImplementedException();
     }
     private object FindUnpinnedVictim()
     {
@@ -78,3 +78,4 @@ public class BufferPool
         throw new NotImplementedException();
     }
 }
+

@@ -1,7 +1,14 @@
-using System;
+public enum TokenType
+{
+    Keyword,
+    Identifier,
+    Operator,
+    Literal,
+    Punctuation
+}
 
 public class Token
 {
-    public string Type { get; set; }
+    public TokenType Type { get; set; }
     public string Value { get; set; }
 }

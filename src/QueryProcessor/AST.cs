@@ -2,6 +2,8 @@ using System;
 
 public class AST
 {
+    public Node Root { get; set; }
+
     public void GetRoot()
     {
         throw new NotImplementedException();

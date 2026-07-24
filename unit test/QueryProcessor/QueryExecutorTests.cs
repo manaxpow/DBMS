@@ -1,5 +1,6 @@
 using System;
 using Xunit;
+using FluentAssertions;
 
 public class QueryExecutorTests
 {
@@ -7,7 +8,17 @@ public class QueryExecutorTests
     [Fact]
     public void Execute_WhenPlanIsValid_ShouldReturnRows()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var executor = new QueryExecutor();
+        var plan = new PhysicalPlan();
+
+        // Act
+        var result = executor.Execute(plan);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Rows.Should().NotBeEmpty();
+        result.Status.Should().Be(ExecutionStatus.Success);
     }
 
     [Fact]

@@ -11,4 +11,9 @@ public class QueryProcessor : IServerComponent
     {
         throw new NotImplementedException();
     }
+
+    public ResultSet ExecuteQuery(string sql)
+    {
+        throw new NotImplementedException();
+    }
 }

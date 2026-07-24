@@ -6,6 +6,6 @@ public class DropTableCommandTests
     [Fact]
     public void Execute_ShouldDropTableFromSchema()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

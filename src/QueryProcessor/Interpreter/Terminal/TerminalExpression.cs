@@ -1,0 +1,5 @@
+public abstract class TerminalExpression : Expression
+{
+    public abstract T Accept<T>(IExpressionVisitor<T> visitor);
+    public abstract LogicalNode Interpret(InterpretationContext context);
+}

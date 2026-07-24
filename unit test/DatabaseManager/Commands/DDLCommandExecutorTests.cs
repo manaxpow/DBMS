@@ -8,7 +8,7 @@ namespace DBMS.UnitTests.DatabaseManager.Commands
         [Fact]
         public void Execute_WhenCommandIsValid_ShouldInvokeCommandAndReturnResult()
         {
-            // TODO: Implement test
+            throw new NotImplementedException();
             throw new NotImplementedException();
         }
     }

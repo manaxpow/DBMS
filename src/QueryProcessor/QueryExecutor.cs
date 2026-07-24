@@ -2,7 +2,7 @@ using System;
 
 public class QueryExecutor
 {
-    public void Execute(PhysicalPlan plan)
+    public ResultSet Execute(PhysicalPlan plan)
     {
         throw new NotImplementedException();
     }

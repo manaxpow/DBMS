@@ -19,12 +19,12 @@ public class Database
     {
         Name = name;
         _isOpen = false;
-        _state = state;
+        throw new NotImplementedException();
     }
 
     public void ChangeState(IDatabaseState state)
     {
-        _state = state;
+        throw new NotImplementedException();
     }
     public void Open()
     {
@@ -58,3 +58,4 @@ public class Database
         throw new SchemaNotFoundException();
     }
 }
+

@@ -7,12 +7,12 @@ public class ContraintCreatorRegistryTests
     [Fact]
     public void Register_ShouldAddCreator()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void GetCreator_ShouldReturnRegisteredCreator()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

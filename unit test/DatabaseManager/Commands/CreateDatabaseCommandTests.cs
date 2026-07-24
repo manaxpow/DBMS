@@ -8,14 +8,14 @@ namespace DBMS.UnitTests.DatabaseManager.Commands
         [Fact]
         public void Execute_WhenDatabaseDoesNotExist_ShouldAddDatabaseAndReturnSuccess()
         {
-            // TODO: Implement test
+            throw new NotImplementedException();
             throw new NotImplementedException();
         }
 
         [Fact]
         public void Execute_WhenDatabaseAlreadyExists_ShouldReturnFailure()
         {
-            // TODO: Implement test
+            throw new NotImplementedException();
             throw new NotImplementedException();
         }
     }

@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 public class Lexer
 {
-    public void Tokenize(string sql)
+    public List<Token> Tokenize(string sql)
     {
         throw new NotImplementedException();
     }

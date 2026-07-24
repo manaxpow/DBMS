@@ -22,9 +22,9 @@ public abstract class Constraint
     {
         if (!IsEnabled)
         {
-            return true;
+            throw new NotImplementedException();
         }
-        return Check(context);
+        throw new NotImplementedException();
     }
 
     public void Enable()
@@ -37,3 +37,4 @@ public abstract class Constraint
         throw new NotImplementedException();
     }
 }
+

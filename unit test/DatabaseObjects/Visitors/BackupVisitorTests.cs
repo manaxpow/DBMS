@@ -6,24 +6,24 @@ public class BackupVisitorTests
     [Fact]
     public void Visit_Schema_ShouldBackupSchema()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_Table_ShouldBackupTable()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_View_ShouldBackupView()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 
     [Fact]
     public void Visit_StoredProcedure_ShouldBackupStoredProcedure()
     {
-        // TODO: implement
+        throw new NotImplementedException();
     }
 }

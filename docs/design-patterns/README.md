@@ -21,7 +21,7 @@ flowchart LR
 
     Obj_P["🟢 Prototype ☐<br/>Object Cloning"] --> DBObj
     Obj_D["🟢 Decorator ☐<br/>Constraint Extension"] --> DBObj
-    Obj_M["🟢 Mediator ☑<br/>Dependency Coordination"] --> DBObj
+    Obj_M["🟢 Mediator ☐<br/>Dependency Coordination"] --> DBObj
 
 
     %% =========================================================
@@ -34,8 +34,8 @@ flowchart LR
     Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
     Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
 
-    Mgmt_FM["🟡 Factory Method ☐<br/>Database Creation"] --> DBMgmt
-    Mgmt_TM["🟡 Template Method ☐<br/>Lifecycle Workflow"] --> DBMgmt
+    Mgmt_FM["🟡 Factory Method ☑<br/>Database Creation"] --> DBMgmt
+    Mgmt_TM["🟡 Template Method ☑<br/>Lifecycle Workflow"] --> DBMgmt
 
     Mgmt_B["🟢 Builder ☐<br/>Database Configuration"] --> DBMgmt
     Mgmt_M["🟢 Mediator ☐<br/>Subsystem Coordination"] --> DBMgmt
@@ -114,9 +114,9 @@ flowchart LR
     %% RIGHT SIDE — QUERY PROCESSOR
     %% =========================================================
 
-    QP --> QP_Int["🔴 Interpreter ☐<br/>SQL / AST Evaluation"]
-    QP --> QP_Vis["🔴 Visitor ☐<br/>AST Processing"]
-    QP --> QP_Str["🔴 Strategy ☐<br/>Query Optimization"]
+    QP --> QP_Int["🔴 Interpreter ☑<br/>SQL / AST Evaluation"]
+    QP --> QP_Vis["🔴 Visitor ☑<br/>AST Processing"]
+    QP --> QP_Str["🔴 Strategy ☑<br/>Query Optimization"]
     QP --> QP_FM["🔴 Factory Method ☐<br/>Physical Operator Creation"]
     QP --> QP_Comp["🔴 Composite ☐<br/>Query Plan Tree"]
     QP --> QP_Iter["🔴 Iterator ☐<br/>Volcano Execution"]
@@ -456,9 +456,39 @@ flowchart LR
 
 ## 3. Query Processor
 
-*(Implementation and pattern class diagrams are currently pending)*
+```mermaid
+flowchart LR
 
+    %% =========================================================
+    %% Interpreter Files & Methods
+    %% =========================================================
+    Interpreter["Interpreter"]
+    
+    Interpreter --> Int_IT["InterpreterTests.cs"]
+    Int_IT --> Int_IT_1["ColumnExpression_Interpret_ShouldResolveColumnFromContext"]
+    Int_IT --> Int_IT_2["TableExpression_Interpret_ShouldResolveTableFromContext"]
+    Int_IT --> Int_IT_3["LiteralExpression_Interpret_ShouldReturnLiteralLogicalNode"]
+    Int_IT --> Int_IT_4["BinaryExpression_Interpret_ShouldInterpretLeftAndRightAndReturnNode"]
+    Int_IT --> Int_IT_5["WhereExpression_Interpret_ShouldInterpretConditionAndReturnNode"]
+    Int_IT --> Int_IT_6["SelectExpression_Interpret_ShouldInterpretFromWhereAndColumns"]
 
+    %% =========================================================
+    %% Strategy Files & Methods
+    %% =========================================================
+    Strategy["Strategy"]
+    
+    Strategy --> Str_QO["QueryOptimizerTests.cs"]
+    Str_QO --> Str_QO_1["QueryOptimizer_Optimize_WhenStrategyIsNull_ShouldThrow"]
+    Str_QO --> Str_QO_2["QueryOptimizer_Optimize_ShouldDelegateToStrategy"]
 
+    Strategy --> Str_CB["CostBasedOptimizationStrategyTests.cs"]
+    Str_CB --> Str_CB_1["SelectBestPlan_WhenMultiplePlansExist_ShouldChooseLowestCostPlan"]
+    Str_CB --> Str_CB_2["SelectBestPlan_WhenIndexScanIsCheaper_ShouldChooseIndexScan"]
+    Str_CB --> Str_CB_3["SelectBestPlan_WhenIndexIsUnavailable_ShouldChooseTableScan"]
 
+    Strategy --> Str_RB["RuleBasedOptimizationStrategyTests.cs"]
+    Str_RB --> Str_RB_1["ApplyPredicatePushdown_WhenValidPlan_ShouldReturnOptimizedPlan"]
+    Str_RB --> Str_RB_2["ApplyProjectionPruning_WhenValidPlan_ShouldReturnOptimizedPlan"]
+    Str_RB --> Str_RB_3["ApplyConstantFolding_WhenValidPlan_ShouldReturnOptimizedPlan"]
 
+```

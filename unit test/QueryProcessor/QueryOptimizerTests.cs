@@ -58,3 +58,15 @@ public class QueryOptimizerTests
         throw new NotImplementedException();
     }
 }
+    [Fact]
+    public void Optimize_WhenIndexIsUnavailable_ShouldChooseTableScan()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Optimize_WhenLogicalPlanIsInvalid_ShouldThrow()
+    {
+        throw new NotImplementedException();
+    }
+}

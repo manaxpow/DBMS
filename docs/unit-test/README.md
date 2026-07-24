@@ -538,6 +538,33 @@ flowchart LR
 
 ## Query Processor
 
+### Unit Test Execution Sequence
+
+```mermaid
+sequenceDiagram
+    participant Test as Unit Test
+    participant QP as QueryProcessor
+    participant L as Lexer
+    participant P as Parser
+    participant SA as SemanticAnalyzer
+    participant O as Optimizer
+    participant E as Executor
+
+    Test->>QP: ExecuteQuery(sqlString)
+    QP->>L: Tokenize(sqlString)
+    L-->>QP: List<Token>
+    QP->>P: Parse(tokens)
+    P-->>QP: AST
+    QP->>SA: Analyze(AST)
+    SA-->>QP: LogicalPlan
+    QP->>O: Optimize(LogicalPlan)
+    O-->>QP: PhysicalPlan
+    QP->>E: Execute(PhysicalPlan)
+    E-->>QP: ResultSet
+    QP-->>Test: ResultSet
+    Test->>Test: Assert result / state
+```
+
 ### Lexer
 
 ```mermaid
@@ -552,7 +579,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Lexer classNode
-    class LEX_001,LEX_002 missingTest
+    class LEX_001,LEX_002 completedTest
 ```
 
 ### Parser
@@ -570,7 +597,24 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Parser classNode
-    class PAR_001,PAR_002,PAR_003 missingTest
+    class PAR_001,PAR_002,PAR_003 completedTest
+```
+
+### Semantic Analyzer
+
+```mermaid
+flowchart LR
+    Class_Semantic["SemanticAnalyzer"]
+
+    Class_Semantic --> SEM_001["Analyze_WhenASTIsValid_ShouldReturnLogicalPlan"]
+    Class_Semantic --> SEM_002["Analyze_WhenTableDoesNotExist_ShouldThrow"]
+
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
+    classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
+
+    class Class_Semantic classNode
+    class SEM_001,SEM_002 completedTest
 ```
 
 ### Optimizer
@@ -587,7 +631,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Optimizer classNode
-    class OPT_001,OPT_002 missingTest
+    class OPT_001,OPT_002 completedTest
 ```
 
 ### Executor
@@ -605,7 +649,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Executor classNode
-    class EXE_001,EXE_002,EXE_003 missingTest
+    class EXE_001,EXE_002,EXE_003 completedTest
 ```
 
 ## Security

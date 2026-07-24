@@ -240,33 +240,55 @@ classDiagram
 
 ```mermaid
 classDiagram
-    direction TB
-    class QueryExecutor {
-        +Execute() void
-    }
-    class SQLParser {
-        +Parse() AST
+    direction LR
+    class QueryProcessor {
+        +Start(object config) void
+        +Stop() void
+        +ExecuteQuery(string sql) ResultSet
     }
     class Lexer {
-        +Tokenize() void
+        +Tokenize(string sql) List~Token~
+    }
+    class SQLParser {
+        +Parse(List~Token~ tokens) AST
+    }
+    class SemanticAnalyzer {
+        +Analyze(AST ast) LogicalPlan
+    }
+    class QueryOptimizer {
+        +Optimize(LogicalPlan plan) PhysicalPlan
+    }
+    class QueryExecutor {
+        +Execute(PhysicalPlan plan) ResultSet
     }
     class AST {
         +GetRoot() void
-    }
-    class QueryOptimizer {
-        +Optimize() PhysicalPlan
+        +Accept(object visitor) void
+        +Build() void
     }
     class LogicalPlan {
+        +AddOperator() void
+        +Validate() void
     }
     class PhysicalPlan {
+        +Build() void
+        +CalculateCost() void
+        +Validate() void
     }
 
-    QueryExecutor *-- SQLParser
-    QueryExecutor *-- QueryOptimizer
-    SQLParser *-- Lexer
+    QueryProcessor *-- Lexer
+    QueryProcessor *-- SQLParser
+    QueryProcessor *-- SemanticAnalyzer
+    QueryProcessor *-- QueryOptimizer
+    QueryProcessor *-- QueryExecutor
+
     SQLParser --> AST : Creates
-    QueryOptimizer --> LogicalPlan : Uses
+    SemanticAnalyzer --> LogicalPlan : Creates
     QueryOptimizer --> PhysicalPlan : Creates
+    
+    SemanticAnalyzer ..> AST : Uses
+    QueryOptimizer ..> LogicalPlan : Uses
+    QueryExecutor ..> PhysicalPlan : Uses
 ```
 
 ### 3. Transaction Management

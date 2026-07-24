@@ -1,8 +1,8 @@
 using System;
 
-public class SQLParser
+public class SemanticAnalyzer
 {
-    public AST Parse(List<Token> tokens)
+    public LogicalPlan Analyze(AST ast)
     {
         throw new NotImplementedException();
     }

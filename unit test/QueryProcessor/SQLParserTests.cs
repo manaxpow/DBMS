@@ -58,3 +58,21 @@ public class SQLParserTests
         throw new NotImplementedException();
     }
 }
+    [Fact]
+    public void Parse_WhenUnexpectedTokenAppears_ShouldReportTokenPosition()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenExpressionIsNested_ShouldPreservePrecedence()
+    {
+        throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void Parse_WhenClauseOrderIsInvalid_ShouldThrowSyntaxError()
+    {
+        throw new NotImplementedException();
+    }
+}

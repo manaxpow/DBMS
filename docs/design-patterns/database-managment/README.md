@@ -6,19 +6,19 @@ You could model it like this:
 
 ## 2. Database Management
 
-|  Priority | Status | Design Pattern       | Feature                    | Reason / Context                                                                                         |
-| :-------: | :----: | :------------------- | :------------------------- | :------------------------------------------------------------------------------------------------------- |
-|  🔴 High  |  `[x]` | **Facade**           | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.                 |
-|  🔴 High  |  `[x]` | **Singleton**        | DatabaseManager            | Ensures a single instance of DatabaseManager centrally manages all database objects.                     |
-|  🔴 High  |  `[x]` | **Command**          | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.                |
-|  🔴 High  |  `[x]` | **Observer**         | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events.            |
-| 🟡 Medium |  `[x]` | **State**            | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.                  |
-| 🟡 Medium |  `[x]` | **Template Method**  | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.                 |
-|   🟢 Low  |  `[ ]` | **Builder**          | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.                      |
-|   🟢 Low  |  `[ ]` | **Proxy**            | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.                      |
-|   🟢 Low  |  `[ ]` | **Bridge**           | Database Storage           | Separates Database abstraction from different storage implementations.                                   |
-|   🟢 Low  |  `[ ]` | **Mediator**         | Subsystem Coordination     | Coordinates Storage, Catalog, Transaction, Recovery, Security, and Monitoring modules.                   |
-|   🟢 Low  |  `[ ]` | **Decorator**        | Database Service Extension | Adds metrics, tracing, caching, or auditing without changing the core service.                           |
+| Priority  | Status | Design Pattern      | Feature                    | Reason / Context                                                                              |
+| :-------: | :----: | :------------------ | :------------------------- | :-------------------------------------------------------------------------------------------- |
+|  🔴 High  | `[x]`  | **Facade**          | DatabaseServer             | Provides a single unified API to start, stop, configure, and access the database server.      |
+|  🔴 High  | `[x]`  | **Singleton**       | DatabaseManager            | Ensures a single instance of DatabaseManager centrally manages all database objects.          |
+|  🔴 High  | `[x]`  | **Command**         | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.     |
+|  🔴 High  | `[x]`  | **Observer**        | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events. |
+| 🟡 Medium | `[x]`  | **State**           | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.       |
+| 🟡 Medium | `[x]`  | **Template Method** | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.      |
+|  🟢 Low   | `[ ]`  | **Builder**         | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.           |
+|  🟢 Low   | `[ ]`  | **Proxy**           | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.           |
+|  🟢 Low   | `[ ]`  | **Bridge**          | Database Storage           | Separates Database abstraction from different storage implementations.                        |
+|  🟢 Low   | `[ ]`  | **Mediator**        | Subsystem Coordination     | Coordinates Storage, Catalog, Transaction, Recovery, Security, and Monitoring modules.        |
+|  🟢 Low   | `[ ]`  | **Decorator**       | Database Service Extension | Adds metrics, tracing, caching, or auditing without changing the core service.                |
 
 ## 3. Pattern Implementation Details
 
@@ -52,15 +52,21 @@ classDiagram
 ```csharp
 public class SubsystemA
 {
-    public void OperationA() { throw new NotImplementedException(); }
+    public void OperationA() {
+        Console.WriteLine("Do A");
+    }
 }
 public class SubsystemB
 {
-    public void OperationB() { throw new NotImplementedException(); }
+    public void OperationB() {
+        Console.WriteLine("Do B");
+    }
 }
 public class SubsystemC
 {
-    public void OperationC() { throw new NotImplementedException(); }
+    public void OperationC() {
+        Console.WriteLine("Do C");
+    }
 }
 
 public class Facade
@@ -76,15 +82,18 @@ public class Facade
         _c = c;
     }
 
+    // Client use Facade without knowing about a b c
     public void SubsystemOperation()
     {
-        throw new NotImplementedException();
+        _a.OperationA();
+        _b.OperationB();
+        _c.OperationC();
     }
 }
 ```
 
-
 #### Class diagram
+
 ```mermaid
 classDiagram
     class Client
@@ -143,11 +152,8 @@ sequenceDiagram
     Server->>Server: _isRunning = true
     Server-->>Client: success
 
-    deactivate Server 
+    deactivate Server
 ```
-
-
-
 
 ### 3.2. Observer (Database Events)
 
@@ -202,17 +208,25 @@ public class ConcretePublisher : IPublisher
 
     public void Attach(IObserver observer) { throw new NotImplementedException(); }
     public void Detach(IObserver observer) { throw new NotImplementedException(); }
-    public void Notify() { throw new NotImplementedException(); }
+    public void Notify() {
+        foreach(IObserver observer in _observers)
+        {
+            // Notify all subcribers
+            observer.Update();
+        }
+    }
 }
 
 public class ConcreteObserver : IObserver
 {
-    public void Update() { throw new NotImplementedException(); }
+    public void Update() {
+        // Do concrete observer job
+    }
 }
 ```
 
-
 #### Class diagram
+
 ```mermaid
 classDiagram
     direction TB
@@ -302,8 +316,6 @@ sequenceDiagram
     DM-->>Client: Database created
 ```
 
-
-
 ### 3.3. State (Database Lifecycle)
 
 The **State** pattern is used to manage the database lifecycle. The database transitions between different states such as Offline, Online, ReadOnly, Recovering, and Dropped. Each state encapsulates the behavior specific to that state.
@@ -334,37 +346,99 @@ classDiagram
 #### Example code
 
 ```csharp
-public interface IState
+// State
+public interface IDatabaseState
 {
-    void Handle();
+    void Open(Database database);
+    void Read(Database database);
+    void Write(Database database, string data);
+    void Close(Database database);
 }
 
-public class ConcreteStateA : IState
+// Concrete State
+public class OfflineState  : IState
 {
-    public void Handle() { throw new NotImplementedException(); }
+   public void Open(Database database)
+    {
+        Console.WriteLine("Opening database...");
+        database.SetState(new OnlineState());
+    }
+
+    public void Read(Database database)
+    {
+        Console.WriteLine("Cannot read: Database is offline.");
+    }
+
+    public void Write(Database database, string data)
+    {
+        Console.WriteLine("Cannot write: Database is offline.");
+    }
+
+    public void Close(Database database)
+    {
+        Console.WriteLine("Database is already offline.");
+    }
 }
 
-public class ConcreteStateB : IState
+public class OnlineState : IDatabaseState
 {
-    public void Handle() { throw new NotImplementedException(); }
+    public void Open(Database database)
+    {
+        Console.WriteLine("Database is already online.");
+    }
+
+    public void Read(Database database)
+    {
+        Console.WriteLine("Reading data...");
+    }
+
+    public void Write(Database database, string data)
+    {
+        Console.WriteLine($"Writing: {data}");
+    }
+
+    public void Close(Database database)
+    {
+        Console.WriteLine("Closing database...");
+        database.SetState(new OfflineState());
+    }
 }
 
-public class Context
+public class Database
 {
-    private IState _state;
+    private IDatabaseState _state;
 
-    public Context(IState state)
+    public Database()
+    {
+        _state = new OfflineState();
+    }
+
+    public void SetState(IDatabaseState state)
     {
         _state = state;
     }
 
-    public void Request()
+    public void Open()
     {
-        _state.Handle();
+        _state.Open(this);
+    }
+
+    public void Read()
+    {
+        _state.Read(this);
+    }
+
+    public void Write(string data)
+    {
+        _state.Write(this, data);
+    }
+
+    public void Close()
+    {
+        _state.Close(this);
     }
 }
 ```
-
 
 #### Class diagram
 
@@ -470,9 +544,6 @@ sequenceDiagram
     DB-->>Client: Database is now Online
 ```
 
-
-
-
 ### 3.4. Command (Database Operations)
 
 The **Command** pattern is used to encapsulate database operations (such as Create, Drop, and Rename Database) into standalone command objects. This allows operations to be parameterized, queued, and executed uniformly by a `DDLCommandExecutor`.
@@ -545,7 +616,6 @@ public class Invoker
     }
 }
 ```
-
 
 #### Class diagram
 
@@ -635,30 +705,24 @@ sequenceDiagram
 
     Client->>Command: new CreateDatabaseCommand(DBManager, "MyDatabase")
     Command-->>Client: command
-    
+
     Client->>Executor: Execute(command)
     activate Executor
-    
+
     Executor->>Command: Execute()
     activate Command
-    
+
     Command->>DBManager: CreateDatabase("MyDatabase")
     activate DBManager
     DBManager-->>Command: (Success)
     deactivate DBManager
-    
+
     Command-->>Executor: DDLResult.Success
     deactivate Command
-    
+
     Executor-->>Client: DDLResult.Success
     deactivate Executor
 ```
-
-
-
-
-
-
 
 ### 3.5. Template Method (Backup/Restore)
 
@@ -736,21 +800,20 @@ classDiagram
         #CompressData() void
         #FinalizeBackup()* void
     }
-    
+
     class FullBackup {
         #ExtractData() void
         #FinalizeBackup() void
     }
-    
+
     class IncrementalBackup {
         #ExtractData() void
         #FinalizeBackup() void
     }
-    
+
     DatabaseBackup <|-- FullBackup
     DatabaseBackup <|-- IncrementalBackup
 ```
-
 
 #### Sequence Diagram: Backup Execution Workflow
 
@@ -763,22 +826,22 @@ sequenceDiagram
 
     Client->>Base: ExecuteBackup()
     activate Base
-    
+
     Base->>Base: InitializeBackup()
-    
+
     Note right of Base: Template method defers to subclass
     Base->>Concrete: ExtractData()
     activate Concrete
     Concrete-->>Base: (data extracted)
     deactivate Concrete
-    
+
     Base->>Base: CompressData()
-    
+
     Base->>Concrete: FinalizeBackup()
     activate Concrete
     Concrete-->>Base: (finalized)
     deactivate Concrete
-    
+
     Base-->>Client: (Success)
     deactivate Base
 ```
@@ -837,12 +900,12 @@ sequenceDiagram
     participant DM as DatabaseManager
 
     Client->>DM: Instance (static property)
-    
+
     alt is first call
         DM->>DM: DatabaseManager() (private constructor)
         DM->>DM: Initialize _databases dictionary
     end
-    
+
     DM-->>Client: _instance
     Client->>DM: GetDatabase("MyDb")
 ```

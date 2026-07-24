@@ -115,3 +115,55 @@ sequenceDiagram
     QP-->>Test: ResultSet
     Test->>Test: Assert result / state
 ```
+
+## 7. Cost-Based Optimization Strategy
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as CostBasedOptimizationStrategyTests
+    participant Strategy as CostBasedOptimizationStrategy
+    participant Plan as PhysicalPlan
+
+    Note over Test, Plan: Arrange
+    Test->>Strategy: new CostBasedOptimizationStrategy()
+    Test->>Plan: Create Candidate Plans (e.g., TableScan, IndexScan)
+
+    Note over Test, Strategy: Act
+    Test->>Strategy: SelectBestPlan(candidates)
+    activate Strategy
+    Strategy->>Strategy: Find plan with minimum cost
+    Strategy-->>Test: PhysicalPlan (bestPlan)
+    deactivate Strategy
+
+    Note over Test: Assert
+    Test->>Test: result.Should().Be(expectedPlan)
+    Test->>Test: result.Cost.Should().Be(expectedCost)
+```
+
+## 8. Rule-Based Optimization Strategy
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Test as RuleBasedOptimizationStrategyTests
+    participant Strategy as RuleBasedOptimizationStrategy
+    participant Plan as LogicalPlan
+
+    Note over Test, Plan: Arrange
+    Test->>Strategy: new RuleBasedOptimizationStrategy()
+    Test->>Plan: new LogicalPlan()
+    Test->>Plan: Add(LogicalNode)
+
+    Note over Test, Strategy: Act
+    Test->>Strategy: ApplyPredicatePushdown(plan)
+    activate Strategy
+    Strategy-->>Test: LogicalPlan (result)
+    deactivate Strategy
+
+    Note over Test: Assert
+    Test->>Test: result.Should().NotBeNull()
+    Test->>Test: result.Nodes.Should().ContainSingle(...)
+```

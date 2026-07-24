@@ -365,147 +365,152 @@ classDiagram
 classDiagram
     direction TB
 
-    class DatabaseServer {
-        -Configuration _config
-        -IReadOnlyList~Component~ _components
-        -bool _isRunning
-        +Start(Configuration config) void
-        +Stop() void
+    namespace Core {
+        class DatabaseServer {
+            -object? _config
+            -IReadOnlyList~IServerComponent~ _components
+            -bool _isRunning
+            +Start(object config) void
+            +Stop() void
+        }
+        class DatabaseManager {
+            -CatalogManager _catalog
+            -static DatabaseManager _instance
+            +static DatabaseManager Instance
+            -Dictionary~string, Database~ _databases
+            -object _eventPublisher
+            +CreateDatabase(string name) void
+            +GetDatabase(string name) Database
+            +DropDatabase(string name) void
+        }
+        class Database {
+            +int Id
+            +string Name
+            -object _storage
+            -object _schemaManager
+            -bool _isOpen
+            -IDatabaseState _state
+            +Database()
+            +Database(string name, IDatabaseState state)
+            +ChangeState(IDatabaseState state) void
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+            +Close() void
+            +AddSchema(object schema) void
+            +DropSchema(string name) void
+        }
     }
 
-    class DatabaseManager {
-        -CatalogManager _catalog
-        -Dictionary~string, Database~ _databases
-        -DatabaseEventPublisher _eventPublisher
-        +CreateDatabase(string name) void
-        +GetDatabase(string name) Database
-        +DropDatabase(string name) void
+    namespace State {
+        class IDatabaseState {
+            <<interface>>
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
+        class OfflineState {
+            -Database _database
+            +OfflineState(Database database)
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
+        class OnlineState {
+            -Database _database
+            +OnlineState(Database database)
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
+        class ReadOnlyState {
+            -Database _database
+            +ReadOnlyState(Database database)
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
+        class RecoveryState {
+            -Database _database
+            +RecoveryState(Database database)
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
+        class DroppedState {
+            -Database _database
+            +DroppedState(Database database)
+            +Open() void
+            +SetReadOnly() void
+            +Recovery() void
+            +Drop() void
+        }
     }
 
-    class Database {
-        +string Name
-        -StorageEngine _storage
-        -SchemaManager _schemaManager
-        -IDatabaseState _state
-        +Database(initialState)
-        +ChangeState(state) void
-        +Open() void
-        +Close() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-        +AddSchema(Schema schema) void
-        +DropSchema(string name) void
+    namespace Events {
+        class DatabaseEventPublisher {
+            -List~IDatabaseEventObserver~ _observers
+            +AddListener(IDatabaseEventObserver listener) void
+            +RemoveListener(IDatabaseEventObserver listener) void
+        }
+        class IDatabaseEventObserver {
+            <<interface>>
+            +OnDatabaseEvent(DatabaseEvent database) void
+        }
+        class MonitoringObserver {
+            +OnDatabaseEvent(DatabaseEvent database) void
+        }
+        class LoggingObserver {
+            +OnDatabaseEvent(DatabaseEvent database) void
+        }
+        class ReplicationObserver {
+            +OnDatabaseEvent(DatabaseEvent database) void
+        }
+        class DatabaseEvent {
+            +DatabaseEventType Type
+            +string DatabaseName
+            +DateTime Timestamp
+        }
+        class DatabaseEventType {
+            <<enumeration>>
+            Created
+            Dropped
+            BackedUpCompleted
+            Restored
+            StateChanged
+        }
     }
 
-    class IDatabaseState {
-        <<interface>>
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class OfflineState {
-        -Database context
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class OnlineState {
-        -Database context
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class ReadOnlyState {
-        -Database context
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class RecoveringState {
-        -Database context
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class DroppedState {
-        -Database context
-        +Open() void
-        +SetReadOnly() void
-        +Recover() void
-        +Drop() void
-    }
-
-    class DatabaseEventPublisher {
-        -List~IDatabaseEventObserver~ _observers
-        +Subscribe(IDatabaseEventObserver observer) void
-        +Unsubscribe(IDatabaseEventObserver observer) void
-        +Notify(DatabaseEvent event) void
-    }
-
-    class IDatabaseEventObserver {
-        <<interface>>
-        +OnDatabaseEvent(DatabaseEvent event) void
-    }
-
-    class MonitoringObserver {
-        +OnDatabaseEvent(DatabaseEvent event) void
-    }
-
-    class LoggingObserver {
-        +OnDatabaseEvent(DatabaseEvent event) void
-    }
-
-    class ReplicationObserver {
-        +OnDatabaseEvent(DatabaseEvent event) void
-    }
-
-    class DatabaseEvent {
-        +DatabaseEventType Type
-        +string DatabaseName
-        +DateTime Timestamp
-    }
-
-    class DatabaseEventType {
-        <<enumeration>>
-        Created
-        Dropped
-        BackupCompleted
-        Restored
-        StateChanged
-    }
-
-    class SchemaManager {
-        -CatalogManager _catalogManager
-        -StorageEngine _storageEngine
-        +DropSchema(Schema schema, bool cascade) void
-        -DropObject(Schema schema, ISchemaObject schemaObject) void
-        -CheckTableDependencies() void
-        -CheckViewDependencies() void
-    }
-
-    class CatalogManager {
-        -Dictionary~string, ICatalogObject~ _store
-        +Register(ICatalogObject obj) void
-        +Find~T~(string name) T?
-        +Remove(ICatalogObject obj) void
-    }
-
-    class StatisticsManager {
-        -Dictionary~string, Statistics~ _stats
-        -DatabaseStore _store
-        +UpdateStatistics(object obj) void
-        +EstimateSelectivity(Predicate predicate) double
+    namespace Managers {
+        class SchemaManager {
+            -CatalogManager _catalogManager
+            -StorageEngine _storageEngine
+            +SchemaManager()
+            +SchemaManager(CatalogManager catalogManager, StorageEngine storageEngine)
+            +DropSchema(Schema schema, bool cascade) void
+            -DropObject(Schema schema, ISchemaObject schemaObject) void
+            -CheckTableDependencies() void
+            -CheckViewDependencies() void
+        }
+        class CatalogManager {
+            -Dictionary~string, ICatalogObject~ _store
+            +Register(ICatalogObject obj) void
+            +Find~T~(string name) T?
+            +Remove(ICatalogObject obj) void
+        }
+        class StatisticsManager {
+            -Dictionary~string, object~ _stats
+            -object _store
+            +StatisticsManager(object store)
+            +UpdateStatistics(object obj) void
+            +EstimateSelectivity(object predicate) double
+        }
     }
 
     DatabaseServer *-- DatabaseManager
@@ -517,13 +522,13 @@ classDiagram
     IDatabaseState <|.. OfflineState
     IDatabaseState <|.. OnlineState
     IDatabaseState <|.. ReadOnlyState
-    IDatabaseState <|.. RecoveringState
+    IDatabaseState <|.. RecoveryState
     IDatabaseState <|.. DroppedState
 
     OfflineState --> Database : context
     OnlineState --> Database : context
     ReadOnlyState --> Database : context
-    RecoveringState --> Database : context
+    RecoveryState --> Database : context
     DroppedState --> Database : context
 
     DatabaseManager --> DatabaseEventPublisher : uses
@@ -541,328 +546,344 @@ classDiagram
 classDiagram
     direction TB
 
-    class Schema {
-        +string Name
-        +IReadOnlyCollection~Table~ Tables
-        +IReadOnlyCollection~View~ Views
-        +IReadOnlyCollection~StoredProcedure~ StoredProcedures
-        +IEnumerable~ISchemaObject~ Objects
-        -Dictionary~string, Table~ _tables
-        -Dictionary~string, View~ _views
-        -Dictionary~string, StoredProcedure~ _storedProcedures
-        +RegisterObject(ISchemaObject obj) void
-        +UnregisterObject(string name) ISchemaObject
-        +AddTable(Table table) void
-        +DropTable(string tableName) void
-        +AlterTable(string tableName, Table newTable) void
-        +GetTable(string tableName) Table?
-        +ContainsTable(string tableName) bool
-        +ContainsObject(string objectName) bool
-        +ResolveObject(string objectName) object?
-        ~RegisterView(View view) void
-        ~UnregisterView(string viewName) void
-        ~IsObjectReferenced(string objectName) bool
-        -IsTableReferencedByForeignKey(string tableName) bool
-        +Drop() void
+    namespace CoreObjects {
+        class ISchemaObject {
+            <<interface>>
+            +int Id
+            +string Name
+            +SchemaObjectType ObjectType
+            +Drop() void
+            +Accept(ISchemaVisitor visitor) void
+        }
+        class Schema {
+            +int Id
+            +string Name
+            +SchemaObjectType ObjectType
+            +IReadOnlyCollection~ISchemaObject~ Objects
+            -Dictionary~string, ISchemaObject~ _objects
+            +Schema(string name)
+            +RegisterObject(ISchemaObject obj) void
+            +UnregisterObject(string name) ISchemaObject
+            +CreateIterator() ISchemaObjectIterator
+            +AddTable(Table table) void
+            +DropTable(string tableName) void
+            +AlterTable(string tableName, Table newTable) void
+            +GetTable(string tableName) Table
+            +ContainsTable(string tableName) bool
+            +ContainsObject(string objectName) bool
+            +ResolveObject(string objectName) object
+            ~RegisterView(View view) void
+            ~UnregisterView(string viewName) void
+            ~IsObjectReferenced(string objectName) bool
+            -IsTableReferencedByForeignKey(string tableName) bool
+            +Drop() void
+            +Accept(ISchemaVisitor visitor) void
+        }
+        class Table {
+            +int Id
+            +string Name
+            +SchemaObjectType ObjectType
+            +IReadOnlyList~Column~ Columns
+            +IReadOnlyList~Row~ Rows
+            +IReadOnlyList~Constraint~ Constraints
+            +IReadOnlyList~Index~ Indexes
+            +IReadOnlyList~Partition~ Partitions
+            +Table(string name)
+            +AddColumn(Column column) void
+            +DropColumn(string columnName) void
+            +AlterColumn(string columnName, Column newColumn) void
+            +AddConstraint(Constraint constraint) void
+            +DropConstraint(string constraintName) void
+            +InsertRow(Row row) void
+            +UpdateRow(Row oldRow, Row newRow) void
+            +DeleteRow(Row row) bool
+            +Drop() void
+            +ContainsColumn(string columnName) bool
+            +ContainsRow(Row row) bool
+            +GetColumn(string columnName) Column
+            +GetColumnIndex(Column column) int
+            +GetColumnIndex(string columnName) int
+            +GetPrimaryIndex() Index
+            +GetForeignKeyIndex() Index
+            +Accept(ISchemaVisitor visitor) void
+        }
+        class View {
+            +int Id
+            +string Name
+            +SchemaObjectType ObjectType
+            +string Query
+            +bool IsDropped
+            +IReadOnlyList~string~ Dependencies
+            -Schema _schema
+            +Create(string name, string query, Schema schema) View
+            +AlterView(string newQuery) void
+            +Drop() void
+            +Resolve(Schema schema) object
+            +Accept(ISchemaVisitor visitor) void
+            -ValidateQuery(string query) void
+            -GetDependencies(string query) IReadOnlyList~string~
+            -EnsureDependenciesExist(Schema schema, IReadOnlyList~string~ dependencies) void
+        }
+        class StoredProcedure {
+            +int Id
+            +string Name
+            +SchemaObjectType ObjectType
+            +bool IsEnabled
+            +bool IsDropped
+            +ProcedureBody Body
+            -object _transactionManager
+            +StoredProcedure()
+            +StoredProcedure(string name, string body)
+            +Execute(object parameters) object
+            +AlterProcedure(ProcedureBody newBody) void
+            +Drop() void
+            +Accept(ISchemaVisitor visitor) void
+            -ValidateParameters(object parameters) bool
+            -ValidateBody(ProcedureBody newBody) bool
+        }
+        class ProcedureBody {
+            +Execute(object parameters, object transaction) object
+        }
     }
 
-    class Table {
-        +string Name
-        +IReadOnlyList~Column~ Columns
-        +IReadOnlyList~Row~ Rows
-        +IReadOnlyList~Constraint~ Constraints
-        +IReadOnlyList~Index~ Indexes
-        +IReadOnlyList~Partition~ Partitions
-        -List~Column~ _columns
-        -List~Row~ _rows
-        -List~Constraint~ _constraints
-        -List~Index~ _indexes
-        -List~Partition~ _partitions
-        +AddColumn(Column column) void
-        +DropColumn(string columnName) void
-        +AlterColumn(string columnName, Column newColumn) void
-        +InsertRow(Row row) void
-        +DeleteRow(Row row) bool
-        +ContainsColumn(string columnName) bool
-        +ContainsRow(Row row) bool
-        +GetColumn(string columnName) Column
-        +GetColumnIndex(Column column) int
-        +GetColumnIndex(string columnName) int
-        +GetPrimaryIndex() Index?
-        +GetForeignKeyIndex() Index?
-        -ValidateValueCount(Row row) bool
-        -ValidateRowValues(Row row) bool
-        -IsColumnReferencedByConstraint(string columnName) bool
-        -RemoveColumnValues(int columnIndex) void
+    namespace TableComponents {
+        class Column {
+            +string Name
+            +Type DataType
+            +bool IsNullable
+            +Create(string name, string type, bool isNullable) Column
+            +ValidateValue(object? value) bool
+            -ResolveDataType(string type) Type
+        }
+        class Row {
+            +int Id
+            +Table Table
+            +IReadOnlyList~object?~ Values
+            -List~object?~ _values
+            +GetValue(string columnName) object?
+            +SetValue(string columnName, object? value) void
+            ~RemoveValueAt(int columnIndex) void
+        }
+        class Index {
+            +bool IsUnique
+            +string Name
+            +bool AllowsNull
+            +IReadOnlyList~string~ ColumnNames
+            +IndexType Type
+            +IReadOnlyDictionary~object, List~object~~ Entries
+            -Dictionary~object, List~object~~ _entries
+            +Insert(object? key, object recordPointer) void
+            +Search(object key) object?
+            +RangeSearch(object startKey, object endKey) object[]
+            +Update(object key, object newRecordPointer) void
+            +Delete(object key) bool
+            -ContainsKey(object key) bool
+            -AddEntry(object key, object recordPointer) void
+            -ReplaceEntry(object key, object newRecordPointer) void
+            -FindEntriesInRange(object startKey, object endKey) IEnumerable~IndexEntry~
+            -OrderByKey(IEnumerable~IndexEntry~ entries) object[]
+        }
+        class IndexEntry {
+            +object Key
+            +IReadOnlyList~object~ RecordPointers
+        }
+        class IndexType {
+            <<enumeration>>
+            NonClustered
+            Clustered
+        }
+        class Partition {
+            +int Id
+            +string Name
+            +IReadOnlyList~PartitionRange~ Ranges
+            -List~PartitionRange~ _ranges
+            +RouteRow(Row row, string partitionKey) Partition
+            +AddRange(PartitionRange range) void
+            +RemoveRange(PartitionRange range) void
+            -FindMatchingRange(object key) PartitionRange?
+            -HasOverlappingRange(PartitionRange range) bool
+        }
+        class PartitionRange {
+            +object Start
+            +object End
+            +bool IncludeStart
+            +bool IncludeEnd
+            +Partition Target
+            +Contains(object key) bool
+            +Overlaps(PartitionRange other) bool
+        }
     }
 
-    class Column {
-        +string Name
-        +Type DataType
-        +bool IsNullable
-        +Create(string name, string type, bool isNullable) Column
-        +ValidateValue(object? value) bool
-        -ResolveDataType(string type) Type
+    namespace Constraints {
+        class ConstraintContext {
+            +Row CandidateRow
+            +Row? ExistingRow
+            +Table Table
+            +Schema Schema
+        }
+        class Constraint {
+            <<abstract>>
+            +string Name
+            +bool IsEnabled
+            +Validate(ConstraintContext context) bool
+            +Enable() void
+            +Disable() void
+            #Check(ConstraintContext context) bool
+        }
+        class CheckConstraint {
+            +Func~Row, bool~ Predicate
+            #Check(ConstraintContext context) bool
+        }
+        class UniqueConstraint {
+            +IReadOnlyList~string~ ColumnNames
+            #Check(ConstraintContext context) bool
+        }
+        class PrimaryKeyConstraint {
+            +IReadOnlyList~string~ ColumnNames
+            #Check(ConstraintContext context) bool
+        }
+        class ForeignKeyConstraint {
+            +string ChildColumnName
+            +string ReferencedTableName
+            +string ReferencedColumnName
+            +IReferentialAction OnDelete
+            +IReferentialAction OnUpdate
+            +bool IsNullable
+            +OnParentRowDeleted(Row parentRow, Table childTable) void
+            #Check(ConstraintContext context) bool
+        }
+        class IReferentialAction {
+            <<interface>>
+            +Execute(Row parentRow, Table childTable) void
+        }
+        class CascadeAction {
+            +Execute(Row parentRow, Table childTable) void
+        }
+        class RestrictAction {
+            +Execute(Row parentRow, Table childTable) void
+        }
+        class SetNullAction {
+            +Execute(Row parentRow, Table childTable) void
+        }
     }
 
-    class Row {
-        +Table Table
-        +IReadOnlyList~object?~ Values
-        -List~object?~ _values
-        +GetValue(string columnName) object?
-        +SetValue(string columnName, object? value) void
-        ~RemoveValueAt(int columnIndex) void
+    namespace Iterators {
+        class ISchemaObjectIterator {
+            <<interface>>
+            +HasNext() bool
+            +Next() ISchemaObject?
+            +Reset() void
+        }
+        class SchemaObjectsIterator {
+            -IReadOnlyList~ISchemaObject~ _objects
+            -int _index
+            +SchemaObjectsIterator(IReadOnlyList~ISchemaObject~ objects)
+            +HasNext() bool
+            +Next() ISchemaObject?
+            +Reset() void
+        }
+        class TableIterator {
+            -IReadOnlyList~ISchemaObject~ _tables
+            +TableIterator(IReadOnlyList~ISchemaObject~ tables)
+            +HasNext() bool
+            +Next() ISchemaObject?
+            +Reset() void
+        }
+        class ViewIterator {
+            -IReadOnlyList~ISchemaObject~ _views
+            +ViewIterator(IReadOnlyList~ISchemaObject~ views)
+            +HasNext() bool
+            +Next() ISchemaObject?
+            +Reset() void
+        }
+        class StoredProcedureIterator {
+            -IReadOnlyList~ISchemaObject~ _storedProcedures
+            +StoredProcedureIterator(IReadOnlyList~ISchemaObject~ storedProcedures)
+            +HasNext() bool
+            +Next() ISchemaObject?
+            +Reset() void
+        }
     }
 
-    class ConstraintContext {
-        +Row CandidateRow
-        +Row? ExistingRow
-        +Table Table
-        +Schema Schema
+    namespace Visitors {
+        class ISchemaVisitor {
+            <<interface>>
+            +Visit(Schema schema) void
+            +Visit(Table table) void
+            +Visit(View view) void
+            +Visit(StoredProcedure storedProcedure) void
+        }
+        class ValidationVisitor {
+            +Visit(Schema schema) void
+            +Visit(Table table) void
+            +Visit(View view) void
+            +Visit(StoredProcedure storedProcedure) void
+        }
+        class BackupVisitor {
+            +Visit(Schema schema) void
+            +Visit(Table table) void
+            +Visit(View view) void
+            +Visit(StoredProcedure storedProcedure) void
+        }
+        class ExportVisitor {
+            +Visit(Schema schema) void
+            +Visit(Table table) void
+            +Visit(View view) void
+            +Visit(StoredProcedure storedProcedure) void
+        }
     }
 
-    class Constraint {
-        <<abstract>>
-        +string Name
-        +bool IsEnabled
-        +Validate(ConstraintContext context) bool
-        +Enable() void
-        +Disable() void
-        #Check(ConstraintContext context) bool
-    }
+    %% Object Hierarchy
+    ISchemaObject <|.. Schema
+    ISchemaObject <|.. Table
+    ISchemaObject <|.. View
+    ISchemaObject <|.. StoredProcedure
 
-    class CheckConstraint {
-        +Func~Row, bool~ Predicate
-        #Check(ConstraintContext context) bool
-    }
+    Schema *-- ISchemaObject
 
-    class UniqueConstraint {
-        +IReadOnlyList~string~ ColumnNames
-        #Check(ConstraintContext context) bool
-    }
+    %% Iterators
+    ISchemaObjectIterator <|.. SchemaObjectsIterator
+    ISchemaObjectIterator <|.. TableIterator
+    ISchemaObjectIterator <|.. ViewIterator
+    ISchemaObjectIterator <|.. StoredProcedureIterator
 
-    class PrimaryKeyConstraint {
-        +IReadOnlyList~string~ ColumnNames
-        #Check(ConstraintContext context) bool
-    }
+    %% Visitors
+    ISchemaVisitor <|.. ValidationVisitor
+    ISchemaVisitor <|.. BackupVisitor
+    ISchemaVisitor <|.. ExportVisitor
+    ISchemaObject --> ISchemaVisitor : Accept
 
-    class ForeignKeyConstraint {
-        +string ChildColumnName
-        +string ReferencedTableName
-        +string ReferencedColumnName
-        +IReferentialAction OnDelete
-        +IReferentialAction OnUpdate
-        +bool IsNullable
-        +OnParentRowDeleted(Row parentRow, Table childTable) void
-        #Check(ConstraintContext context) bool
-    }
-
-    class IReferentialAction {
-        <<interface>>
-        +Execute(Row parentRow, Table childTable) void
-    }
-
-    class CascadeAction {
-        +Execute(Row parentRow, Table childTable) void
-    }
-
-    class RestrictAction {
-        +Execute(Row parentRow, Table childTable) void
-    }
-
-    class SetNullAction {
-        +Execute(Row parentRow, Table childTable) void
-    }
-
-    class Index {
-        +bool IsUnique
-        +bool AllowsNull
-        +IReadOnlyDictionary~object, List~object~~ Entries
-        -Dictionary~object, List~object~~ _entries
-        +Insert(object? key, object recordPointer) void
-        +Search(object key) object?
-        +RangeSearch(object startKey, object endKey) object[]
-        +Update(object key, object newRecordPointer) void
-        +Delete(object key) bool
-        -ContainsKey(object key) bool
-        -AddEntry(object key, object recordPointer) void
-        -ReplaceEntry(object key, object newRecordPointer) void
-        -FindEntriesInRange(object startKey, object endKey) IEnumerable~IndexEntry~
-        -OrderByKey(IEnumerable~IndexEntry~ entries) object[]
-    }
-
-    class IndexEntry {
-        +object Key
-        +IReadOnlyList~object~ RecordPointers
-    }
-
-    class Partition {
-        +string Name
-        +IReadOnlyList~PartitionRange~ Ranges
-        -List~PartitionRange~ _ranges
-        +RouteRow(Row row, string partitionKey) Partition
-        +AddRange(PartitionRange range) void
-        +RemoveRange(PartitionRange range) void
-        -FindMatchingRange(object key) PartitionRange?
-        -HasOverlappingRange(PartitionRange range) bool
-    }
-
-    class PartitionRange {
-        +object Start
-        +object End
-        +bool IncludeStart
-        +bool IncludeEnd
-        +Partition Target
-        +Contains(object key) bool
-        +Overlaps(PartitionRange other) bool
-    }
-
-    class View {
-        +string Name
-        +string Query
-        +bool IsDropped
-        +IReadOnlyList~string~ Dependencies
-        -Schema _schema
-        +Create(string name, string query, Schema schema) View
-        +AlterView(string newQuery) void
-        +Drop() void
-        +Resolve(Schema schema) object
-        -ValidateQuery(string query) void
-        -GetDependencies(string query) IReadOnlyList~string~
-        -EnsureDependenciesExist(Schema schema, IReadOnlyList~string~ dependencies) void
-    }
-
-    class StoredProcedure {
-        +string Name
-        +bool IsEnabled
-        +bool IsDropped
-        +ProcedureBody Body
-        -TransactionManager _transactionManager
-        +Execute(object parameters) object
-        +AlterProcedure(ProcedureBody newBody) void
-        +Drop() void
-        -ValidateParameters(object parameters) bool
-        -ValidateBody(ProcedureBody newBody) bool
-    }
-
-    class TransactionManager {
-        +BeginTransaction() object
-        +Commit(object transaction) void
-        +Rollback(object transaction) void
-    }
-
-    class ProcedureBody {
-        +Execute(object parameters, object transaction) object
-    }
-
-    class DDLCommandExecutor {
-        +Execute(IDDLCommand) DDLResult
-    }
-    class IDDLCommand {
-        <<interface>>
-        +Execute() DDLResult
-    }
-    class CreateTableCommand {
-        +Execute() DDLResult
-    }
-    class AlterTableCommand {
-        +Execute() DDLResult
-    }
-    class DropTableCommand {
-        +Execute() DDLResult
-    }
-    class DDLResult {
-        <<enumeration>>
-        Success
-        Failure
-    }
-
-    class ConstraintCreatorRegistry {
-        +GetCreator(metadataType) ConstraintCreator
-    }
-    class ConstraintCreator {
-        <<abstract>>
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class PrimaryKeyConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class ForeignKeyConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class UniqueConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-    class CheckConstraintCreator {
-        +CreateConstraint(ConstraintMetadata metadata) Constraint
-    }
-
-    Schema *-- Table
-    Schema *-- View
-    Schema *-- StoredProcedure
-
+    %% Table Relationships
     Table *-- Column
     Table *-- Row
-        Constraint <|-- CheckConstraint
-    Constraint <|-- UniqueConstraint
-    Constraint <|-- PrimaryKeyConstraint
-    Constraint <|-- ForeignKeyConstraint
-    Constraint ..> ConstraintContext : Uses
-
     Table *-- ConstraintContext
     Table *-- Constraint
     Table *-- Index
     Table *-- Partition
 
-    Constraint <|-- ForeignKeyConstraint
     Row --> Table
     Row --> Column
+    Partition --> PartitionRange
+
+    %% Constraints
+    Constraint <|-- CheckConstraint
+    Constraint <|-- UniqueConstraint
+    Constraint <|-- PrimaryKeyConstraint
+    Constraint <|-- ForeignKeyConstraint
+    Constraint ..> ConstraintContext : Uses
+
     ForeignKeyConstraint --> Schema
     ForeignKeyConstraint --> Table
     ForeignKeyConstraint --> Index
-    Partition --> PartitionRange
-    StoredProcedure --> TransactionManager
-    StoredProcedure --> ProcedureBody
+    ForeignKeyConstraint *-- IReferentialAction
 
     IReferentialAction <|.. CascadeAction
     IReferentialAction <|.. RestrictAction
     IReferentialAction <|.. SetNullAction
-    ForeignKeyConstraint *-- IReferentialAction
-    
-    class ISchemaObject {
-        <<interface>>
-        +int Id
-        +string Name
-        +Drop() void
-    }
-    
-    ISchemaObject <|.. Schema
-    ISchemaObject <|.. Table
-    ISchemaObject <|.. View
-    ISchemaObject <|.. StoredProcedure
-    Schema *-- ISchemaObject
 
-    DDLCommandExecutor o--> IDDLCommand : invokes
-    IDDLCommand <|.. CreateTableCommand
-    IDDLCommand <|.. AlterTableCommand
-    IDDLCommand <|.. DropTableCommand
-    CreateTableCommand --> Schema : receiver
-    CreateTableCommand --> Table : creates
-    AlterTableCommand --> Schema : receiver
-    DropTableCommand --> Schema : receiver
-
-    ConstraintCreatorRegistry ..> ConstraintCreator : returns
-    ConstraintCreator <|-- PrimaryKeyConstraintCreator
-    ConstraintCreator <|-- ForeignKeyConstraintCreator
-    ConstraintCreator <|-- UniqueConstraintCreator
-    ConstraintCreator <|-- CheckConstraintCreator
-    
-    PrimaryKeyConstraintCreator ..> PrimaryKeyConstraint : creates
-    ForeignKeyConstraintCreator ..> ForeignKeyConstraint : creates
-    UniqueConstraintCreator ..> UniqueConstraint : creates
-    CheckConstraintCreator ..> CheckConstraint : creates
+    %% Procedures
+    StoredProcedure --> ProcedureBody
 ```
-
 ### 8. Replication and Cluster
 
 ```mermaid

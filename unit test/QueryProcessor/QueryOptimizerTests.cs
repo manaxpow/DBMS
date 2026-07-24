@@ -1,83 +1,48 @@
 using System;
 using Xunit;
 using FluentAssertions;
+using NSubstitute;
 
 public class QueryOptimizerTests
 {
-    [Trait("Category", "Important")]
-    [Fact]
-    public void Optimize_WhenMultiplePlansExist_ShouldChooseLowestCostPlan()
-    {
-        // Arrange
-        var optimizer = new QueryOptimizer();
-
-        var plan = new LogicalPlan();
-
-        // Act
-        var result = optimizer.Optimize(plan);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Cost.Should().Be(10);
-        result.OperatorType.Should().Be(PhysicalOperatorType.IndexScan);
-    }
+    // --------------------------------------------------------------------
+    // QueryOptimizer Tests (Context)
+    // --------------------------------------------------------------------
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Optimize_ShouldPreserveLogicalSemantics()
+    public void QueryOptimizer_Optimize_WhenStrategyIsNull_ShouldThrow()
     {
         // Arrange
-        var optimizer = new QueryOptimizer();
+        var optimizer = new QueryOptimizer(null);
         var plan = new LogicalPlan();
 
         // Act
-        var result = optimizer.Optimize(plan);
+        Action act = () => optimizer.Optimize(plan);
 
         // Assert
-        result.Should().NotBeNull();
-        result.EquivalentTo(plan).Should().BeTrue();
+        act.Should().Throw<InvalidOperationException>()
+           .WithMessage("Optimization strategy not set.");
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Optimize_WhenNoAlternativeExists_ShouldReturnOriginalPlan()
+    public void QueryOptimizer_Optimize_ShouldDelegateToStrategy()
     {
-        throw new NotImplementedException();
-    }
+        // Arrange
+        var mockStrategy = Substitute.For<IOptimizationStrategy>();
+        var expectedPhysicalPlan = new PhysicalPlan { Cost = 42, OperatorType = PhysicalOperatorType.TableScan };
+        
+        mockStrategy.Optimize(Arg.Any<LogicalPlan>()).Returns(expectedPhysicalPlan);
+        
+        var optimizer = new QueryOptimizer(mockStrategy);
+        var logicalPlan = new LogicalPlan();
 
+        // Act
+        var result = optimizer.Optimize(logicalPlan);
 
-    [Fact]
-    public void Optimize_WhenStatisticsAreMissing_ShouldUseFallbackCost()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenPredicatePushdownIsValid_ShouldPushPredicate()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenJoinReorderingReducesCost_ShouldReorderJoins()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenIndexScanIsCheaper_ShouldChooseIndexScan()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenIndexIsUnavailable_ShouldChooseTableScan()
-    {
-        throw new NotImplementedException();
-    }
-
-    [Fact]
-    public void Optimize_WhenLogicalPlanIsInvalid_ShouldThrow()
-    {
-        throw new NotImplementedException();
+        // Assert
+        result.Should().Be(expectedPhysicalPlan);
+        mockStrategy.Received(1).Optimize(logicalPlan);
     }
 }

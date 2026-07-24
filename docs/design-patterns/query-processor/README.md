@@ -2,18 +2,18 @@
 
 This document tracks the design patterns used across the Query Processor module and their current implementation status.
 
-| Priority  | Status | Design Pattern              | Feature                     | Reason / Context                                                                                                                                                                             |
-| :-------: | :----: | :-------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  🔴 High  | `[x]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan. |
-|  🔴 High  | `[ ]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.       |
-|  🔴 High  | `[ ]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                    |
-|  🔴 High  | `[ ]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                               |
-| 🟡 Medium | `[ ]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.   |
-| 🟡 Medium | `[ ]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.          |
-| 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                 |
+| Priority  | Status | Design Pattern              | Feature                     | Reason / Context                                                                                                                                                                                    |
+| :-------: | :----: | :-------------------------- | :-------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  🔴 High  | `[x]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan.        |
+|  🔴 High  | `[x]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.              |
+|  🔴 High  | `[x]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                           |
+|  🔴 High  | `[ ]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
+| 🟡 Medium | `[ ]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
+| 🟡 Medium | `[ ]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
+| 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
 |  🟢 Low   | `[ ]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
-|  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.      |
-|  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                        |
+|  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.             |
+|  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                               |
 
 ---
 
@@ -85,7 +85,7 @@ public class BinaryExpression : NonTerminalExpression
     {
         var leftNode = Left.Interpret(context);
         var rightNode = Right.Interpret(context);
-        
+
         // Return combined LogicalNode
         return new LogicalNode();
     }
@@ -192,7 +192,7 @@ sequenceDiagram
     Note over BinaryExpr: Interpret left child
     BinaryExpr->>ColExpr: Interpret(context)
     activate ColExpr
-    
+
     Note over ColExpr: Resolve column from context
     ColExpr->>Context: ResolveColumn(ColumnName)
     Context-->>ColExpr: LogicalNode
@@ -382,7 +382,7 @@ sequenceDiagram
 
     Client->>Expr: Accept(Visitor)
     activate Expr
-    
+
     Expr->>Visitor: Visit(BinaryExpression)
     activate Visitor
 
@@ -399,7 +399,183 @@ sequenceDiagram
     Note over Visitor: Combine results
     Visitor-->>Expr: LogicalNode
     deactivate Visitor
-    
+
     Expr-->>Client: LogicalNode
     deactivate Expr
+```
+
+---
+
+## 2.3. Strategy (Query Optimization)
+
+The **Strategy** pattern is used in the `QueryOptimizer` to switch between different optimization algorithms (e.g., rule-based vs. cost-based) dynamically at runtime without modifying the context class.
+
+- Define an `IOptimizationStrategy` interface with an `Optimize` method.
+- Implement specific concrete strategies such as `RuleBasedOptimizationStrategy` and `CostBasedOptimizationStrategy`.
+- The `QueryOptimizer` (Context) maintains a reference to a strategy object and delegates the optimization execution to it.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Context {
+        -Strategy strategy
+        +SetStrategy(Strategy)
+        +ContextInterface()
+    }
+
+    class Strategy {
+        <<interface>>
+        +AlgorithmInterface()
+    }
+
+    class ConcreteStrategyA {
+        +AlgorithmInterface()
+    }
+
+    class ConcreteStrategyB {
+        +AlgorithmInterface()
+    }
+
+    Context o-- Strategy : contains
+    Strategy <|.. ConcreteStrategyA
+    Strategy <|.. ConcreteStrategyB
+
+    note for Context "strategy.AlgorithmInterface()"
+```
+
+#### Example code
+
+```csharp
+// Strategy
+public interface IOptimizationStrategy
+{
+    PhysicalPlan Optimize(LogicalPlan plan);
+}
+
+// Concrete Strategies
+public class RuleBasedOptimizationStrategy : IOptimizationStrategy
+{
+    // Algorithm
+    public PhysicalPlan Optimize(LogicalPlan plan)
+    {
+        plan = ApplyPredicatePushdown(plan);
+        plan = ApplyProjectionPruning(plan);
+        plan = ApplyConstantFolding(plan);
+        return new PhysicalPlan();
+    }
+
+    private LogicalPlan ApplyPredicatePushdown(LogicalPlan plan) { throw new NotImplementedException(); }
+    private LogicalPlan ApplyProjectionPruning(LogicalPlan plan) { throw new NotImplementedException(); }
+    private LogicalPlan ApplyConstantFolding(LogicalPlan plan) { throw new NotImplementedException(); }
+}
+
+public class CostBasedOptimizationStrategy : IOptimizationStrategy
+{
+    // Algorithm
+    public PhysicalPlan Optimize(LogicalPlan plan)
+    {
+        GenerateCandidatePlans(plan);
+        EstimateCost(plan);
+        return SelectBestPlan();
+    }
+
+    private void GenerateCandidatePlans(LogicalPlan plan) { throw new NotImplementedException(); }
+    private double EstimateCost(LogicalPlan plan) { throw new NotImplementedException(); }
+    private PhysicalPlan SelectBestPlan() { throw new NotImplementedException(); }
+}
+
+// Context
+public class QueryOptimizer
+{
+    private IOptimizationStrategy _strategy;
+
+    public QueryOptimizer(IOptimizationStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+
+    public void SetStrategy(IOptimizationStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+
+    public PhysicalPlan Optimize(LogicalPlan plan)
+    {
+        // Delegate optimization to the Strategy object
+        return _strategy.Optimize(plan);
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class QueryOptimizer {
+        <<Context>>
+        -IOptimizationStrategy strategy
+        +SetStrategy(IOptimizationStrategy strategy) void
+        +Optimize(LogicalPlan plan) PhysicalPlan
+    }
+
+    class IOptimizationStrategy {
+        <<Strategy>>
+        +Optimize(LogicalPlan plan) PhysicalPlan
+    }
+
+    class RuleBasedOptimizationStrategy {
+        <<ConcreteStrategy>>
+        +Optimize(LogicalPlan plan) PhysicalPlan
+        +ApplyPredicatePushdown(LogicalPlan plan) LogicalPlan
+        +ApplyProjectionPruning(LogicalPlan plan) LogicalPlan
+        +ApplyConstantFolding(LogicalPlan plan) LogicalPlan
+    }
+
+    class CostBasedOptimizationStrategy {
+        <<ConcreteStrategy>>
+        +Optimize(LogicalPlan plan) PhysicalPlan
+        +GenerateCandidatePlans(LogicalPlan plan) List~PhysicalPlan~
+        +EstimateCost(List~PhysicalPlan~ candidates)
+        +SelectBestPlan(List~PhysicalPlan~ candidates) PhysicalPlan
+    }
+
+    QueryOptimizer o-- IOptimizationStrategy : strategy
+
+    IOptimizationStrategy <|.. RuleBasedOptimizationStrategy
+    IOptimizationStrategy <|.. CostBasedOptimizationStrategy
+```
+
+#### Sequence Diagram: Strategy Execution Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Client
+    participant Optimizer as QueryOptimizer
+    participant Strategy as CostBasedOptimizationStrategy
+
+    Client->>Optimizer: SetStrategy(new CostBasedOptimizationStrategy())
+
+    Client->>Optimizer: Optimize(plan)
+    activate Optimizer
+
+    Note over Optimizer: Delegate to current strategy
+    Optimizer->>Strategy: Optimize(plan)
+    activate Strategy
+
+    Strategy->>Strategy: GenerateCandidatePlans()
+    Strategy->>Strategy: EstimateCost()
+    Strategy->>Strategy: SelectBestPlan()
+
+    Strategy-->>Optimizer: PhysicalPlan
+    deactivate Strategy
+
+    Optimizer-->>Client: PhysicalPlan
+    deactivate Optimizer
 ```

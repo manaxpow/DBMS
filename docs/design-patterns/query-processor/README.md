@@ -4,7 +4,7 @@ This document tracks the design patterns used across the Query Processor module 
 
 | Priority  | Status | Design Pattern              | Feature                     | Reason / Context                                                                                                                                                                             |
 | :-------: | :----: | :-------------------------- | :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  🔴 High  | `[ ]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan. |
+|  🔴 High  | `[x]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan. |
 |  🔴 High  | `[ ]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.       |
 |  🔴 High  | `[ ]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                    |
 |  🔴 High  | `[ ]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                               |
@@ -202,4 +202,204 @@ sequenceDiagram
     Note over BinaryExpr: Combine results and return
     BinaryExpr-->>Client: LogicalNode
     deactivate BinaryExpr
+```
+
+---
+
+## 2.2. Visitor (AST Processing)
+
+The **Visitor** pattern is used in the `Expression` class hierarchy to decouple operations from the AST nodes they operate on.
+
+- Define an `Accept` method on each expression node that takes an `IExpressionVisitor`.
+- Implement specific visitors (like `SemanticAnalysisVisitor` or `LogicalPlanVisitor`) that encapsulate the logic for processing the entire expression tree.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Visitor {
+        <<interface>>
+        +VisitElementA(ElementA)
+        +VisitElementB(ElementB)
+    }
+
+    class ConcreteVisitor1 {
+        +VisitElementA(ElementA)
+        +VisitElementB(ElementB)
+    }
+
+    class Element {
+        <<interface>>
+        +Accept(Visitor)
+    }
+
+    class ConcreteElementA {
+        +Accept(Visitor)
+    }
+
+    class ConcreteElementB {
+        +Accept(Visitor)
+    }
+
+    Visitor <|.. ConcreteVisitor1
+    Element <|.. ConcreteElementA
+    Element <|.. ConcreteElementB
+    ConcreteElementA ..> Visitor : calls VisitElementA(this)
+    ConcreteElementB ..> Visitor : calls VisitElementB(this)
+```
+
+#### Example code
+
+```csharp
+// Abstract Element
+public interface Expression
+{
+    T Accept<T>(IExpressionVisitor<T> visitor);
+}
+
+// Concrete Element
+public class ColumnExpression : Expression
+{
+    public string ColumnName { get; set; }
+
+    public T Accept<T>(IExpressionVisitor<T> visitor)
+    {
+        return visitor.Visit(this);
+    }
+}
+
+// Visitor Interface
+public interface IExpressionVisitor<T>
+{
+    T Visit(ColumnExpression expression);
+    // other visit methods...
+}
+
+// Concrete Visitor
+public class LogicalPlanVisitor : IExpressionVisitor<LogicalNode>
+{
+    public LogicalNode Visit(ColumnExpression expression)
+    {
+        // Generate logical node for column
+        return new LogicalNode();
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction LR
+
+    class Expression {
+        <<interface>>
+        +Accept~T~(IExpressionVisitor~T~ visitor) T
+    }
+
+    class ColumnExpression {
+        +string ColumnName
+        +Accept(visitor) T
+    }
+
+    class LiteralExpression {
+        +object Value
+        +Accept(visitor) T
+    }
+
+    class BinaryExpression {
+        +Expression Left
+        +BinaryOperator Operator
+        +Expression Right
+        +Accept(visitor) T
+    }
+
+    class WhereExpression {
+        +Expression Condition
+        +Accept(visitor) T
+    }
+
+    class SelectExpression {
+        +List~Expression~ Columns
+        +Expression Source
+        +WhereExpression Where
+        +Accept(visitor) T
+    }
+
+    class IExpressionVisitor~T~ {
+        <<interface>>
+        +Visit(ColumnExpression expression) T
+        +Visit(LiteralExpression expression) T
+        +Visit(BinaryExpression expression) T
+        +Visit(WhereExpression expression) T
+        +Visit(SelectExpression expression) T
+    }
+
+    class SemanticAnalysisVisitor {
+        +Visit(ColumnExpression expression)
+        +Visit(LiteralExpression expression)
+        +Visit(BinaryExpression expression)
+        +Visit(WhereExpression expression)
+        +Visit(SelectExpression expression)
+    }
+
+    class LogicalPlanVisitor {
+        +Visit(ColumnExpression expression) LogicalNode
+        +Visit(LiteralExpression expression) LogicalNode
+        +Visit(BinaryExpression expression) LogicalNode
+        +Visit(WhereExpression expression) LogicalNode
+        +Visit(SelectExpression expression) LogicalNode
+    }
+
+    Expression <|.. ColumnExpression
+    Expression <|.. LiteralExpression
+    Expression <|.. BinaryExpression
+    Expression <|.. WhereExpression
+    Expression <|.. SelectExpression
+
+    BinaryExpression o-- Expression
+    WhereExpression o-- Expression
+    SelectExpression o-- Expression
+
+    IExpressionVisitor~T~ <|.. SemanticAnalysisVisitor
+    IExpressionVisitor~T~ <|.. LogicalPlanVisitor
+
+    Expression --> IExpressionVisitor~T~ : Accept(visitor)
+```
+
+#### Sequence Diagram: AST Processing Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Client
+    participant Visitor as LogicalPlanVisitor
+    participant Expr as BinaryExpression
+    participant ColExpr as ColumnExpression
+
+    Client->>Expr: Accept(Visitor)
+    activate Expr
+    
+    Expr->>Visitor: Visit(BinaryExpression)
+    activate Visitor
+
+    Note over Visitor: Process left child
+    Visitor->>ColExpr: Accept(Visitor)
+    activate ColExpr
+    ColExpr->>Visitor: Visit(ColumnExpression)
+    activate Visitor
+    Visitor-->>ColExpr: LogicalNode
+    deactivate Visitor
+    ColExpr-->>Visitor: LogicalNode
+    deactivate ColExpr
+
+    Note over Visitor: Combine results
+    Visitor-->>Expr: LogicalNode
+    deactivate Visitor
+    
+    Expr-->>Client: LogicalNode
+    deactivate Expr
 ```

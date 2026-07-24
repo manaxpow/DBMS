@@ -114,7 +114,7 @@ flowchart LR
     %% RIGHT SIDE — QUERY PROCESSOR
     %% =========================================================
 
-    QP --> QP_Int["🔴 Interpreter ☐<br/>SQL / AST Evaluation"]
+    QP --> QP_Int["🔴 Interpreter ☑<br/>SQL / AST Evaluation"]
     QP --> QP_Vis["🔴 Visitor ☐<br/>AST Processing"]
     QP --> QP_Str["🔴 Strategy ☐<br/>Query Optimization"]
     QP --> QP_FM["🔴 Factory Method ☐<br/>Physical Operator Creation"]
@@ -456,9 +456,20 @@ flowchart LR
 
 ## 3. Query Processor
 
-*(Implementation and pattern class diagrams are currently pending)*
+```mermaid
+flowchart LR
 
+    %% =========================================================
+    %% Interpreter Files & Methods
+    %% =========================================================
+    Interpreter["Interpreter"]
+    
+    Interpreter --> Int_IT["InterpreterTests.cs"]
+    Int_IT --> Int_IT_1["ColumnExpression_Interpret_ShouldResolveColumnFromContext"]
+    Int_IT --> Int_IT_2["TableExpression_Interpret_ShouldResolveTableFromContext"]
+    Int_IT --> Int_IT_3["LiteralExpression_Interpret_ShouldReturnLiteralLogicalNode"]
+    Int_IT --> Int_IT_4["BinaryExpression_Interpret_ShouldInterpretLeftAndRightAndReturnNode"]
+    Int_IT --> Int_IT_5["WhereExpression_Interpret_ShouldInterpretConditionAndReturnNode"]
+    Int_IT --> Int_IT_6["SelectExpression_Interpret_ShouldInterpretFromWhereAndColumns"]
 
-
-
-
+```

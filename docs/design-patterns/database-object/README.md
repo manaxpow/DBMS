@@ -784,7 +784,6 @@ classDiagram
     }
     Iterator <|.. ConcreteIterator
     IterableCollection <|.. ConcreteCollection
-    ConcreteCollection <.. ConcreteIterator
     ConcreteIterator ..> ConcreteCollection
 ```
 

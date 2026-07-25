@@ -7,7 +7,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🔴 High  | `[x]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan.        |
 |  🔴 High  | `[x]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.              |
 |  🔴 High  | `[x]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                           |
-|  🔴 High  | `[ ]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
+|  🔴 High  | `[x]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
 | 🟡 Medium | `[ ]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
 | 🟡 Medium | `[ ]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
 | 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
@@ -578,4 +578,206 @@ sequenceDiagram
 
     Optimizer-->>Client: PhysicalPlan
     deactivate Optimizer
+```
+
+---
+
+## 2.4. Factory Method (Physical Operator Creation)
+
+The **Factory Method** pattern is used to create physical operators such as `TableScan`, `IndexScan`, `HashJoin`, `NestedLoopJoin`, and `Sort` from logical-plan nodes selected by the optimizer.
+
+- Define an interface or abstract class (`OperatorFactory`) for creating physical operators, but let concrete subclasses decide which objects to instantiate based on logical node types.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Creator {
+        <<abstract>>
+        +FactoryMethod()* Product
+        +AnOperation()
+    }
+
+    class ConcreteCreator {
+        +FactoryMethod() Product
+    }
+
+    class Product {
+        <<interface>>
+    }
+
+    class ConcreteProduct {
+    }
+
+    Creator <|-- ConcreteCreator
+    Product <|.. ConcreteProduct
+    ConcreteCreator ..> ConcreteProduct : creates
+```
+
+#### Example code
+
+```csharp
+// Product
+public abstract class PhysicalOperator
+{
+    public abstract void Open();
+    public abstract bool Next();
+    public abstract void Close();
+}
+
+// Concrete Products
+public class TableScanOperator : PhysicalOperator
+{
+    public override void Open() { }
+    public override bool Next() { return false; }
+    public override void Close() { }
+}
+
+public class HashJoinOperator : PhysicalOperator
+{
+    public override void Open() { }
+    public override bool Next() { return false; }
+    public override void Close() { }
+}
+
+public class IndexScanOperator : PhysicalOperator
+{
+    public override void Open() { }
+    public override bool Next() { return false; }
+    public override void Close() { }
+}
+
+public class NestedLoopJoinOperator : PhysicalOperator
+{
+    public override void Open() { }
+    public override bool Next() { return false; }
+    public override void Close() { }
+}
+
+public class SortOperator : PhysicalOperator
+{
+    public override void Open() { }
+    public override bool Next() { return false; }
+    public override void Close() { }
+}
+
+// Creator
+public abstract class OperatorFactory
+{
+    // Factory Method
+    public abstract PhysicalOperator CreateOperator(LogicalNode node);
+}
+
+// Concrete Creator
+public class PhysicalOperatorFactory : OperatorFactory
+{
+    public override PhysicalOperator CreateOperator(LogicalNode node)
+    {
+        return node switch
+        {
+            LogicalTableScan scan => new TableScanOperator(scan.TableName),
+            LogicalIndexScan iscan => new IndexScanOperator(),
+            LogicalHashJoin hjoin => new HashJoinOperator(),
+            LogicalNestedLoopJoin nljoin => new NestedLoopJoinOperator(),
+            LogicalSort sort => new SortOperator(),
+            _ => throw new NotSupportedException($"Unsupported logical node: {node.GetType().Name}")
+        };
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class OperatorFactory {
+        <<abstract>>
+        +CreateOperator(LogicalNode node)* PhysicalOperator
+    }
+
+    class PhysicalOperatorFactory {
+        +CreateOperator(LogicalNode node) PhysicalOperator
+    }
+
+    class PhysicalOperator {
+        <<abstract>>
+        +Open()* void
+        +Next()* bool
+        +Close()* void
+    }
+
+    class TableScanOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class HashJoinOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class IndexScanOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class NestedLoopJoinOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class SortOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class LogicalNode {
+        <<abstract>>
+    }
+
+    OperatorFactory <|-- PhysicalOperatorFactory
+    PhysicalOperator <|-- TableScanOperator
+    PhysicalOperator <|-- HashJoinOperator
+    PhysicalOperator <|-- IndexScanOperator
+    PhysicalOperator <|-- NestedLoopJoinOperator
+    PhysicalOperator <|-- SortOperator
+
+    PhysicalOperatorFactory ..> TableScanOperator : creates
+    PhysicalOperatorFactory ..> HashJoinOperator : creates
+    PhysicalOperatorFactory ..> IndexScanOperator : creates
+    PhysicalOperatorFactory ..> NestedLoopJoinOperator : creates
+    PhysicalOperatorFactory ..> SortOperator : creates
+    PhysicalOperatorFactory ..> LogicalNode : inspects
+```
+
+#### Sequence Diagram: Operator Creation Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    participant Client as QueryExecutor
+    participant Factory as PhysicalOperatorFactory
+    participant Op as PhysicalOperator
+
+    Client->>Factory: CreateOperator(LogicalNode)
+    activate Factory
+
+    Note over Factory: Inspect node type (e.g., TableScan)
+    Factory->>Op: new TableScanOperator()
+    activate Op
+    Op-->>Factory: instance
+    deactivate Op
+
+    Factory-->>Client: PhysicalOperator
+    deactivate Factory
 ```

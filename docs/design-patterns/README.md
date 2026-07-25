@@ -491,4 +491,17 @@ flowchart LR
     Str_RB --> Str_RB_2["ApplyProjectionPruning_WhenValidPlan_ShouldReturnOptimizedPlan"]
     Str_RB --> Str_RB_3["ApplyConstantFolding_WhenValidPlan_ShouldReturnOptimizedPlan"]
 
+    %% =========================================================
+    %% Factory Method Files & Methods
+    %% =========================================================
+    FactoryMethod["Factory Method"]
+    
+    FactoryMethod --> FM_POFT["PhysicalOperatorFactoryTests.cs"]
+    FM_POFT --> FM_POFT_1["CreateOperator_GivenLogicalTableScan_ReturnsTableScanOperator"]
+    FM_POFT --> FM_POFT_2["CreateOperator_GivenLogicalIndexScan_ReturnsIndexScanOperator"]
+    FM_POFT --> FM_POFT_3["CreateOperator_GivenLogicalHashJoin_ReturnsHashJoinOperator"]
+    FM_POFT --> FM_POFT_4["CreateOperator_GivenLogicalNestedLoopJoin_ReturnsNestedLoopJoinOperator"]
+    FM_POFT --> FM_POFT_5["CreateOperator_GivenLogicalSort_ReturnsSortOperator"]
+    FM_POFT --> FM_POFT_6["CreateOperator_GivenUnsupportedNode_ThrowsNotSupportedException"]
+
 ```

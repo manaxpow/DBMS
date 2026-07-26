@@ -119,7 +119,7 @@ flowchart LR
     QP --> QP_Str["🔴 Strategy ☑<br/>Query Optimization"]
     QP --> QP_FM["🔴 Factory Method ☑<br/>Physical Operator Creation"]
     QP --> QP_Comp["🟡 Composite ☑<br/>Query Plan Tree"]
-    QP --> QP_Iter["🟡 Iterator ☐<br/>Query Result Execution"]
+    QP --> QP_Iter["🟡 Iterator ☑<br/>Query Result Execution"]
 
     QP --> QP_Cmd["🟡 Command ☐<br/>SQL Statement Execution"]
 

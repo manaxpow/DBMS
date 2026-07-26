@@ -30,10 +30,10 @@
 | Query Processor | Lexer | 2 | 0 | 2 | 0% |
 | Query Processor | Parser | 3 | 0 | 3 | 0% |
 | Query Processor | Optimizer | 2 | 0 | 2 | 0% |
-| Query Processor | Executor | 3 | 0 | 3 | 0% |
+| Query Processor | Executor | 11 | 8 | 3 | 72% |
 | Security | Authentication | 3 | 0 | 3 | 0% |
 | Security | Authorization | 5 | 0 | 5 | 0% |
-| **Total** | | **161** | **83** | **78** | **52%** |
+| **Total** | | **169** | **91** | **78** | **53%** |
 
 ## Database Objects
 

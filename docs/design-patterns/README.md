@@ -352,6 +352,18 @@ flowchart LR
     B_TB --> B_TB_4["AddIndex_ShouldReturnBuilder_AndAddIndex"]
     B_TB --> B_TB_5["AddPartition_ShouldReturnBuilder_AndAddPartition"]
     B_TB --> B_TB_6["Build_ShouldReturnTable_WithAllPropertiesSet"]
+
+    classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
+
+    class TM,FM,S,C,Cmd,I,V,B patternNode
+    class TM_CT,TM_UC,TM_PC,TM_CC,TM_FC,FM_CCT,FM_CCR,S_RAT,C_ST,Cmd_CTC,Cmd_DTC,Cmd_ATC,Cmd_DDL,I_ST,V_BV,V_EV,V_VV,B_TB classNode
+    class TM_CT_1,TM_CT_2,TM_CT_3,TM_CT_4,TM_CT_5,TM_CT_6,TM_UC_1,TM_UC_2,TM_UC_3,TM_UC_4,TM_PC_1,TM_PC_2,TM_PC_3,TM_PC_4,TM_CC_1,TM_CC_2,TM_CC_3,TM_FC_1,TM_FC_2,TM_FC_3,TM_FC_4,TM_FC_5 completedTest
+    class FM_CCT_1,FM_CCR_1,FM_CCR_2,S_RAT_1,S_RAT_2,S_RAT_3 completedTest
+    class C_ST_1,C_ST_2,C_ST_3,C_ST_4,C_ST_5,C_ST_6,C_ST_7,C_ST_8,C_ST_9,C_ST_10,C_ST_11,C_ST_12,C_ST_13,C_ST_14,C_ST_15 completedTest
+    class Cmd_CTC_1,Cmd_CTC_2,Cmd_DTC_1,Cmd_ATC_1,Cmd_DDL_1,I_ST_1 completedTest
+    class V_BV_1,V_BV_2,V_BV_3,V_BV_4,V_EV_1,V_EV_2,V_EV_3,V_EV_4,V_VV_1,V_VV_2,V_VV_3,V_VV_4,B_TB_1,B_TB_2,B_TB_3,B_TB_4,B_TB_5,B_TB_6 completedTest
 ```
 
 ## 2. Database Management
@@ -452,6 +464,18 @@ flowchart LR
     TM_IBT --> TM_IBT_1["ExtractData_ShouldExtractOnlyChangedData"]
     TM_IBT --> TM_IBT_2["FinalizeBackup_ShouldSetIncrementalBackupMetadata"]
 
+    classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
+
+    class Facade,Singleton,Observer,State,Command,TemplateMethod patternNode
+    class Sing_DMT,Fac_DST,Obs_DMT,Obs_DT,St_DST,St_DT,Cmd_CDC,Cmd_DDC,Cmd_RDC,Cmd_DCE,TM_DBT,TM_FBT,TM_IBT classNode
+    class Sing_DMT_1,Fac_DST_1,Fac_DST_2,Fac_DST_3,Fac_DST_4,Fac_DST_5,Fac_DST_6,Fac_DST_7,Fac_DST_8 completedTest
+    class Obs_DMT_1,Obs_DMT_2,Obs_DMT_3,Obs_DMT_4,Obs_DMT_5,Obs_DMT_6,Obs_DMT_7,Obs_DMT_8 completedTest
+    class Obs_DT_1,Obs_DT_2,Obs_DT_3,Obs_DT_4,Obs_DT_5,Obs_DT_6,Obs_DT_7 completedTest
+    class St_DST_1,St_DST_2,St_DST_3,St_DST_4,St_DST_5,St_DT_1,St_DT_2,St_DT_3,St_DT_4,St_DT_5,St_DT_6 completedTest
+    class Cmd_CDC_1,Cmd_CDC_2,Cmd_DDC_1,Cmd_DDC_2,Cmd_RDC_1,Cmd_RDC_2,Cmd_RDC_3,Cmd_DCE_1 completedTest
+    class TM_DBT_1,TM_FBT_1,TM_FBT_2,TM_IBT_1,TM_IBT_2 completedTest
 ```
 
 ## 3. Query Processor
@@ -513,4 +537,32 @@ flowchart LR
     Comp_PO --> Comp_PO_1["AddChild_ShouldAddChildToOperator"]
     Comp_PO --> Comp_PO_2["RemoveChild_ShouldRemoveChildFromOperator"]
 
+    %% =========================================================
+    %% Iterator Files & Methods
+    %% =========================================================
+    Iterator["Iterator"]
+
+    Iterator --> Iter_TS["TableScanOperatorTests.cs"]
+    Iter_TS --> TS_001["Open_ShouldInitializeEnumerator"]
+    Iter_TS --> TS_002["Next_WhenRowsExist_ShouldReturnTrue"]
+    Iter_TS --> TS_003["Next_WhenNoMoreRows_ShouldReturnFalse"]
+    Iter_TS --> TS_004["GetCurrent_ShouldReturnCorrectRow"]
+
+    Iterator --> Iter_FL["FilterOperatorTests.cs"]
+    Iter_FL --> FL_001["Next_WhenRowMatchesPredicate_ShouldReturnTrue"]
+    Iter_FL --> FL_002["Next_WhenNoRowMatches_ShouldReturnFalse"]
+    Iter_FL --> FL_003["GetCurrent_ShouldReturnMatchedRow"]
+    Iter_FL --> FL_004["Close_ShouldCloseChildOperator"]
+
+    classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
+    classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
+    classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
+
+    class Interpreter,Strategy,FactoryMethod,Composite,Iterator patternNode
+    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL classNode
+    class Int_IT_1,Int_IT_2,Int_IT_3,Int_IT_4,Int_IT_5,Int_IT_6 completedTest
+    class Str_QO_1,Str_QO_2,Str_CB_1,Str_CB_2,Str_CB_3,Str_RB_1,Str_RB_2,Str_RB_3 completedTest
+    class FM_POFT_1,FM_POFT_2,FM_POFT_3,FM_POFT_4,FM_POFT_5,FM_POFT_6 completedTest
+    class Comp_PO_1,Comp_PO_2 completedTest
+    class TS_001,TS_002,TS_003,TS_004,FL_001,FL_002,FL_003,FL_004 completedTest
 ```

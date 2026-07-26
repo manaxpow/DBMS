@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 public class PhysicalOperatorFactory : OperatorFactory {
     public override PhysicalOperator CreateOperator(LogicalNode node) {
         return node switch {
-            LogicalTableScan scan => new TableScanOperator(scan.TableName),
+            LogicalTableScan scan => new TableScanOperator(scan.TableName, new System.Collections.Generic.List<Row>()),
             LogicalIndexScan _ => new IndexScanOperator(),
             LogicalHashJoin _ => new HashJoinOperator(),
             LogicalNestedLoopJoin _ => new NestedLoopJoinOperator(),

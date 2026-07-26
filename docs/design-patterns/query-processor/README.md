@@ -1064,62 +1064,62 @@ classDiagram
 #### Example code
 
 ```csharp
-public interface IOperatorIterator
+public abstract class PhysicalOperator
 {
-    void Open();
-    bool Next();
-    Row GetCurrent();
-    void Close();
+    public abstract void Open();
+    public abstract bool Next();
+    public abstract Row GetCurrent();
+    public abstract void Close();
 }
 
-public class TableScanIterator : IOperatorIterator
+public class TableScanOperator : PhysicalOperator
 {
     private IEnumerator<Row> _enumerator;
     private IEnumerable<Row> _tableRows;
 
-    public TableScanIterator(IEnumerable<Row> tableRows)
+    public TableScanOperator(IEnumerable<Row> tableRows)
     {
         _tableRows = tableRows;
     }
 
-    public void Open()
+    public override void Open()
     {
         _enumerator = _tableRows.GetEnumerator();
     }
 
-    public bool Next()
+    public override bool Next()
     {
         return _enumerator.MoveNext();
     }
 
-    public Row GetCurrent()
+    public override Row GetCurrent()
     {
         return _enumerator.Current;
     }
 
-    public void Close()
+    public override void Close()
     {
         _enumerator?.Dispose();
     }
 }
 
-public class FilterIterator : IOperatorIterator
+public class FilterOperator : PhysicalOperator
 {
-    private IOperatorIterator _child;
+    private PhysicalOperator _child;
     private Func<Row, bool> _predicate;
 
-    public FilterIterator(IOperatorIterator child, Func<Row, bool> predicate)
+    public FilterOperator(PhysicalOperator child, Func<Row, bool> predicate)
     {
         _child = child;
         _predicate = predicate;
     }
 
-    public void Open()
+    public override void Open()
     {
         _child.Open();
     }
 
-    public bool Next()
+    public override bool Next()
     {
         while (_child.Next())
         {
@@ -1131,25 +1131,74 @@ public class FilterIterator : IOperatorIterator
         return false;
     }
 
-    public Row GetCurrent()
+    public override Row GetCurrent()
     {
         return _child.GetCurrent();
     }
 
-    public void Close()
+    public override void Close()
     {
         _child.Close();
     }
 }
 ```
 
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction LR
+
+    class QueryExecutor {
+        <<Client>>
+        +Execute()
+    }
+
+    class Row
+
+    class PhysicalOperator {
+        <<Iterator>>
+        +Open() void
+        +Next() bool
+        +GetCurrent() Row
+        +Close() void
+    }
+
+    class TableScanOperator {
+        -IEnumerator~Row~ _enumerator
+        -IEnumerable~Row~ _tableRows
+        +Open()
+        +Next()
+        +GetCurrent()
+        +Close()
+    }
+
+    class FilterOperator {
+        -PhysicalOperator _child
+        -Func~Row,bool~ _predicate
+        +Open()
+        +Next()
+        +GetCurrent()
+        +Close()
+    }
+
+    QueryExecutor --> PhysicalOperator : Execute()
+
+    PhysicalOperator <|-- TableScanOperator
+    PhysicalOperator <|-- FilterOperator
+
+    FilterOperator --> PhysicalOperator : pull Next()
+
+    PhysicalOperator --> Row : returns
+```
+
 #### Sequence Diagram: Pipelined Execution
 
 ```mermaid
 sequenceDiagram
-    participant Executor
-    participant Filter as FilterIterator
-    participant Scan as TableScanIterator
+    participant Executor as QueryExecutor
+    participant Filter as FilterOperator
+    participant Scan as TableScanOperator
     
     Executor->>Filter: Open()
     Filter->>Scan: Open()
@@ -1159,13 +1208,18 @@ sequenceDiagram
     loop Pull Rows
         Executor->>Filter: Next()
         Filter->>Scan: Next()
-        Scan-->>Filter: true (Row 1)
+        Scan-->>Filter: true
         Note over Filter: Predicate matches
-        Filter-->>Executor: true (Row 1)
+        Filter-->>Executor: true
+        
+        Executor->>Filter: GetCurrent()
+        Filter->>Scan: GetCurrent()
+        Scan-->>Filter: Row 1
+        Filter-->>Executor: Row 1
         
         Executor->>Filter: Next()
         Filter->>Scan: Next()
-        Scan-->>Filter: true (Row 2)
+        Scan-->>Filter: true
         Note over Filter: Predicate fails, loop again
         
         Filter->>Scan: Next()

@@ -5,25 +5,30 @@ public class CompositePhysicalOperatorTests
     private class TestCompositeOperator : CompositePhysicalOperator
     {
         public override void Open() { }
-        public override bool Next() { return false; }
+        public override bool Next() => false;
+        public override Row GetCurrent() => null!;
         public override void Close() { }
     }
 
     private class TestLeafOperator : PhysicalOperator
     {
         public override void Open() { }
-        public override bool Next() { return false; }
+        public override bool Next() => false;
+        public override Row GetCurrent() => null!;
         public override void Close() { }
     }
 
     [Fact]
     public void AddChild_ShouldAddChildToOperator()
     {
+        // Arrange
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
         
+        // Act
         composite.AddChild(child);
 
+        // Assert
         var children = composite.GetChildren();
         Assert.Single(children);
         Assert.Equal(child, children[0]);
@@ -32,12 +37,15 @@ public class CompositePhysicalOperatorTests
     [Fact]
     public void RemoveChild_ShouldRemoveChildFromOperator()
     {
+        // Arrange
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
         composite.AddChild(child);
         
+        // Act
         composite.RemoveChild(child);
 
+        // Assert
         var children = composite.GetChildren();
         Assert.Empty(children);
     }

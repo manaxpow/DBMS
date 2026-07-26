@@ -8,7 +8,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🔴 High  | `[x]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.              |
 |  🔴 High  | `[x]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                           |
 |  🔴 High  | `[x]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
-| 🟡 Medium | `[ ]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
+| 🟡 Medium | `[x]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
 | 🟡 Medium | `[ ]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
 | 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
 |  🟢 Low   | `[ ]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
@@ -780,4 +780,219 @@ sequenceDiagram
 
     Factory-->>Client: PhysicalOperator
     deactivate Factory
+```
+
+---
+
+## 2.5. Composite (Query Plan Tree)
+
+The **Composite** pattern is used to represent the hierarchical structure of a query plan. It allows the system to treat both leaf operators (such as scans) and composite operators (such as joins, filters, and projections) uniformly as plan nodes.
+
+- Define an abstract component `PlanNode` (or `LogicalNode` / `PhysicalOperator`) that declares the interface for objects in the composition.
+- Implement leaf objects that have no children.
+- Implement composite objects that store child components and implement operations by delegating to them.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Component {
+        <<abstract>>
+        +Operation()
+        +Add(Component c)
+        +Remove(Component c)
+        +GetChild(int i)* Component
+    }
+
+    class Leaf {
+        +Operation()
+    }
+
+    class Composite {
+        -List~Component~ children
+        +Operation()
+        +Add(Component c)
+        +Remove(Component c)
+        +GetChild(int i) Component
+    }
+
+    Component <|-- Leaf
+    Component <|-- Composite
+    Composite o-- Component : children
+```
+
+#### Example code
+
+```csharp
+// Component
+public abstract class PhysicalOperator
+{
+    public abstract void Open();
+    public abstract bool Next();
+    public abstract void Close();
+    
+    public virtual void AddChild(PhysicalOperator child)
+    {
+        throw new NotSupportedException();
+    }
+    
+    public virtual IEnumerable<PhysicalOperator> GetChildren()
+    {
+        return Enumerable.Empty<PhysicalOperator>();
+    }
+}
+
+// Leaf
+public class TableScanOperator : PhysicalOperator
+{
+    public string TableName { get; }
+
+    public TableScanOperator(string tableName)
+    {
+        TableName = tableName;
+    }
+
+    public override void Open() {}
+    public override bool Next() { return false; }
+    public override void Close() {}
+}
+
+// Composite
+public abstract class UnaryOperator : PhysicalOperator
+{
+    protected PhysicalOperator _child;
+
+    public override void AddChild(PhysicalOperator child)
+    {
+        _child = child;
+    }
+
+    public override IEnumerable<PhysicalOperator> GetChildren()
+    {
+        if (_child != null) yield return _child;
+    }
+}
+
+public class FilterOperator : UnaryOperator
+{
+    public override void Open()
+    {
+        _child.Open();
+    }
+
+    public override bool Next()
+    {
+        while (_child.Next())
+        {
+            if (ConditionPassed()) return true;
+        }
+        return false;
+    }
+
+    public override void Close()
+    {
+        _child.Close();
+    }
+}
+
+public abstract class BinaryOperator : PhysicalOperator
+{
+    protected PhysicalOperator _leftChild;
+    protected PhysicalOperator _rightChild;
+
+    public override void AddChild(PhysicalOperator child)
+    {
+        if (_leftChild == null) _leftChild = child;
+        else if (_rightChild == null) _rightChild = child;
+        else throw new InvalidOperationException("Binary operator can only have two children");
+    }
+
+    public override IEnumerable<PhysicalOperator> GetChildren()
+    {
+        if (_leftChild != null) yield return _leftChild;
+        if (_rightChild != null) yield return _rightChild;
+    }
+}
+
+public class HashJoinOperator : BinaryOperator
+{
+    public override void Open()
+    {
+        _leftChild.Open();
+        _rightChild.Open();
+    }
+
+    public override bool Next()
+    {
+        // Perform join logic
+        return false;
+    }
+
+    public override void Close()
+    {
+        _leftChild.Close();
+        _rightChild.Close();
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class PhysicalOperator {
+        <<abstract>>
+        +Open()* void
+        +Next()* bool
+        +Close()* void
+        +AddChild(PhysicalOperator child)
+        +GetChildren() IEnumerable~PhysicalOperator~
+    }
+
+    class TableScanOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class UnaryOperator {
+        <<abstract>>
+        #PhysicalOperator _child
+        +AddChild(PhysicalOperator child)
+        +GetChildren() IEnumerable~PhysicalOperator~
+    }
+
+    class FilterOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    class BinaryOperator {
+        <<abstract>>
+        #PhysicalOperator _leftChild
+        #PhysicalOperator _rightChild
+        +AddChild(PhysicalOperator child)
+        +GetChildren() IEnumerable~PhysicalOperator~
+    }
+
+    class HashJoinOperator {
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+
+    PhysicalOperator <|-- TableScanOperator
+    PhysicalOperator <|-- UnaryOperator
+    PhysicalOperator <|-- BinaryOperator
+
+    UnaryOperator <|-- FilterOperator
+    BinaryOperator <|-- HashJoinOperator
+
+    UnaryOperator o-- PhysicalOperator : child
+    BinaryOperator o-- PhysicalOperator : left/right children
 ```

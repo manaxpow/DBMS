@@ -275,6 +275,18 @@ classDiagram
         +CalculateCost() void
         +Validate() void
     }
+    class PhysicalOperator {
+        <<abstract>>
+        +Open() void
+        +Next() bool
+        +Close() void
+    }
+    class CompositePhysicalOperator {
+        <<abstract>>
+        +AddChild(PhysicalOperator child) void
+        +RemoveChild(PhysicalOperator child) void
+        +GetChildren() IReadOnlyList~PhysicalOperator~
+    }
 
     QueryProcessor *-- Lexer
     QueryProcessor *-- SQLParser
@@ -289,6 +301,10 @@ classDiagram
     SemanticAnalyzer ..> AST : Uses
     QueryOptimizer ..> LogicalPlan : Uses
     QueryExecutor ..> PhysicalPlan : Uses
+    
+    PhysicalPlan *-- PhysicalOperator
+    CompositePhysicalOperator --|> PhysicalOperator
+    CompositePhysicalOperator *-- PhysicalOperator : Children
 ```
 
 ### 3. Transaction Management

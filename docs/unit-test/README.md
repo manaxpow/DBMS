@@ -18,7 +18,6 @@
 | Database Management | DatabaseManager | 6 | 6 | 0 | 100% |
 | Database Management | Database | 8 | 8 | 0 | 100% |
 | Database Management | CatalogManager | 5 | 5 | 0 | 100% |
-
 | Transaction Management | Transaction | 6 | 0 | 6 | 0% |
 | Transaction Management | TransactionManager | 5 | 0 | 5 | 0% |
 | Transaction Management | LockManager | 8 | 0 | 8 | 0% |

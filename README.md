@@ -279,6 +279,7 @@ classDiagram
         <<abstract>>
         +Open() void
         +Next() bool
+        +GetCurrent() Row
         +Close() void
     }
     class CompositePhysicalOperator {

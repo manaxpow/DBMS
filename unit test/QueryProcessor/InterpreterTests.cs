@@ -11,7 +11,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void ColumnExpression_Interpret_ShouldResolveColumnFromContext()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             var expectedNode = new LogicalNode();
@@ -30,7 +31,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void TableExpression_Interpret_ShouldResolveTableFromContext()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             var expectedNode = new LogicalNode();
@@ -49,7 +51,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void LiteralExpression_Interpret_ShouldReturnLiteralLogicalNode()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             var expr = new LiteralExpression { Value = 42 };
@@ -64,7 +67,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void BinaryExpression_Interpret_ShouldInterpretLeftAndRightAndReturnNode()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             
@@ -95,7 +99,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void WhereExpression_Interpret_ShouldInterpretConditionAndReturnNode()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             var conditionExpr = Substitute.For<Expression>();
@@ -115,7 +120,8 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void SelectExpression_Interpret_ShouldInterpretFromWhereAndColumns()
-        {
+    {
+        throw new System.NotImplementedException();
             // Arrange
             var context = Substitute.For<InterpretationContext>();
             
@@ -146,3 +152,4 @@ namespace DBMS.UnitTests.QueryProcessor
         }
     }
 }
+

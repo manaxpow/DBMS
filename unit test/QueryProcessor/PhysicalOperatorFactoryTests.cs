@@ -9,6 +9,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenLogicalTableScan_ReturnsTableScanOperator()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var logicalNode = new LogicalTableScan("Users");
 
@@ -23,6 +24,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenLogicalIndexScan_ReturnsIndexScanOperator()
     {
+        throw new System.NotImplementedException();
         var logicalNode = new LogicalIndexScan("Users", "IX_Users_Id");
         var physicalOperator = _factory.CreateOperator(logicalNode);
         physicalOperator.Should().BeOfType<IndexScanOperator>();
@@ -31,6 +33,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenLogicalHashJoin_ReturnsHashJoinOperator()
     {
+        throw new System.NotImplementedException();
         var logicalNode = new LogicalHashJoin();
         var physicalOperator = _factory.CreateOperator(logicalNode);
         physicalOperator.Should().BeOfType<HashJoinOperator>();
@@ -39,6 +42,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenLogicalNestedLoopJoin_ReturnsNestedLoopJoinOperator()
     {
+        throw new System.NotImplementedException();
         var logicalNode = new LogicalNestedLoopJoin();
         var physicalOperator = _factory.CreateOperator(logicalNode);
         physicalOperator.Should().BeOfType<NestedLoopJoinOperator>();
@@ -47,6 +51,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenLogicalSort_ReturnsSortOperator()
     {
+        throw new System.NotImplementedException();
         var logicalNode = new LogicalSort();
         var physicalOperator = _factory.CreateOperator(logicalNode);
         physicalOperator.Should().BeOfType<SortOperator>();
@@ -55,6 +60,7 @@ public class PhysicalOperatorFactoryTests
     [Fact]
     public void CreateOperator_GivenUnsupportedNode_ThrowsNotSupportedException()
     {
+        throw new System.NotImplementedException();
         var logicalNode = new UnsupportedLogicalNode();
 
         Action act = () => _factory.CreateOperator(logicalNode);
@@ -63,3 +69,4 @@ public class PhysicalOperatorFactoryTests
            .WithMessage("Unsupported logical node: UnsupportedLogicalNode");
     }
 }
+

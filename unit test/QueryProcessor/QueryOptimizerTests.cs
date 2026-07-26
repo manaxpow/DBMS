@@ -13,6 +13,7 @@ public class QueryOptimizerTests
     [Fact]
     public void QueryOptimizer_Optimize_WhenStrategyIsNull_ShouldThrow()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var optimizer = new QueryOptimizer(null);
         var plan = new LogicalPlan();
@@ -29,6 +30,7 @@ public class QueryOptimizerTests
     [Fact]
     public void QueryOptimizer_Optimize_ShouldDelegateToStrategy()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var mockStrategy = Substitute.For<IOptimizationStrategy>();
         var expectedPhysicalPlan = new PhysicalPlan { Cost = 42, OperatorType = PhysicalOperatorType.TableScan };
@@ -46,3 +48,4 @@ public class QueryOptimizerTests
         mockStrategy.Received(1).Optimize(logicalPlan);
     }
 }
+

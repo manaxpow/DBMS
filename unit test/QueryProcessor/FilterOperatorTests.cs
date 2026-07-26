@@ -19,6 +19,7 @@ public class FilterOperatorTests
     [Fact]
     public void Next_WhenRowMatchesPredicate_ShouldReturnTrue()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var child = new TableScanOperator("Test", rows);
@@ -37,6 +38,7 @@ public class FilterOperatorTests
     [Fact]
     public void Next_WhenNoRowMatches_ShouldReturnFalse()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var child = new TableScanOperator("Test", rows);
@@ -54,6 +56,7 @@ public class FilterOperatorTests
     [Fact]
     public void GetCurrent_ShouldReturnMatchedRow()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var child = new TableScanOperator("Test", rows);
@@ -72,6 +75,7 @@ public class FilterOperatorTests
     [Fact]
     public void Close_ShouldCloseChildOperator()
     {
+        throw new System.NotImplementedException();
         // Arrange
         var child = Substitute.For<PhysicalOperator>();
         var sut = new FilterOperator(child, r => true);
@@ -83,3 +87,4 @@ public class FilterOperatorTests
         child.Received(1).Close();
     }
 }
+

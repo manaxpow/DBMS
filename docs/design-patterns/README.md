@@ -19,7 +19,7 @@ flowchart LR
     Obj_V["🟡 Visitor ☑<br/>Schema Operations"] --> DBObj
     Obj_B["🟡 Builder ☑<br/>Table Definition"] --> DBObj
 
-    Obj_P["🟢 Prototype ☐<br/>Object Cloning"] --> DBObj
+    Obj_P["🟢 Prototype ☑<br/>Object Cloning"] --> DBObj
     Obj_D["🟢 Decorator ☐<br/>Constraint Extension"] --> DBObj
     Obj_M["🟢 Mediator ☐<br/>Dependency Coordination"] --> DBObj
 
@@ -241,6 +241,7 @@ flowchart LR
     I["Iterator"]
     V["Visitor"]
     B["Builder"]
+    P["Prototype"]
 
     %% Template Method Files & Methods
     TM --> TM_CT["ConstraintTests.cs"]
@@ -353,17 +354,24 @@ flowchart LR
     B_TB --> B_TB_5["AddPartition_ShouldReturnBuilder_AndAddPartition"]
     B_TB --> B_TB_6["Build_ShouldReturnTable_WithAllPropertiesSet"]
 
+    %% Prototype Files & Methods
+    P --> P_PT["PrototypeTests.cs"]
+    P_PT --> P_PT_1["Clone_Schema_ShouldReturnDeepCopy"]
+    P_PT --> P_PT_2["Clone_Table_ShouldReturnDeepCopy"]
+    P_PT --> P_PT_3["Clone_View_ShouldReturnDeepCopy"]
+    P_PT --> P_PT_4["Clone_StoredProcedure_ShouldReturnDeepCopy"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class TM,FM,S,C,Cmd,I,V,B patternNode
-    class TM_CT,TM_UC,TM_PC,TM_CC,TM_FC,FM_CCT,FM_CCR,S_RAT,C_ST,Cmd_CTC,Cmd_DTC,Cmd_ATC,Cmd_DDL,I_ST,V_BV,V_EV,V_VV,B_TB classNode
+    class TM,FM,S,C,Cmd,I,V,B,P patternNode
+    class TM_CT,TM_UC,TM_PC,TM_CC,TM_FC,FM_CCT,FM_CCR,S_RAT,C_ST,Cmd_CTC,Cmd_DTC,Cmd_ATC,Cmd_DDL,I_ST,V_BV,V_EV,V_VV,B_TB,P_PT classNode
     class TM_CT_1,TM_CT_2,TM_CT_3,TM_CT_4,TM_CT_5,TM_CT_6,TM_UC_1,TM_UC_2,TM_UC_3,TM_UC_4,TM_PC_1,TM_PC_2,TM_PC_3,TM_PC_4,TM_CC_1,TM_CC_2,TM_CC_3,TM_FC_1,TM_FC_2,TM_FC_3,TM_FC_4,TM_FC_5 completedTest
     class FM_CCT_1,FM_CCR_1,FM_CCR_2,S_RAT_1,S_RAT_2,S_RAT_3 completedTest
     class C_ST_1,C_ST_2,C_ST_3,C_ST_4,C_ST_5,C_ST_6,C_ST_7,C_ST_8,C_ST_9,C_ST_10,C_ST_11,C_ST_12,C_ST_13,C_ST_14,C_ST_15 completedTest
     class Cmd_CTC_1,Cmd_CTC_2,Cmd_DTC_1,Cmd_ATC_1,Cmd_DDL_1,I_ST_1 completedTest
-    class V_BV_1,V_BV_2,V_BV_3,V_BV_4,V_EV_1,V_EV_2,V_EV_3,V_EV_4,V_VV_1,V_VV_2,V_VV_3,V_VV_4,B_TB_1,B_TB_2,B_TB_3,B_TB_4,B_TB_5,B_TB_6 completedTest
+    class V_BV_1,V_BV_2,V_BV_3,V_BV_4,V_EV_1,V_EV_2,V_EV_3,V_EV_4,V_VV_1,V_VV_2,V_VV_3,V_VV_4,B_TB_1,B_TB_2,B_TB_3,B_TB_4,B_TB_5,B_TB_6,P_PT_1,P_PT_2,P_PT_3,P_PT_4 completedTest
 ```
 
 ## 2. Database Management

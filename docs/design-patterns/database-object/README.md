@@ -14,7 +14,7 @@ This document tracks the design patterns used across different modules in the DB
 | 🟡 Medium | `[x]`  | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
 | 🟡 Medium | `[x]`  | **Visitor**         | Schema Operations       | Backup, Export, and Validation can operate on all schema object types.                                |
 | 🟡 Medium | `[x]`  | **Builder**         | Table Definition        | Builds a Table step by step from columns, constraints, indexes, and partitions.                       |
-|  🟢 Low   | `[ ]`  | **Prototype**       | Schema Object Cloning   | Clones schema objects for migration, temporary objects, or schema duplication.                        |
+|  🟢 Low   | `[x]`  | **Prototype**       | Schema Object Cloning   | Clones schema objects for migration, temporary objects, or schema duplication.                        |
 |  🟢 Low   | `[ ]`  | **Decorator**       | Constraint Extension    | Adds logging, metrics, or auditing without modifying existing constraints.                            |
 |  🟢 Low   | `[ ]`  | **Mediator**        | Dependency Management   | Coordinates interactions among Tables, Views, Procedures, and Foreign Keys.                           |
 
@@ -1411,4 +1411,131 @@ sequenceDiagram
 
     TB-->>Client: Table
     deactivate TB
+```
+
+### 2.9. Prototype (Schema Object Cloning)
+
+The **Prototype** pattern is used to clone existing schema objects (such as `Table`, `View`, and `Schema`). This is particularly useful for creating temporary objects, schema duplication, or generating migration scripts where a working copy of an object is modified without affecting the original.
+
+- Define a `Clone()` method in the base schema object interface.
+- Allow complex objects to duplicate themselves, including all their internal structures (deep copy).
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Prototype {
+        <<interface>>
+        +Clone() Prototype
+    }
+    class ConcretePrototype1 {
+        +Clone() Prototype
+    }
+    class ConcretePrototype2 {
+        +Clone() Prototype
+    }
+    class Client {
+        -Prototype prototype
+        +Operation()
+    }
+    Prototype <|.. ConcretePrototype1
+    Prototype <|.. ConcretePrototype2
+    Client --> Prototype
+```
+
+#### Example code
+
+```csharp
+// Prototype
+public interface ISchemaObjectPrototype
+{
+    ISchemaObjectPrototype Clone();
+}
+
+// Concrete Prototype
+public class Table : ISchemaObjectPrototype
+{
+    public string Name { get; set; }
+    public List<Column> Columns { get; set; }
+
+    public Table(string name, List<Column> columns)
+    {
+        Name = name;
+        Columns = columns;
+    }
+
+    public ISchemaObjectPrototype Clone()
+    {
+        // Deep copy of columns
+        var clonedColumns = new List<Column>();
+        foreach (var col in Columns)
+        {
+            clonedColumns.Add(new Column(col.Name, col.Type));
+        }
+        
+        return new Table(Name + "_Clone", clonedColumns);
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction LR
+
+    class ICloneableSchemaObject {
+        <<interface>>
+        +Clone() ICloneableSchemaObject
+    }
+
+    class ISchemaObject {
+        <<interface>>
+        +string Name
+    }
+
+    class Schema {
+        +Clone() ICloneableSchemaObject
+    }
+
+    class Table {
+        +Clone() ICloneableSchemaObject
+    }
+
+    class View {
+        +Clone() ICloneableSchemaObject
+    }
+
+    ISchemaObject <|-- ICloneableSchemaObject
+    ICloneableSchemaObject <|.. Schema
+    ICloneableSchemaObject <|.. Table
+    ICloneableSchemaObject <|.. View
+```
+
+#### Sequence Diagram: Schema Object Cloning
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor Client
+    participant OriginalTable as Table (Original)
+    participant ClonedTable as Table (Clone)
+
+    Client->>OriginalTable: Clone()
+    activate OriginalTable
+
+    OriginalTable->>OriginalTable: Create shallow copy
+    OriginalTable->>ClonedTable: new Table()
+
+    loop For each Column
+        OriginalTable->>ClonedTable: Add cloned Column
+    end
+
+    loop For each Constraint
+        OriginalTable->>ClonedTable: Add cloned Constraint
+    end
+
+    OriginalTable-->>Client: ClonedTable
+    deactivate OriginalTable
 ```

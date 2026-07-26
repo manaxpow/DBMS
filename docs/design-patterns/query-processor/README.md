@@ -14,6 +14,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🟢 Low   | `[ ]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
 |  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.             |
 |  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                               |
+|  🟢 Low   | `[ ]`  | **Decorator**               | Query Execution Logging     | Wraps IQueryExecutor to intercept execution, logging the SQL query and execution time without modifying the underlying executor.                                                                    |
 
 ---
 
@@ -1231,4 +1232,156 @@ sequenceDiagram
     Filter->>Scan: Close()
     Scan-->>Filter: 
     Filter-->>Executor: 
+```
+
+
+### 2.7. Chain of Responsibility (Optimization Pipeline)
+
+The **Chain of Responsibility** pattern is used to construct a flexible optimization pipeline for query plans. Each optimization rule (e.g., constant folding, predicate pushdown) acts as a handler in the chain. The rule applies its specific transformation to the `LogicalPlan` and then passes the transformed plan to the next rule in the chain.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class IOptimizationRule {
+        <<interface>>
+        +SetNext(IOptimizationRule next) IOptimizationRule
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+
+    class OptimizationRuleBase {
+        <<abstract>>
+        -IOptimizationRule _next
+        +SetNext(IOptimizationRule next) IOptimizationRule
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+
+    class ConstantFoldingRule {
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+
+    class PredicatePushdownRule {
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+
+    class ProjectionPruningRule {
+        +Optimize(LogicalPlan plan) LogicalPlan
+    }
+
+    IOptimizationRule <|.. OptimizationRuleBase
+    OptimizationRuleBase o-- IOptimizationRule
+    OptimizationRuleBase <|-- ConstantFoldingRule
+    OptimizationRuleBase <|-- PredicatePushdownRule
+    OptimizationRuleBase <|-- ProjectionPruningRule
+    
+    QueryOptimizer --> IOptimizationRule : Uses
+```
+
+#### Sequence Diagram: Optimization Pipeline Execution
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Optimizer as QueryOptimizer
+    participant ConstantFold as ConstantFoldingRule
+    participant PredicatePush as PredicatePushdownRule
+    participant ProjectionPrune as ProjectionPruningRule
+
+    Optimizer->>ConstantFold: Optimize(initialPlan)
+    activate ConstantFold
+    
+    Note over ConstantFold: Applies constant folding transformations
+    
+    ConstantFold->>PredicatePush: Optimize(transformedPlan1)
+    activate PredicatePush
+    
+    Note over PredicatePush: Applies predicate pushdown transformations
+    
+    PredicatePush->>ProjectionPrune: Optimize(transformedPlan2)
+    activate ProjectionPrune
+    
+    Note over ProjectionPrune: Applies projection pruning transformations
+    
+    ProjectionPrune-->>PredicatePush: finalPlan
+    deactivate ProjectionPrune
+    
+    PredicatePush-->>ConstantFold: finalPlan
+    deactivate PredicatePush
+    
+    ConstantFold-->>Optimizer: finalPlan
+    deactivate ConstantFold
+```
+
+#### Example Code
+
+```csharp
+public interface IOptimizationRule
+{
+    IOptimizationRule SetNext(IOptimizationRule next);
+    LogicalPlan Optimize(LogicalPlan plan);
+}
+
+public abstract class OptimizationRuleBase : IOptimizationRule
+{
+    private IOptimizationRule _next;
+
+    public IOptimizationRule SetNext(IOptimizationRule next)
+    {
+        _next = next;
+        return next;
+    }
+
+    public virtual LogicalPlan Optimize(LogicalPlan plan)
+    {
+        if (_next != null)
+        {
+            return _next.Optimize(plan);
+        }
+        return plan;
+    }
+}
+
+public class ConstantFoldingRule : OptimizationRuleBase
+{
+    public override LogicalPlan Optimize(LogicalPlan plan)
+    {
+        // 1. Apply constant folding logic to the plan
+        // ... (transformation logic) ...
+        
+        // 2. Pass the modified plan to the next rule in the chain
+        return base.Optimize(plan);
+    }
+}
+
+public class PredicatePushdownRule : OptimizationRuleBase
+{
+    public override LogicalPlan Optimize(LogicalPlan plan)
+    {
+        // 1. Apply predicate pushdown logic to the plan
+        // ... (transformation logic) ...
+        
+        // 2. Pass the modified plan to the next rule in the chain
+        return base.Optimize(plan);
+    }
+}
+
+// Usage in QueryOptimizer
+public class QueryOptimizer
+{
+    public PhysicalPlan Optimize(LogicalPlan plan)
+    {
+        // Build the optimization chain
+        var pipeline = new ConstantFoldingRule();
+        pipeline.SetNext(new PredicatePushdownRule())
+                .SetNext(new ProjectionPruningRule());
+
+        // Execute the pipeline
+        var optimizedLogicalPlan = pipeline.Optimize(plan);
+        
+        // ... Convert optimizedLogicalPlan to PhysicalPlan ...
+        return new PhysicalPlan();
+    }
+}
 ```

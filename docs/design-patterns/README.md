@@ -117,15 +117,15 @@ flowchart LR
     QP --> QP_Int["🔴 Interpreter ☑<br/>SQL / AST Evaluation"]
     QP --> QP_Vis["🔴 Visitor ☑<br/>AST Processing"]
     QP --> QP_Str["🔴 Strategy ☑<br/>Query Optimization"]
-    QP --> QP_FM["🔴 Factory Method ☐<br/>Physical Operator Creation"]
-    QP --> QP_Comp["🔴 Composite ☐<br/>Query Plan Tree"]
-    QP --> QP_Iter["🔴 Iterator ☐<br/>Volcano Execution"]
+    QP --> QP_FM["🔴 Factory Method ☑<br/>Physical Operator Creation"]
+    QP --> QP_Comp["🟡 Composite ☑<br/>Query Plan Tree"]
+    QP --> QP_Iter["🟡 Iterator ☐<br/>Query Result Execution"]
 
-    QP --> QP_CoR["🟡 Chain of Responsibility ☐<br/>Optimization Pipeline"]
     QP --> QP_Cmd["🟡 Command ☐<br/>SQL Statement Execution"]
-    QP --> QP_Bld["🟡 Builder ☐<br/>Query Plan Construction"]
 
-    QP --> QP_TM["🟢 Template Method ☐<br/>Operator Lifecycle"]
+    QP --> QP_CoR["🟢 Chain of Responsibility ☐<br/>Optimization Pipeline"]
+    QP --> QP_Bld["🟢 Builder ☐<br/>Query Plan Construction"]
+    QP --> QP_TM["🟢 Template Method ☐<br/>Physical Operator Execution"]
 
 
     %% =========================================================
@@ -214,15 +214,15 @@ flowchart LR
 
 
 %% HIGH PRIORITY
-    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_Sing,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,QP_Comp,QP_Iter,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
+    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_Sing,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
 
 
     %% MEDIUM PRIORITY
-    class Obj_I,Obj_V,Obj_B,Mgmt_FM,Mgmt_TM,SE_TM,SE_FM,SE_P,TM_Cmd,TM_O,TM_TM,RM_O,RM_B,RM_CoR,QP_CoR,QP_Cmd,QP_Bld,CM_V,CM_FM,CM_C,SM_Str,SM_O,Rep_Cmd,Rep_M,Mon_D,Mon_V medium;
+    class Obj_I,Obj_V,Obj_B,Mgmt_FM,Mgmt_TM,SE_TM,SE_FM,SE_P,TM_Cmd,TM_O,TM_TM,RM_O,RM_B,RM_CoR,QP_Cmd,QP_Comp,QP_Iter,CM_V,CM_FM,CM_C,SM_Str,SM_O,Rep_Cmd,Rep_M,Mon_D,Mon_V medium;
 
 
     %% LOW PRIORITY
-    class Obj_P,Obj_D,Obj_M,Mgmt_B,Mgmt_M,SE_S,SE_D,TM_FM,RM_FM,QP_TM,CM_D,SM_FM,SM_D,Rep_CoR,Mon_A low;
+    class Obj_P,Obj_D,Obj_M,Mgmt_B,Mgmt_M,SE_S,SE_D,TM_FM,RM_FM,QP_TM,QP_CoR,QP_Bld,CM_D,SM_FM,SM_D,Rep_CoR,Mon_A low;
 ```
 
 
@@ -490,5 +490,27 @@ flowchart LR
     Str_RB --> Str_RB_1["ApplyPredicatePushdown_WhenValidPlan_ShouldReturnOptimizedPlan"]
     Str_RB --> Str_RB_2["ApplyProjectionPruning_WhenValidPlan_ShouldReturnOptimizedPlan"]
     Str_RB --> Str_RB_3["ApplyConstantFolding_WhenValidPlan_ShouldReturnOptimizedPlan"]
+
+    %% =========================================================
+    %% Factory Method Files & Methods
+    %% =========================================================
+    FactoryMethod["Factory Method"]
+    
+    FactoryMethod --> FM_POFT["PhysicalOperatorFactoryTests.cs"]
+    FM_POFT --> FM_POFT_1["CreateOperator_GivenLogicalTableScan_ReturnsTableScanOperator"]
+    FM_POFT --> FM_POFT_2["CreateOperator_GivenLogicalIndexScan_ReturnsIndexScanOperator"]
+    FM_POFT --> FM_POFT_3["CreateOperator_GivenLogicalHashJoin_ReturnsHashJoinOperator"]
+    FM_POFT --> FM_POFT_4["CreateOperator_GivenLogicalNestedLoopJoin_ReturnsNestedLoopJoinOperator"]
+    FM_POFT --> FM_POFT_5["CreateOperator_GivenLogicalSort_ReturnsSortOperator"]
+    FM_POFT --> FM_POFT_6["CreateOperator_GivenUnsupportedNode_ThrowsNotSupportedException"]
+
+    %% =========================================================
+    %% Composite Files & Methods
+    %% =========================================================
+    Composite["Composite"]
+    
+    Composite --> Comp_PO["CompositePhysicalOperatorTests.cs"]
+    Comp_PO --> Comp_PO_1["AddChild_ShouldAddChildToOperator"]
+    Comp_PO --> Comp_PO_2["RemoveChild_ShouldRemoveChildFromOperator"]
 
 ```

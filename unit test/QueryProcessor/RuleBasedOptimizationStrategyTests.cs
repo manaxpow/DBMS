@@ -8,7 +8,6 @@ public class RuleBasedOptimizationStrategyTests
     [Fact]
     public void ApplyPredicatePushdown_WhenValidPlan_ShouldReturnOptimizedPlan()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var strategy = new RuleBasedOptimizationStrategy();
         var plan = new LogicalPlan();
@@ -26,7 +25,6 @@ public class RuleBasedOptimizationStrategyTests
     [Fact]
     public void ApplyProjectionPruning_WhenValidPlan_ShouldReturnOptimizedPlan()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var strategy = new RuleBasedOptimizationStrategy();
         var plan = new LogicalPlan();
@@ -44,7 +42,6 @@ public class RuleBasedOptimizationStrategyTests
     [Fact]
     public void ApplyConstantFolding_WhenValidPlan_ShouldReturnOptimizedPlan()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var strategy = new RuleBasedOptimizationStrategy();
         var plan = new LogicalPlan();
@@ -57,4 +54,5 @@ public class RuleBasedOptimizationStrategyTests
         result.Should().NotBeNull();
     }
 }
+
 

@@ -12,7 +12,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void ColumnExpression_Accept_ShouldCallVisitColumnExpression()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<bool>>();
             visitor.Visit(Arg.Any<ColumnExpression>()).Returns(true);
@@ -30,7 +29,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void LiteralExpression_Accept_ShouldCallVisitLiteralExpression()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<int>>();
             visitor.Visit(Arg.Any<LiteralExpression>()).Returns(42);
@@ -48,7 +46,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void BinaryExpression_Accept_ShouldCallVisitBinaryExpression()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<string>>();
             visitor.Visit(Arg.Any<BinaryExpression>()).Returns("ok");
@@ -66,7 +63,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void WhereExpression_Accept_ShouldCallVisitWhereExpression()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<bool>>();
             visitor.Visit(Arg.Any<WhereExpression>()).Returns(false);
@@ -84,7 +80,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void SelectExpression_Accept_ShouldCallVisitSelectExpression()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<int>>();
             visitor.Visit(Arg.Any<SelectExpression>()).Returns(1);
@@ -106,7 +101,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void SemanticAnalysVisitor_Visit_ColumnExpression_ShouldReturnTrueForValidColumn()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = new SemanticAnalysVisitor();
             var expr = new ColumnExpression { ColumnName = "name" };
@@ -123,7 +117,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void SemanticAnalysVisitor_Visit_BinaryExpression_ShouldTraverseLeftAndRight()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = new SemanticAnalysVisitor();
             
@@ -148,7 +141,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void SemanticAnalysVisitor_Visit_SelectExpression_ShouldTraverseColumnsAndWhere()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = new SemanticAnalysVisitor();
             
@@ -190,7 +182,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void LogicalPlanVisitor_Visit_ColumnExpression_ShouldReturnLogicalNode()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = new LogicalPlanVisitor();
             var expr = new ColumnExpression { ColumnName = "name" };
@@ -207,7 +198,6 @@ namespace DBMS.UnitTests.QueryProcessor
         [Fact]
         public void LogicalPlanVisitor_Visit_BinaryExpression_ShouldCombineLeftAndRightNodes()
     {
-        throw new System.NotImplementedException();
             // Arrange
             var visitor = new LogicalPlanVisitor();
             
@@ -229,4 +219,5 @@ namespace DBMS.UnitTests.QueryProcessor
         }
     }
 }
+
 

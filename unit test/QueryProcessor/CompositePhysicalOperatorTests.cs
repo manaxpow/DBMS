@@ -21,7 +21,6 @@ public class CompositePhysicalOperatorTests
     [Fact]
     public void AddChild_ShouldAddChildToOperator()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
@@ -38,7 +37,6 @@ public class CompositePhysicalOperatorTests
     [Fact]
     public void RemoveChild_ShouldRemoveChildFromOperator()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
@@ -52,4 +50,5 @@ public class CompositePhysicalOperatorTests
         Assert.Empty(children);
     }
 }
+
 

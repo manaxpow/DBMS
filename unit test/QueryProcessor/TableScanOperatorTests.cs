@@ -17,7 +17,6 @@ public class TableScanOperatorTests
     [Fact]
     public void Open_ShouldInitializeEnumerator()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var sut = new TableScanOperator("TestTable", rows);
@@ -34,7 +33,6 @@ public class TableScanOperatorTests
     [Fact]
     public void Next_WhenRowsExist_ShouldReturnTrue()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var sut = new TableScanOperator("TestTable", rows);
@@ -49,7 +47,6 @@ public class TableScanOperatorTests
     [Fact]
     public void Next_WhenNoMoreRows_ShouldReturnFalse()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var sut = new TableScanOperator("TestTable", rows);
@@ -69,7 +66,6 @@ public class TableScanOperatorTests
     [Fact]
     public void GetCurrent_ShouldReturnCorrectRow()
     {
-        throw new System.NotImplementedException();
         // Arrange
         var rows = CreateMockRows();
         var sut = new TableScanOperator("TestTable", rows);
@@ -87,4 +83,5 @@ public class TableScanOperatorTests
         current2.Should().Be(rows[1]);
     }
 }
+
 

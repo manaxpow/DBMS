@@ -6,4 +6,5 @@ public interface ISchemaObject
     SchemaObjectType ObjectType { get; }
     void Drop();
     void Accept(ISchemaVisitor visitor);
+    ISchemaObject Clone();
 }

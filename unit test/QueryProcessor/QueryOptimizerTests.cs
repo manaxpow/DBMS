@@ -46,3 +46,5 @@ public class QueryOptimizerTests
         mockStrategy.Received(1).Optimize(logicalPlan);
     }
 }
+
+

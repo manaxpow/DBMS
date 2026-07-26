@@ -16,7 +16,7 @@ namespace DBMS.UnitTests.QueryProcessor
             var context = Substitute.For<InterpretationContext>();
             var expectedNode = new LogicalNode();
             context.ResolveColumn("id").Returns(expectedNode);
-            
+
             var expr = new ColumnExpression { ColumnName = "id" };
 
             // Act
@@ -35,7 +35,7 @@ namespace DBMS.UnitTests.QueryProcessor
             var context = Substitute.For<InterpretationContext>();
             var expectedNode = new LogicalNode();
             context.ResolveTable("users").Returns(expectedNode);
-            
+
             var expr = new TableExpression { TableName = "users" };
 
             // Act
@@ -67,20 +67,20 @@ namespace DBMS.UnitTests.QueryProcessor
         {
             // Arrange
             var context = Substitute.For<InterpretationContext>();
-            
+
             var leftExpr = Substitute.For<Expression>();
             var leftNode = new LogicalNode();
             leftExpr.Interpret(context).Returns(leftNode);
-            
+
             var rightExpr = Substitute.For<Expression>();
             var rightNode = new LogicalNode();
             rightExpr.Interpret(context).Returns(rightNode);
-            
-            var expr = new BinaryExpression 
-            { 
-                Left = leftExpr, 
-                Right = rightExpr, 
-                Operator = "=" 
+
+            var expr = new BinaryExpression
+            {
+                Left = leftExpr,
+                Right = rightExpr,
+                Operator = "="
             };
 
             // Act
@@ -101,7 +101,7 @@ namespace DBMS.UnitTests.QueryProcessor
             var conditionExpr = Substitute.For<Expression>();
             var conditionNode = new LogicalNode();
             conditionExpr.Interpret(context).Returns(conditionNode);
-            
+
             var expr = new WhereExpression { Condition = conditionExpr };
 
             // Act
@@ -118,21 +118,21 @@ namespace DBMS.UnitTests.QueryProcessor
         {
             // Arrange
             var context = Substitute.For<InterpretationContext>();
-            
+
             var fromExpr = Substitute.For<Expression>();
             fromExpr.Interpret(context).Returns(new LogicalNode());
-            
+
             var whereExpr = Substitute.For<Expression>();
             whereExpr.Interpret(context).Returns(new LogicalNode());
-            
+
             var colExpr = Substitute.For<Expression>();
             colExpr.Interpret(context).Returns(new LogicalNode());
-            
-            var expr = new SelectExpression 
-            { 
-                From = fromExpr, 
-                Where = whereExpr, 
-                Columns = new List<Expression> { colExpr } 
+
+            var expr = new SelectExpression
+            {
+                From = fromExpr,
+                Where = whereExpr,
+                Columns = new List<Expression> { colExpr }
             };
 
             // Act
@@ -146,3 +146,4 @@ namespace DBMS.UnitTests.QueryProcessor
         }
     }
 }
+

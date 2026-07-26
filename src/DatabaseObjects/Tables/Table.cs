@@ -60,4 +60,5 @@ public class Table : ISchemaObject
         throw new NotImplementedException();
     }
 
+    public ISchemaObject Clone() => throw new NotImplementedException();
 }

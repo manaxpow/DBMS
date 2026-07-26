@@ -33,4 +33,5 @@ public class StoredProcedure : ISchemaObject
         throw new NotImplementedException();
     }
 
+    public ISchemaObject Clone() => throw new NotImplementedException();
 }

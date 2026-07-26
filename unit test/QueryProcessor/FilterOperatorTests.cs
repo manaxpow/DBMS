@@ -40,7 +40,7 @@ public class FilterOperatorTests
         // Arrange
         var rows = CreateMockRows();
         var child = new TableScanOperator("Test", rows);
-        var sut = new FilterOperator(child, r => (int)r.Values[0] > 10); 
+        var sut = new FilterOperator(child, r => (int)r.Values[0] > 10);
 
         sut.Open();
 
@@ -57,7 +57,7 @@ public class FilterOperatorTests
         // Arrange
         var rows = CreateMockRows();
         var child = new TableScanOperator("Test", rows);
-        var sut = new FilterOperator(child, r => (string)r.Values[1] == "Charlie"); 
+        var sut = new FilterOperator(child, r => (string)r.Values[1] == "Charlie");
 
         sut.Open();
 
@@ -75,7 +75,7 @@ public class FilterOperatorTests
         // Arrange
         var child = Substitute.For<PhysicalOperator>();
         var sut = new FilterOperator(child, r => true);
-        
+
         // Act
         sut.Close();
 
@@ -83,3 +83,5 @@ public class FilterOperatorTests
         child.Received(1).Close();
     }
 }
+
+

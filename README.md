@@ -571,6 +571,7 @@ classDiagram
             +SchemaObjectType ObjectType
             +Drop() void
             +Accept(ISchemaVisitor visitor) void
+            +Clone() ISchemaObject
         }
         class Schema {
             +int Id
@@ -595,6 +596,7 @@ classDiagram
             -IsTableReferencedByForeignKey(string tableName) bool
             +Drop() void
             +Accept(ISchemaVisitor visitor) void
+            +Clone() ISchemaObject
         }
         class Table {
             +int Id
@@ -623,6 +625,7 @@ classDiagram
             +GetPrimaryIndex() Index
             +GetForeignKeyIndex() Index
             +Accept(ISchemaVisitor visitor) void
+            +Clone() ISchemaObject
         }
         class View {
             +int Id
@@ -640,6 +643,7 @@ classDiagram
             -ValidateQuery(string query) void
             -GetDependencies(string query) IReadOnlyList~string~
             -EnsureDependenciesExist(Schema schema, IReadOnlyList~string~ dependencies) void
+            +Clone() ISchemaObject
         }
         class StoredProcedure {
             +int Id
@@ -657,6 +661,7 @@ classDiagram
             +Accept(ISchemaVisitor visitor) void
             -ValidateParameters(object parameters) bool
             -ValidateBody(ProcedureBody newBody) bool
+            +Clone() ISchemaObject
         }
         class ProcedureBody {
             +Execute(object parameters, object transaction) object

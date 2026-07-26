@@ -83,3 +83,5 @@ public class TableScanOperatorTests
         current2.Should().Be(rows[1]);
     }
 }
+
+

@@ -6,23 +6,11 @@ public class TableScanOperator : PhysicalOperator {
     private IEnumerable<Row> _tableRows;
 
     public TableScanOperator(string tableName, IEnumerable<Row> tableRows) { 
-        TableName = tableName; 
-        _tableRows = tableRows;
+        throw new NotImplementedException();
     }
 
-    public override void Open() { 
-        _enumerator = _tableRows.GetEnumerator();
-    }
-
-    public override bool Next() { 
-        return _enumerator.MoveNext(); 
-    }
-
-    public override Row GetCurrent() { 
-        return _enumerator.Current; 
-    }
-
-    public override void Close() { 
-        _enumerator?.Dispose();
-    }
+    public override void Open() => throw new NotImplementedException();
+    public override bool Next() => throw new NotImplementedException();
+    public override Row GetCurrent() => throw new NotImplementedException();
+    public override void Close() => throw new NotImplementedException();
 }

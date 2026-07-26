@@ -54,3 +54,5 @@ public class RuleBasedOptimizationStrategyTests
         result.Should().NotBeNull();
     }
 }
+
+

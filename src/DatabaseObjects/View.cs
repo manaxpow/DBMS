@@ -32,4 +32,5 @@ public class View : ISchemaObject
         throw new NotImplementedException();
     }
 
+    public ISchemaObject Clone() => throw new NotImplementedException();
 }

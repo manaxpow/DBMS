@@ -50,3 +50,5 @@ public class CompositePhysicalOperatorTests
         Assert.Empty(children);
     }
 }
+
+

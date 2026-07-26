@@ -9,17 +9,6 @@ public class QueryOptimizer
         _strategy = strategy;
     }
 
-    public void SetStrategy(IOptimizationStrategy strategy)
-    {
-        _strategy = strategy;
-    }
-
-    public PhysicalPlan Optimize(LogicalPlan plan)
-    {
-        if (_strategy == null)
-        {
-            throw new InvalidOperationException("Optimization strategy not set.");
-        }
-        return _strategy.Optimize(plan);
-    }
+    public void SetStrategy(IOptimizationStrategy strategy) => throw new NotImplementedException();
+    public PhysicalPlan Optimize(LogicalPlan plan) => throw new NotImplementedException();
 }

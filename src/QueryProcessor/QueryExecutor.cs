@@ -1,6 +1,4 @@
-using System;
-
-public class QueryExecutor
+public class QueryExecutor : IQueryExecutor
 {
     public ResultSet Execute(PhysicalPlan plan)
     {

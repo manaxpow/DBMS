@@ -7,8 +7,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🔴 High  | `[x]`  | **Interpreter**             | SQL / AST Evaluation        | Represents SQL grammar as AST expression nodes such as SelectNode, WhereNode, and BinaryExpression, allowing the parsed query structure to be interpreted or translated into a logical plan.        |
 |  🔴 High  | `[x]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.              |
 |  🔴 High  | `[x]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                           |
-|  🔴 High  | `[x]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
-|  🔴 High  | `[ ]`  | **Abstract Factory**        | Query Processor Factory     | Creates related families of objects (Parser, Optimizer, Executor).                                                                                  
+|  🔴 High  | `[x]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                                                  
 |  🔴 High  | `[x]`  | **Proxy**                   | Lazy Physical Operator      | Defers creation or initialization of physical operators until execution is required.
 | 🟡 Medium | `[x]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
 | 🟡 Medium | `[x]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
@@ -16,7 +15,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🟢 Low   | `[x]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
 |  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.             |
 |  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                               |
-|  🟢 Low   | `[ ]`  | **Decorator**               | Query Execution Logging     | Wraps IQueryExecutor to intercept execution, logging the SQL query and execution time without modifying the underlying executor.                                                                    |
+|  🟢 Low   | `[x]`  | **Decorator**               | Query Execution Logging     | Wraps IQueryExecutor to intercept execution, logging the SQL query and execution time without modifying the underlying executor.                                                                    |
 
 ---
 
@@ -1576,6 +1575,279 @@ public class LazyTableScanOperatorProxy : PhysicalOperator
     public override void Close()
     {
         _realOperator?.Close();
+    }
+}
+```
+
+## 2.9. Decorator (Query Execution Logging)
+
+The **Decorator** pattern is used to add logging, profiling, or auditing capabilities to query execution dynamically without modifying the underlying `QueryExecutor`. By wrapping the core execution component, decorators can intercept method calls, record start and end times, handle errors, and then delegate the main work to the inner component.
+
+- Define a common `IQueryExecutor` interface that all executors implement.
+- Implement the core `QueryExecutor` responsible for executing the physical plan.
+- Create a `QueryExecutorDecorator` base class that wraps an `IQueryExecutor`.
+- Implement concrete decorators like `QueryExecutionLoggerDecorator` that measure execution time and log queries.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+    
+    class Component {
+        <<interface>>
+        +Operation()
+    }
+    
+    class ConcreteComponent {
+        +Operation()
+    }
+    
+    class Decorator {
+        <<abstract>>
+        -Component component
+        +Decorator(Component)
+        +Operation()
+    }
+    
+    class ConcreteDecoratorA {
+        +Operation()
+    }
+    
+    class ConcreteDecoratorB {
+        +Operation()
+    }
+    
+    Component <|.. ConcreteComponent
+    Component <|.. Decorator
+    Decorator o-- Component : wraps
+    Decorator <|-- ConcreteDecoratorA
+    Decorator <|-- ConcreteDecoratorB
+```
+
+#### Class diagram
+
+
+```mermaid
+classDiagram
+    direction TB
+
+    class IQueryExecutor {
+        <<interface>>
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class QueryExecutor {
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class QueryExecutorDecorator {
+        <<abstract>>
+        #IQueryExecutor _innerExecutor
+        +QueryExecutorDecorator(IQueryExecutor innerExecutor)
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class QueryExecutionLoggerDecorator {
+        -ILogger _logger
+        +QueryExecutionLoggerDecorator(IQueryExecutor innerExecutor, ILogger logger)
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class ProfilingDecorator {
+        +ProfilingDecorator(IQueryExecutor innerExecutor)
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class AuditDecorator {
+        -IAuditLogger _auditLogger
+        +AuditDecorator(IQueryExecutor innerExecutor, IAuditLogger auditLogger)
+        +Execute(PhysicalPlan plan) QueryResult
+    }
+
+    class ILogger {
+        <<interface>>
+        +Log(string message)
+        +LogError(string message)
+    }
+
+    class IAuditLogger {
+        <<interface>>
+        +Record(string event)
+    }
+
+    IQueryExecutor <|.. QueryExecutor
+    IQueryExecutor <|.. QueryExecutorDecorator
+
+    QueryExecutorDecorator o-- IQueryExecutor : wraps
+
+    QueryExecutorDecorator <|-- QueryExecutionLoggerDecorator
+    QueryExecutorDecorator <|-- ProfilingDecorator
+    QueryExecutorDecorator <|-- AuditDecorator
+
+    QueryExecutionLoggerDecorator --> ILogger
+    AuditDecorator --> IAuditLogger
+```
+
+#### Sequence Diagram: Query Execution Logging
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Logger as QueryExecutionLoggerDecorator
+    participant Executor as QueryExecutor
+    
+    Client->>Logger: Execute(plan)
+    activate Logger
+    
+    Note over Logger: Start Stopwatch
+    Note over Logger: Log "[Start] Executing query plan..."
+    
+    Logger->>Executor: Execute(plan)
+    activate Executor
+    Note over Executor: Traverse and execute physical plan
+    Executor-->>Logger: QueryResult
+    deactivate Executor
+    
+    Note over Logger: Stop Stopwatch
+    Note over Logger: Log "[Success] Execution finished in X ms"
+    
+    Logger-->>Client: QueryResult
+    deactivate Logger
+```
+
+#### Example code
+
+```csharp
+// Component 
+public interface IQueryExecutor
+{
+    QueryResult Execute(PhysicalPlan plan);
+}
+
+// Concrete Component
+public class QueryExecutor : IQueryExecutor
+{
+    public QueryResult Execute(PhysicalPlan plan)
+    {
+        // Logic 
+        return new QueryResult();
+    }
+}
+
+// Base Decorator
+public abstract class QueryExecutorDecorator : IQueryExecutor
+{
+    protected readonly IQueryExecutor _innerExecutor;
+
+    protected QueryExecutorDecorator(IQueryExecutor innerExecutor)
+    {
+        _innerExecutor = innerExecutor ?? throw new ArgumentNullException(nameof(innerExecutor));
+    }
+
+    public virtual QueryResult Execute(PhysicalPlan plan)
+    {
+        return _innerExecutor.Execute(plan);
+    }
+}
+
+// Concrete Decorator for Logging
+public class QueryExecutionLoggerDecorator : QueryExecutorDecorator
+{
+    private readonly ILogger _logger;
+
+    public QueryExecutionLoggerDecorator(IQueryExecutor innerExecutor, ILogger logger) 
+        : base(innerExecutor)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public override QueryResult Execute(PhysicalPlan plan)
+    {
+        _logger.Log($"[Start] Executing query plan...");
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        // Delegate execution to the wrapped executor
+        var result = base.Execute(plan);
+        
+        stopwatch.Stop();
+        _logger.Log($"[Success] Execution finished in {stopwatch.ElapsedMilliseconds} ms.");
+        return result;
+    }
+}
+
+// Concrete Decorator for Profiling
+public class ProfilingDecorator : QueryExecutorDecorator
+{
+    public ProfilingDecorator(IQueryExecutor innerExecutor) 
+        : base(innerExecutor)
+    {
+    }
+
+    public override QueryResult Execute(PhysicalPlan plan)
+    {
+        // Example profiling logic (e.g., memory usage, CPU time)
+        Console.WriteLine("[Profiling] Collecting pre-execution metrics...");
+        
+        var result = base.Execute(plan);
+        
+        Console.WriteLine("[Profiling] Collecting post-execution metrics...");
+        return result;
+    }
+}
+
+// Concrete Decorator for Auditing
+public class AuditDecorator : QueryExecutorDecorator
+{
+    private readonly IAuditLogger _auditLogger;
+
+    public AuditDecorator(IQueryExecutor innerExecutor, IAuditLogger auditLogger) 
+        : base(innerExecutor)
+    {
+        _auditLogger = auditLogger ?? throw new ArgumentNullException(nameof(auditLogger));
+    }
+
+    public override QueryResult Execute(PhysicalPlan plan)
+    {
+        _auditLogger.Record($"Query execution requested at {DateTime.UtcNow}");
+        
+        var result = base.Execute(plan);
+        
+        _auditLogger.Record($"Query execution completed at {DateTime.UtcNow}");
+        return result;
+    }
+}
+
+public interface ILogger
+{
+    void Log(string message);
+    void LogError(string message);
+}
+
+public interface IAuditLogger
+{
+    void Record(string eventMsg);
+}
+
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        IQueryExecutor executor = new QueryExecutor();
+        ILogger logger = new ConsoleLogger(); // Assuming implementation exists
+        IAuditLogger auditLogger = new DbAuditLogger(); // Assuming implementation exists
+        
+        // Stack the decorators around the core executor
+        executor = new ProfilingDecorator(executor);
+        executor = new QueryExecutionLoggerDecorator(executor, logger);
+        executor = new AuditDecorator(executor, auditLogger);
+        
+        var plan = new PhysicalPlan();
+        
+        // The execute call will now be audited, logged/timed, and profiled
+        var result = executor.Execute(plan);
     }
 }
 ```

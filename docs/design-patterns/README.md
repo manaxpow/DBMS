@@ -33,7 +33,7 @@ flowchart LR
     Mgmt_Cmd["🔴 Command ☑<br/>Database Operations"] --> DBMgmt
     Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
     Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
-    Mgmt_Br["🔴 Bridge ☐<br/>Database ↔ Storage Engine"] --> DBMgmt
+    Mgmt_Br["🔴 Bridge ☑<br/>Database ↔ Storage Engine"] --> DBMgmt
 
     Mgmt_FM["🟡 Factory Method ☑<br/>Database Creation"] --> DBMgmt
     Mgmt_TM["🟡 Template Method ☑<br/>Lifecycle Workflow"] --> DBMgmt
@@ -120,8 +120,7 @@ flowchart LR
     QP --> QP_Vis["🔴 Visitor ☑<br/>AST Processing"]
     QP --> QP_Str["🔴 Strategy ☑<br/>Query Optimization"]
     QP --> QP_FM["🔴 Factory Method ☑<br/>Physical Operator Creation"]
-    QP --> QP_AF["🔴 Abstract Factory ☐<br/>Query Processor Factory"]
-    QP --> QP_Px["🔴 Proxy ☐<br/>Lazy Physical Operator / Remote Table Proxy"]
+    QP --> QP_Px["🔴 Proxy ☑<br/>Lazy Physical Operator "]
     QP --> QP_Comp["🟡 Composite ☑<br/>Query Plan Tree"]
     QP --> QP_Iter["🟡 Iterator ☑<br/>Query Result Execution"]
 
@@ -614,12 +613,22 @@ flowchart LR
     CoR_OPT --> CoR_OPT_4["ProjectionPruningRule_Optimize_ShouldTransformPlan"]
     CoR_OPT --> CoR_OPT_5["Rule_WhenNextIsNull_ShouldReturnPlan"]
 
+    %% =========================================================
+    %% Decorator Files & Methods
+    %% =========================================================
+    Decorator["Decorator"]
+
+    Decorator --> Dec_QED["QueryExecutorDecoratorTests.cs"]
+    Dec_QED --> Dec_QED_1["QueryExecutionLoggerDecorator_Execute_ShouldLogStartAndSuccess"]
+    Dec_QED --> Dec_QED_2["ProfilingDecorator_Execute_ShouldExecuteInner"]
+    Dec_QED --> Dec_QED_3["AuditDecorator_Execute_ShouldRecordStartAndEnd"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class Interpreter,Strategy,FactoryMethod,Composite,Iterator,Proxy,ChainOfResponsibility patternNode
-    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL,Px_LTS,CoR_OPT classNode
+    class Interpreter,Strategy,FactoryMethod,Composite,Iterator,Proxy,ChainOfResponsibility,Decorator patternNode
+    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL,Px_LTS,CoR_OPT,Dec_QED classNode
     class Int_IT_1,Int_IT_2,Int_IT_3,Int_IT_4,Int_IT_5,Int_IT_6 completedTest
     class Str_QO_1,Str_QO_2,Str_CB_1,Str_CB_2,Str_CB_3,Str_RB_1,Str_RB_2,Str_RB_3 completedTest
     class FM_POFT_1,FM_POFT_2,FM_POFT_3,FM_POFT_4,FM_POFT_5,FM_POFT_6 completedTest
@@ -627,4 +636,5 @@ flowchart LR
     class TS_001,TS_002,TS_003,TS_004,FL_001,FL_002,FL_003,FL_004 completedTest
     class Px_LTS_1,Px_LTS_2,Px_LTS_3,Px_LTS_4,Px_LTS_5,Px_LTS_6,Px_LTS_7 completedTest
     class CoR_OPT_1,CoR_OPT_2,CoR_OPT_3,CoR_OPT_4,CoR_OPT_5 completedTest
+    class Dec_QED_1,Dec_QED_2,Dec_QED_3 completedTest
 ```

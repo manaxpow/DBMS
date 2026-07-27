@@ -602,15 +602,29 @@ flowchart LR
     Px_LTS --> Px_LTS_6["Close_WhenRealOperatorInitialized_ShouldDelegate"]
     Px_LTS --> Px_LTS_7["Close_WhenRealOperatorNotInitialized_ShouldNotThrow"]
 
+    %% =========================================================
+    %% Chain of Responsibility Files & Methods
+    %% =========================================================
+    ChainOfResponsibility["Chain of Responsibility"]
+
+    ChainOfResponsibility --> CoR_OPT["OptimizationPipelineTests.cs"]
+    CoR_OPT --> CoR_OPT_1["Optimize_ShouldPassThroughChainInCorrectOrder"]
+    CoR_OPT --> CoR_OPT_2["ConstantFoldingRule_Optimize_ShouldTransformPlan"]
+    CoR_OPT --> CoR_OPT_3["PredicatePushdownRule_Optimize_ShouldTransformPlan"]
+    CoR_OPT --> CoR_OPT_4["ProjectionPruningRule_Optimize_ShouldTransformPlan"]
+    CoR_OPT --> CoR_OPT_5["Rule_WhenNextIsNull_ShouldReturnPlan"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class Interpreter,Strategy,FactoryMethod,Composite,Iterator,Proxy patternNode
-    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL,Px_LTS classNode
+    class Interpreter,Strategy,FactoryMethod,Composite,Iterator,Proxy,ChainOfResponsibility patternNode
+    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL,Px_LTS,CoR_OPT classNode
     class Int_IT_1,Int_IT_2,Int_IT_3,Int_IT_4,Int_IT_5,Int_IT_6 completedTest
     class Str_QO_1,Str_QO_2,Str_CB_1,Str_CB_2,Str_CB_3,Str_RB_1,Str_RB_2,Str_RB_3 completedTest
     class FM_POFT_1,FM_POFT_2,FM_POFT_3,FM_POFT_4,FM_POFT_5,FM_POFT_6 completedTest
     class Comp_PO_1,Comp_PO_2 completedTest
     class TS_001,TS_002,TS_003,TS_004,FL_001,FL_002,FL_003,FL_004 completedTest
+    class Px_LTS_1,Px_LTS_2,Px_LTS_3,Px_LTS_4,Px_LTS_5,Px_LTS_6,Px_LTS_7 completedTest
+    class CoR_OPT_1,CoR_OPT_2,CoR_OPT_3,CoR_OPT_4,CoR_OPT_5 completedTest
 ```

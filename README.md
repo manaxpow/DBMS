@@ -127,6 +127,15 @@ classDiagram
     Table *-- ForeignKeyConstraint
     Table *-- Index
     Table *-- Partition
+
+    Column --> IDataType
+    DataTypeFactory o-- IDataType
+    IDataType <|.. IntegerType
+    IDataType <|.. VarcharType
+    IDataType <|.. DateTimeType
+    IDataType <|.. BooleanType
+
+    Index *-- IndexType
     Schema *-- View
     Schema *-- StoredProcedure
 
@@ -152,71 +161,80 @@ classDiagram
 classDiagram
     direction TB
 
-    class BufferPool {
-        +int Capacity
-        +Dictionary~int, Frame~ PageTable
-        +FetchPage(object pageId) object
-        -FindBufferedFrame(object pageId) object
-        -FindAvailableFrame() object
-        -FindUnpinnedVictim() object
-        -Pin(object frame) void
-        -LoadPage(object frame, object pageData) void
-        -RegisterPage(object pageId, object frame) void
-        +FlushDirtyPages() void
-        +Flush(object pageId) void
-        +Evict(object frame) void
-        +Clear() void
-    }
-
-    class Page {
-        +int PageId
-        +int FreeSpace
-        +byte[] Data
-        +List~Slot~ SlotDirectory
-        +InsertRecord(object record) object
-        +UpdateRecord(object record) void
-        +DeleteRecord(object slotId) void
-        -CalculateRequiredSpace(object record) int
-        -HasAvailableSpace(int requiredSpace) bool
-        -WriteRecordData(object record) int
-        -AddSlot(int recordOffset, int recordLength) object
-        -UpdateFreeSpaceMetadata() void
-        -FindSlot(object slotId) object
-        -MarkRecordDeleted(object slot) void
-        -RemoveOrInvalidateSlot(object slotId) void
-        +Read() object
-    }
-
-
-    class EngineState {
-        <<enumeration>>
-        Uninitialized
-        Initialized
-        Stopped
-    }
-
-    class StorageEngine {
-        +EngineState State
+    class IStorageEngine {
+        <<interface>>
         +Initialize(object configuration) void
-        -ValidateConfiguration(object configuration) bool
-        -SetState(object state) void
         +ReadPage(object pageId) object
         +WritePage(object pageId, object data) void
         +Shutdown() void
     }
 
+    class InMemoryStorageEngine {
+        -Dictionary~object, object~ _memory
+        +Initialize(object configuration) void
+        +ReadPage(object pageId) object
+        +WritePage(object pageId, object data) void
+        +Shutdown() void
+    }
+
+    class DiskStorageEngine {
+        -IFileManager _fileManager
+        -BufferPool _bufferPool
+        +Initialize(object configuration) void
+        +ReadPage(object pageId) object
+        +WritePage(object pageId, object data) void
+        +Shutdown() void
+    }
+
+    class BufferPool {
+        +int Capacity
+        +Dictionary~int, Frame~ PageTable
+        +FetchPage(object pageId) object
+        +FlushDirtyPages() void
+        +Flush(object pageId) void
+        +Evict(object frame) void
+    }
+
+    class Frame {
+        +int FrameId
+        +Page Page
+        +bool IsDirty
+        +int PinCount
+    }
+
+    class Page {
+        +PageId Id
+        +byte[] Data
+        +List~Slot~ SlotDirectory
+        +InsertRecord(object record) object
+        +UpdateRecord(object record) void
+        +DeleteRecord(object slotId) void
+        +Read() object
+    }
+    
+    class Slot {
+        +int Offset
+        +int Length
+    }
+
+    class IFileManager {
+        <<interface>>
+        +CreateFile(string path) object
+        +OpenFile(string path) object
+        +ReadPage(object pageId) object
+    }
+
     class FileManager {
         +string RootDirectory
         +Dictionary~string, FileHandle~ OpenFiles
-        +Initialize(object fileSettings) void
         +CreateFile(string path) object
         +OpenFile(string path) object
-        +CloseFile(string path) void
-        +DeleteFile(string path) void
         +ReadPage(object pageId) object
-        +CloseAllFiles() void
-        -IsFileOpen(string path) bool
-        -RegisterOpenFile(string path, object fileHandle) void
+    }
+
+    class FileHandle {
+        +string Path
+        +object Stream
     }
 
     class PhysicalFileSystem {
@@ -225,14 +243,20 @@ classDiagram
         +Open(string path) object
     }
 
-    StorageEngine ..> EngineState : uses
-    StorageEngine *-- BufferPool
-    StorageEngine *-- FileManager
-    BufferPool *-- Page
-    FileManager *-- Page
+    IStorageEngine <|.. InMemoryStorageEngine
+    IStorageEngine <|.. DiskStorageEngine
 
-    BufferPool --> FileManager : loads page
-    StorageEngine --> Page : reads page
+    DiskStorageEngine *-- BufferPool
+    DiskStorageEngine *-- IFileManager
+    
+    IFileManager <|.. FileManager
+
+    BufferPool *-- Frame
+    Frame *-- Page
+    Page *-- Slot
+    FileManager *-- FileHandle
+
+    BufferPool --> IFileManager : loads/flushes page
     FileManager --> PhysicalFileSystem : accesses files
 ```
 
@@ -241,40 +265,94 @@ classDiagram
 ```mermaid
 classDiagram
     direction LR
-    class QueryProcessor {
-        +Start(object config) void
-        +Stop() void
-        +ExecuteQuery(string sql) ResultSet
+
+    namespace Core {
+        class QueryProcessor {
+            +Start(object config) void
+            +Stop() void
+            +ExecuteQuery(string sql) ResultSet
+        }
+        class Lexer {
+            +Tokenize(string sql) List~Token~
+        }
+        class SQLParser {
+            +Parse(List~Token~ tokens) AST
+        }
+        class SemanticAnalyzer {
+            +Analyze(AST ast) LogicalPlan
+        }
+        class QueryOptimizer {
+            -IOptimizationStrategy _strategy
+            +Optimize(LogicalPlan plan) PhysicalPlan
+        }
+        class QueryExecutor {
+            +Execute(PhysicalPlan plan) ResultSet
+        }
     }
-    class Lexer {
-        +Tokenize(string sql) List~Token~
+
+    namespace Interpreter {
+        class Expression {
+            <<abstract>>
+            +Interpret(InterpretationContext context) LogicalNode
+            +Accept(IExpressionVisitor visitor) void
+        }
+        class InterpretationContext {
+            +Schema Schema
+        }
+        class SelectExpression
+        class WhereExpression
+        class BinaryExpression
+        class ColumnExpression
+        class LiteralExpression
+        class TableExpression
     }
-    class SQLParser {
-        +Parse(List~Token~ tokens) AST
+
+    namespace Visitor {
+        class IExpressionVisitor {
+            <<interface>>
+            +Visit(Expression exp) void
+        }
+        class LogicalPlanVisitor
+        class SemanticAnalysVisitor
     }
-    class SemanticAnalyzer {
-        +Analyze(AST ast) LogicalPlan
+
+    namespace Strategy {
+        class IOptimizationStrategy {
+            <<interface>>
+            +Optimize(LogicalPlan plan) PhysicalPlan
+        }
+        class CostBasedOptimizationStrategy
+        class RuleBasedOptimizationStrategy
     }
-    class QueryOptimizer {
-        +Optimize(LogicalPlan plan) PhysicalPlan
+
+    namespace Factory {
+        class PhysicalOperatorFactory {
+            +CreateOperator(LogicalNode node) PhysicalOperator
+        }
     }
-    class QueryExecutor {
-        +Execute(PhysicalPlan plan) ResultSet
-    }
+
     class AST {
+        +Expression Root
         +GetRoot() void
         +Accept(object visitor) void
         +Build() void
     }
     class LogicalPlan {
+        +LogicalNode Root
         +AddOperator() void
         +Validate() void
     }
     class PhysicalPlan {
+        +PhysicalOperator Root
         +Build() void
         +CalculateCost() void
         +Validate() void
     }
+    
+    class LogicalNode {
+        <<abstract>>
+    }
+    
     class PhysicalOperator {
         <<abstract>>
         +Open() void
@@ -303,6 +381,27 @@ classDiagram
     QueryOptimizer ..> LogicalPlan : Uses
     QueryExecutor ..> PhysicalPlan : Uses
     
+    QueryOptimizer *-- IOptimizationStrategy
+    IOptimizationStrategy <|.. CostBasedOptimizationStrategy
+    IOptimizationStrategy <|.. RuleBasedOptimizationStrategy
+
+    AST *-- Expression
+    Expression <|-- SelectExpression
+    Expression <|-- WhereExpression
+    Expression <|-- BinaryExpression
+    Expression <|-- ColumnExpression
+    Expression <|-- LiteralExpression
+    Expression <|-- TableExpression
+
+    Expression ..> InterpretationContext : Interpret
+    Expression ..> IExpressionVisitor : Accept
+    
+    IExpressionVisitor <|.. LogicalPlanVisitor
+    IExpressionVisitor <|.. SemanticAnalysVisitor
+
+    PhysicalOperatorFactory --> PhysicalOperator : Creates
+    
+    LogicalPlan *-- LogicalNode
     PhysicalPlan *-- PhysicalOperator
     CompositePhysicalOperator --|> PhysicalOperator
     CompositePhysicalOperator *-- PhysicalOperator : Children
@@ -403,7 +502,7 @@ classDiagram
         class Database {
             +int Id
             +string Name
-            -object _storage
+            -IStorageEngine _storage
             -object _schemaManager
             -bool _isOpen
             -IDatabaseState _state
@@ -671,11 +770,10 @@ classDiagram
     namespace TableComponents {
         class Column {
             +string Name
-            +Type DataType
+            +IDataType DataType
             +bool IsNullable
             +Create(string name, string type, bool isNullable) Column
             +ValidateValue(object? value) bool
-            -ResolveDataType(string type) Type
         }
         class Row {
             +int Id
@@ -752,40 +850,38 @@ classDiagram
             +Disable() void
             #Check(ConstraintContext context) bool
         }
-        class CheckConstraint {
-            +Func~Row, bool~ Predicate
-            #Check(ConstraintContext context) bool
+    }
+
+    namespace Flyweight {
+        class DataTypeFactory {
+            -Dictionary~string, IDataType~ _cache
+            +GetDataType(string name) IDataType
         }
-        class UniqueConstraint {
-            +IReadOnlyList~string~ ColumnNames
-            #Check(ConstraintContext context) bool
-        }
-        class PrimaryKeyConstraint {
-            +IReadOnlyList~string~ ColumnNames
-            #Check(ConstraintContext context) bool
-        }
-        class ForeignKeyConstraint {
-            +string ChildColumnName
-            +string ReferencedTableName
-            +string ReferencedColumnName
-            +IReferentialAction OnDelete
-            +IReferentialAction OnUpdate
-            +bool IsNullable
-            +OnParentRowDeleted(Row parentRow, Table childTable) void
-            #Check(ConstraintContext context) bool
-        }
-        class IReferentialAction {
+        class IDataType {
             <<interface>>
-            +Execute(Row parentRow, Table childTable) void
+            +string Name
+            +int Size
+            +Validate(Column context, object value) void
         }
-        class CascadeAction {
-            +Execute(Row parentRow, Table childTable) void
+        class IntegerType {
+            +string Name
+            +int Size
+            +Validate(Column context, object value) void
         }
-        class RestrictAction {
-            +Execute(Row parentRow, Table childTable) void
+        class VarcharType {
+            +string Name
+            +int Size
+            +Validate(Column context, object value) void
         }
-        class SetNullAction {
-            +Execute(Row parentRow, Table childTable) void
+        class DateTimeType {
+            +string Name
+            +int Size
+            +Validate(Column context, object value) void
+        }
+        class BooleanType {
+            +string Name
+            +int Size
+            +Validate(Column context, object value) void
         }
     }
 

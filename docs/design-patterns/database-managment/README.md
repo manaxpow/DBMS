@@ -12,11 +12,12 @@ You could model it like this:
 |  🔴 High  | `[x]`  | **Singleton**       | DatabaseManager            | Ensures a single instance of DatabaseManager centrally manages all database objects.          |
 |  🔴 High  | `[x]`  | **Command**         | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.     |
 |  🔴 High  | `[x]`  | **Observer**        | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events. |
+|  🔴 High  | `[ ]`  | **Bridge**          | Database ↔ Storage Engine  | Separates Database abstraction from different storage implementations.                        |
+|  🔴 High  | `[ ]`  | **Memento**         | Database Checkpoint / Configuration Snapshot | Captures and restores database checkpoints or configuration snapshots.                      |
 | 🟡 Medium | `[x]`  | **State**           | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.       |
 | 🟡 Medium | `[x]`  | **Template Method** | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.      |
 |  🟢 Low   | `[ ]`  | **Builder**         | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.           |
 |  🟢 Low   | `[ ]`  | **Proxy**           | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.           |
-|  🟢 Low   | `[ ]`  | **Bridge**          | Database Storage           | Separates Database abstraction from different storage implementations.                        |
 |  🟢 Low   | `[ ]`  | **Mediator**        | Subsystem Coordination     | Coordinates Storage, Catalog, Transaction, Recovery, Security, and Monitoring modules.        |
 |  🟢 Low   | `[ ]`  | **Decorator**       | Database Service Extension | Adds metrics, tracing, caching, or auditing without changing the core service.                |
 
@@ -908,4 +909,162 @@ sequenceDiagram
 
     DM-->>Client: _instance
     Client->>DM: GetDatabase("MyDb")
+```
+
+### 3.7. Bridge (Database ↔ Storage Engine)
+
+The **Bridge** pattern is used to decouple the database's logical abstraction from its physical storage implementation. This allows the DBMS to support various storage engines (e.g., In-Memory, Disk-based, or Cloud-native) dynamically without altering the core database logic or requiring a massive class hierarchy for every combination of database feature and storage type.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Abstraction {
+        -Implementor imp
+        +Function()
+    }
+    class RefinedAbstraction {
+        +Function()
+    }
+    class Implementor {
+        <<interface>>
+        +Implementation()
+    }
+    class ConcreteImplementorA {
+        +Implementation()
+    }
+    class ConcreteImplementorB {
+        +Implementation()
+    }
+
+    Abstraction o--> Implementor
+    Abstraction <|-- RefinedAbstraction
+    Implementor <|.. ConcreteImplementorA
+    Implementor <|.. ConcreteImplementorB
+```
+
+#### Example code
+
+```csharp
+// Implementor
+public interface IStorageEngine
+{
+    void ReadData();
+    void WriteData();
+}
+
+// Concrete Implementors
+public class InMemoryStorageEngine : IStorageEngine
+{
+    public void ReadData() { Console.WriteLine("Reading from memory"); }
+    public void WriteData() { Console.WriteLine("Writing to memory"); }
+}
+
+public class DiskStorageEngine : IStorageEngine
+{
+    public void ReadData() { Console.WriteLine("Reading from disk"); }
+    public void WriteData() { Console.WriteLine("Writing to disk"); }
+}
+
+// Abstraction
+public abstract class Database
+{
+    protected IStorageEngine _storageEngine;
+
+    public Database(IStorageEngine storageEngine)
+    {
+        _storageEngine = storageEngine;
+    }
+
+    public virtual void Connect() { Console.WriteLine("Connecting to database"); }
+    public abstract void ExecuteQuery();
+}
+
+// Refined Abstraction
+public class RelationalDatabase : Database
+{
+    public RelationalDatabase(IStorageEngine storageEngine) : base(storageEngine) { }
+
+    public override void ExecuteQuery()
+    {
+        Console.WriteLine("Executing SQL Query...");
+        _storageEngine.ReadData();
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    class Database {
+        <<abstract>>
+        #IStorageEngine _storageEngine
+        +Database(IStorageEngine engine)
+        +Initialize()
+        +ReadPage(int pageId) Page
+        +WritePage(Page page)
+    }
+
+    class RelationalDatabase {
+        +Initialize()
+        +ReadPage(int pageId) Page
+        +WritePage(Page page)
+    }
+
+    class DocumentDatabase {
+        +Initialize()
+        +ReadPage(int pageId) Page
+        +WritePage(Page page)
+    }
+
+    class IStorageEngine {
+        <<interface>>
+        +Mount()
+        +FetchPage(int pageId) Page
+        +FlushPage(Page page)
+    }
+
+    class InMemoryStorageEngine {
+        +Mount()
+        +FetchPage(int pageId) Page
+        +FlushPage(Page page)
+    }
+
+    class DiskStorageEngine {
+        +Mount()
+        +FetchPage(int pageId) Page
+        +FlushPage(Page page)
+    }
+
+    Database o--> IStorageEngine : uses
+    Database <|-- RelationalDatabase
+    Database <|-- DocumentDatabase
+
+    IStorageEngine <|.. InMemoryStorageEngine
+    IStorageEngine <|.. DiskStorageEngine
+```
+
+#### Sequence Diagram: Storage Execution Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant DB as RelationalDatabase (Abstraction)
+    participant Engine as DiskStorageEngine (Implementor)
+
+    Client->>DB: ReadPage(105)
+    activate DB
+
+    Note right of DB: Delegates to configured StorageEngine
+    DB->>Engine: FetchPage(105)
+    activate Engine
+
+    Engine->>Engine: Read from disk
+    Engine-->>DB: Page data
+    deactivate Engine
+
+    DB-->>Client: Page
+    deactivate DB
 ```

@@ -1,11 +1,10 @@
 using System;
-using DBMS.Exceptions;
 
-public class Database
+public abstract class Database
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    private object _storage;
+    protected readonly IStorageEngine _storage;
     private object _schemaManager;
     private bool _isOpen;
     private IDatabaseState _state;
@@ -19,43 +18,23 @@ public class Database
     {
         Name = name;
         _isOpen = false;
-        throw new NotImplementedException();
+        _state = state;
     }
 
-    public void ChangeState(IDatabaseState state)
+    public Database(IStorageEngine storage)
     {
-        throw new NotImplementedException();
-    }
-    public void Open()
-    {
-        throw new NotImplementedException();
-    }
-    public void SetReadOnly()
-    {
-        throw new NotImplementedException();
-    }
-    public void Recovery()
-    {
-        throw new NotImplementedException();
-    }
-    public void Drop()
-    {
-        throw new NotImplementedException();
+        _storage = storage;
     }
 
-    public void Close()
+    public abstract void Initialize();
+
+    public virtual Page ReadPage(int pageId)
     {
-        throw new FlushFailureException();
+        return _storage.FetchPage(pageId);
     }
 
-    public void AddSchema(object schema)
+    public virtual void WritePage(Page page)
     {
-        throw new SchemaAlreadyExistsException();
-    }
-
-    public void DropSchema(string name)
-    {
-        throw new SchemaNotFoundException();
+        _storage.FlushPage(page);
     }
 }
-

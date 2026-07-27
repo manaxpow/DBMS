@@ -5,11 +5,11 @@ using NSubstitute.ExceptionExtensions;
 
 public class DatabaseTests
 {
-    private Database _database;
+    private RelationalDatabase _database;
 
     public DatabaseTests()
     {
-        _database = new Database();
+        _database = new RelationalDatabase();
     }
 
     [Trait("Category", "Important")]
@@ -162,6 +162,24 @@ public class DatabaseTests
     public void AlterSchema_WhenSchemaDoesNotExist_ShouldThrow()
     {
         throw new NotImplementedException();
+    }
+
+    [Fact]
+    public void ReadPage_ShouldDelegateToStorageEngine()
+    {
+        // Arrange
+        var storageEngine = Substitute.For<IStorageEngine>();
+        var expectedPage = new Page(new PageId(105), new byte[4096]);
+        storageEngine.FetchPage(105).Returns(expectedPage);
+        
+        var database = new RelationalDatabase(storageEngine);
+
+        // Act
+        var result = database.ReadPage(105);
+
+        // Assert
+        result.Should().Be(expectedPage);
+        storageEngine.Received(1).FetchPage(105);
     }
 }
 

@@ -33,6 +33,7 @@ flowchart LR
     Mgmt_Cmd["🔴 Command ☑<br/>Database Operations"] --> DBMgmt
     Mgmt_O["🔴 Observer ☑<br/>Database Events"] --> DBMgmt
     Mgmt_S["🔴 State ☑<br/>Database Lifecycle"] --> DBMgmt
+    Mgmt_Br["🔴 Bridge ☐<br/>Database ↔ Storage Engine"] --> DBMgmt
 
     Mgmt_FM["🟡 Factory Method ☑<br/>Database Creation"] --> DBMgmt
     Mgmt_TM["🟡 Template Method ☑<br/>Lifecycle Workflow"] --> DBMgmt
@@ -80,6 +81,7 @@ flowchart LR
     RM_TM["🔴 Template Method ☐<br/>Recovery Workflow"] --> RM["Recovery Management"]
     RM_Cmd["🔴 Command ☐<br/>WAL Log Records"] --> RM
     RM_Str["🔴 Strategy ☐<br/>Recovery / Backup Strategy"] --> RM
+    RM_Mem["🔴 Memento ☐<br/>Database Checkpoint / Configuration Snapshot"] --> RM
 
     RM_O["🟡 Observer ☐<br/>Recovery Events"] --> RM
     RM_B["🟡 Builder ☐<br/>Backup Construction"] --> RM
@@ -118,6 +120,8 @@ flowchart LR
     QP --> QP_Vis["🔴 Visitor ☑<br/>AST Processing"]
     QP --> QP_Str["🔴 Strategy ☑<br/>Query Optimization"]
     QP --> QP_FM["🔴 Factory Method ☑<br/>Physical Operator Creation"]
+    QP --> QP_AF["🔴 Abstract Factory ☐<br/>Query Processor Factory"]
+    QP --> QP_Px["🔴 Proxy ☐<br/>Lazy Physical Operator / Remote Table Proxy"]
     QP --> QP_Comp["🟡 Composite ☑<br/>Query Plan Tree"]
     QP --> QP_Iter["🟡 Iterator ☑<br/>Query Result Execution"]
 
@@ -135,6 +139,7 @@ flowchart LR
     CM --> CM_R["🔴 Repository ☐<br/>Catalog Object Registry"]
     CM --> CM_O["🔴 Observer ☐<br/>Metadata Synchronization"]
     CM --> CM_Str["🔴 Strategy ☐<br/>Selectivity Estimation"]
+    CM --> CM_FW["🔴 Flyweight ☑<br/>Shared DataType / Metadata"]
 
     CM --> CM_V["🟡 Visitor ☐<br/>Metadata Operations"]
     CM --> CM_FM["🟡 Factory Method ☐<br/>Catalog Entry Creation"]
@@ -214,7 +219,7 @@ flowchart LR
 
 
 %% HIGH PRIORITY
-    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_Sing,Mgmt_O,Mgmt_S,Mgmt_Cmd,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,QP_Int,QP_Vis,QP_Str,QP_FM,CM_R,CM_O,CM_Str,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
+    class Obj_TM,Obj_FM,Obj_S,Obj_C,Obj_Cmd,Mgmt_F,Mgmt_Sing,Mgmt_O,Mgmt_S,Mgmt_Cmd,Mgmt_Br,SE_Str,SE_F,SE_A,TM_F,TM_Str,TM_S,TM_CoR,RM_TM,RM_Cmd,RM_Str,RM_Mem,QP_Int,QP_Vis,QP_Str,QP_FM,QP_AF,QP_Px,CM_R,CM_O,CM_Str,CM_FW,SM_CoR,SM_Comp,SM_P,Rep_Str,Rep_O,Rep_S,Mon_O,Mon_Str high;
 
 
     %% MEDIUM PRIORITY
@@ -242,6 +247,7 @@ flowchart LR
     V["Visitor"]
     B["Builder"]
     P["Prototype"]
+    FW["Flyweight"]
 
     %% Template Method Files & Methods
     TM --> TM_CT["ConstraintTests.cs"]
@@ -361,17 +367,23 @@ flowchart LR
     P_PT --> P_PT_3["Clone_View_ShouldReturnDeepCopy"]
     P_PT --> P_PT_4["Clone_StoredProcedure_ShouldReturnDeepCopy"]
 
+    %% Flyweight Files & Methods
+    FW --> FW_DT["DataTypeFactoryTests.cs"]
+    FW_DT --> FW_DT_1["GetDataType_WhenValidType_ShouldReturnSharedInstance"]
+    FW_DT --> FW_DT_2["GetDataType_WhenInvalidType_ShouldThrow"]
+    FW_DT --> FW_DT_3["Validate_ShouldDelegateToConcreteFlyweight"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class TM,FM,S,C,Cmd,I,V,B,P patternNode
-    class TM_CT,TM_UC,TM_PC,TM_CC,TM_FC,FM_CCT,FM_CCR,S_RAT,C_ST,Cmd_CTC,Cmd_DTC,Cmd_ATC,Cmd_DDL,I_ST,V_BV,V_EV,V_VV,B_TB,P_PT classNode
+    class TM,FM,S,C,Cmd,I,V,B,P,FW patternNode
+    class TM_CT,TM_UC,TM_PC,TM_CC,TM_FC,FM_CCT,FM_CCR,S_RAT,C_ST,Cmd_CTC,Cmd_DTC,Cmd_ATC,Cmd_DDL,I_ST,V_BV,V_EV,V_VV,B_TB,P_PT,FW_DT classNode
     class TM_CT_1,TM_CT_2,TM_CT_3,TM_CT_4,TM_CT_5,TM_CT_6,TM_UC_1,TM_UC_2,TM_UC_3,TM_UC_4,TM_PC_1,TM_PC_2,TM_PC_3,TM_PC_4,TM_CC_1,TM_CC_2,TM_CC_3,TM_FC_1,TM_FC_2,TM_FC_3,TM_FC_4,TM_FC_5 completedTest
     class FM_CCT_1,FM_CCR_1,FM_CCR_2,S_RAT_1,S_RAT_2,S_RAT_3 completedTest
     class C_ST_1,C_ST_2,C_ST_3,C_ST_4,C_ST_5,C_ST_6,C_ST_7,C_ST_8,C_ST_9,C_ST_10,C_ST_11,C_ST_12,C_ST_13,C_ST_14,C_ST_15 completedTest
     class Cmd_CTC_1,Cmd_CTC_2,Cmd_DTC_1,Cmd_ATC_1,Cmd_DDL_1,I_ST_1 completedTest
-    class V_BV_1,V_BV_2,V_BV_3,V_BV_4,V_EV_1,V_EV_2,V_EV_3,V_EV_4,V_VV_1,V_VV_2,V_VV_3,V_VV_4,B_TB_1,B_TB_2,B_TB_3,B_TB_4,B_TB_5,B_TB_6,P_PT_1,P_PT_2,P_PT_3,P_PT_4 completedTest
+    class V_BV_1,V_BV_2,V_BV_3,V_BV_4,V_EV_1,V_EV_2,V_EV_3,V_EV_4,V_VV_1,V_VV_2,V_VV_3,V_VV_4,B_TB_1,B_TB_2,B_TB_3,B_TB_4,B_TB_5,B_TB_6,P_PT_1,P_PT_2,P_PT_3,P_PT_4,FW_DT_1,FW_DT_2,FW_DT_3 completedTest
 ```
 
 ## 2. Database Management
@@ -386,6 +398,7 @@ flowchart LR
     Observer["Observer"]
     State["State"]
     Command["Command"]
+    Bridge["Bridge"]
 
     %% Singleton Files & Methods
     Singleton --> Sing_DMT["DatabaseManagerTests.cs"]
@@ -472,18 +485,31 @@ flowchart LR
     TM_IBT --> TM_IBT_1["ExtractData_ShouldExtractOnlyChangedData"]
     TM_IBT --> TM_IBT_2["FinalizeBackup_ShouldSetIncrementalBackupMetadata"]
 
+    %% Bridge Files & Methods
+    Bridge --> Br_DBT["DatabaseTests.cs (Bridge)"]
+    Br_DBT --> Br_DBT_1["ReadPage_ShouldDelegateToStorageEngine"]
+
+    Bridge --> Br_ISET["InMemoryStorageEngineTests.cs"]
+    Br_ISET --> Br_ISET_1["FetchPage_ShouldReadFromMemory"]
+    Br_ISET --> Br_ISET_2["FlushPage_ShouldWriteToMemory"]
+
+    Bridge --> Br_DSET["DiskStorageEngineTests.cs"]
+    Br_DSET --> Br_DSET_1["FetchPage_ShouldReadFromDisk"]
+    Br_DSET --> Br_DSET_2["FlushPage_ShouldWriteToDisk"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class Facade,Singleton,Observer,State,Command,TemplateMethod patternNode
-    class Sing_DMT,Fac_DST,Obs_DMT,Obs_DT,St_DST,St_DT,Cmd_CDC,Cmd_DDC,Cmd_RDC,Cmd_DCE,TM_DBT,TM_FBT,TM_IBT classNode
+    class Facade,Singleton,Observer,State,Command,TemplateMethod,Bridge patternNode
+    class Sing_DMT,Fac_DST,Obs_DMT,Obs_DT,St_DST,St_DT,Cmd_CDC,Cmd_DDC,Cmd_RDC,Cmd_DCE,TM_DBT,TM_FBT,TM_IBT,Br_DBT,Br_ISET,Br_DSET classNode
     class Sing_DMT_1,Fac_DST_1,Fac_DST_2,Fac_DST_3,Fac_DST_4,Fac_DST_5,Fac_DST_6,Fac_DST_7,Fac_DST_8 completedTest
     class Obs_DMT_1,Obs_DMT_2,Obs_DMT_3,Obs_DMT_4,Obs_DMT_5,Obs_DMT_6,Obs_DMT_7,Obs_DMT_8 completedTest
     class Obs_DT_1,Obs_DT_2,Obs_DT_3,Obs_DT_4,Obs_DT_5,Obs_DT_6,Obs_DT_7 completedTest
     class St_DST_1,St_DST_2,St_DST_3,St_DST_4,St_DST_5,St_DT_1,St_DT_2,St_DT_3,St_DT_4,St_DT_5,St_DT_6 completedTest
     class Cmd_CDC_1,Cmd_CDC_2,Cmd_DDC_1,Cmd_DDC_2,Cmd_RDC_1,Cmd_RDC_2,Cmd_RDC_3,Cmd_DCE_1 completedTest
     class TM_DBT_1,TM_FBT_1,TM_FBT_2,TM_IBT_1,TM_IBT_2 completedTest
+    class Br_DBT_1,Br_ISET_1,Br_ISET_2,Br_DSET_1,Br_DSET_2 completedTest
 ```
 
 ## 3. Query Processor

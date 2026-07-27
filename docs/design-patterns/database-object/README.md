@@ -11,7 +11,7 @@ This document tracks the design patterns used across different modules in the DB
 |  🔴 High  | `[x]`  | **Strategy**        | Referential Action      | Selects Cascade, Restrict, SetNull, or SetDefault behavior when deleting or updating referenced rows. |
 |  🔴 High  | `[x]`  | **Composite**       | Schema Objects          | Schema contains Tables, Views, and Stored Procedures and manages them uniformly as `ISchemaObject`.   |
 |  🔴 High  | `[x]`  | **Command**         | DDL Command             | `CreateTable`, `DropTable`, and `AlterTable` operations are encapsulated into command objects.        |
-|  🔴 High  | `[ ]`  | **Flyweight**       | Shared DataType / Metadata | Shares DataType and metadata instances to reduce memory footprint.                                |
+|  🔴 High  | `[x]`  | **Flyweight**       | Shared DataType / Metadata | Shares immutable data type and metadata objects across schema objects to reduce memory usage.         |
 | 🟡 Medium | `[x]`  | **Iterator**        | Schema Object Traversal | Provides sequential access to schema objects without exposing internal collections.                   |
 | 🟡 Medium | `[x]`  | **Visitor**         | Schema Operations       | Backup, Export, and Validation can operate on all schema object types.                                |
 | 🟡 Medium | `[x]`  | **Builder**         | Table Definition        | Builds a Table step by step from columns, constraints, indexes, and partitions.                       |
@@ -1539,4 +1539,254 @@ sequenceDiagram
 
     OriginalTable-->>Client: ClonedTable
     deactivate OriginalTable
+```
+
+### 2.10. Flyweight (Shared DataType / Metadata)
+
+The **Flyweight** pattern is used to minimize memory usage by sharing as much data as possible. In a database schema, many columns share the exact same data types (e.g., `INT`, `VARCHAR(255)`, `DATETIME`) and identical metadata. Instead of creating new instances of these objects for every column, a `DataTypeFactory` manages a pool of immutable, shared data type instances.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class FlyweightFactory {
+        -Dictionary flyweights
+        +GetFlyweight(key) Flyweight
+    }
+    class Flyweight {
+        <<interface>>
+        +Operation(context: Context)
+    }
+    class ConcreteFlyweight {
+        -intrinsicState
+        +Operation(context: Context)
+    }
+    class Context {
+        -extrinsicState
+        -flyweight: Flyweight
+        +Operation()
+    }
+
+    FlyweightFactory o--> Flyweight
+    Flyweight <|.. ConcreteFlyweight
+    Context --> Flyweight
+```
+
+#### Example code
+
+```csharp
+// Flyweight Interface
+public interface IDataType
+{
+    string Name { get; }
+    int Size { get; }
+    void Validate(Column context, object? value);
+}
+
+// Concrete Flyweight (Shared, Immutable)
+public class IntegerDataType : IDataType
+{
+    public string Name => "INT";
+    public int Size => 4;
+
+    public void Validate(Column context, object? value)
+    {
+        if (value == null)
+        {
+            if (!context.IsNullable)
+                throw new InvalidOperationException($"{context.Name} cannot be null.");
+            return;
+        }
+
+        if (value is not int)
+            throw new InvalidOperationException($"{context.Name} must contain an integer.");
+    }
+}
+
+public class VarcharDataType : IDataType
+{
+    public string Name => "VARCHAR";
+    public int Size => 255;
+
+    public void Validate(Column context, object? value)
+    {
+        if (value == null)
+        {
+            if (!context.IsNullable)
+                throw new InvalidOperationException($"{context.Name} cannot be null.");
+            return;
+        }
+
+        if (value is not string str)
+            throw new InvalidOperationException($"{context.Name} must be a string.");
+            
+        if (str.Length > Size)
+            throw new InvalidOperationException($"{context.Name} exceeds maximum length of {Size}.");
+    }
+}
+
+public class DateTimeDataType : IDataType
+{
+    public string Name => "DATETIME";
+    public int Size => 8;
+
+    public void Validate(Column context, object? value)
+    {
+        if (value == null)
+        {
+            if (!context.IsNullable)
+                throw new InvalidOperationException($"{context.Name} cannot be null.");
+            return;
+        }
+
+        if (value is not DateTime)
+            throw new InvalidOperationException($"{context.Name} must be a valid DateTime.");
+    }
+}
+
+public class BooleanDataType : IDataType
+{
+    public string Name => "BOOLEAN";
+    public int Size => 1;
+
+    public void Validate(Column context, object? value)
+    {
+        if (value == null)
+        {
+            if (!context.IsNullable)
+                throw new InvalidOperationException($"{context.Name} cannot be null.");
+            return;
+        }
+
+        if (value is not bool)
+            throw new InvalidOperationException($"{context.Name} must be a boolean.");
+    }
+}
+
+// Context (Extrinsic State)
+public class Column
+{
+    public string Name { get; }
+    public bool IsNullable { get; }
+    private readonly IDataType _dataType;
+
+    public Column(string name, IDataType dataType, bool isNullable)
+    {
+        Name = name;
+        _dataType = dataType;
+        IsNullable = isNullable;
+    }
+
+    public void Validate(object? value)
+    {
+        // Passes itself (the Context) and the value to the Flyweight
+        _dataType.Validate(this, value);
+    }
+}
+
+// Flyweight Factory
+public class DataTypeFactory
+{
+    private Dictionary<string, IDataType> _cache = new();
+
+    public IDataType GetDataType(string name)
+    {
+        name = name.ToUpper();
+        if (!_cache.TryGetValue(name, out var type))
+        {
+            type = name switch
+            {
+                "INT" => new IntegerDataType(),
+                "VARCHAR" => new VarcharDataType(),
+                "DATETIME" => new DateTimeDataType(),
+                "BOOLEAN" => new BooleanDataType(),
+                _ => throw new NotSupportedException($"Data type {name} not supported.")
+            };
+            _cache[name] = type;
+        }
+        return type;
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    class DataTypeFactory {
+        -Dictionary~string, IDataType~ _cache
+        +GetDataType(string typeName) IDataType
+    }
+
+    class IDataType {
+        <<interface>>
+        +Name : string
+        +Size : int
+        +Validate(context: Column, value: object)
+    }
+
+    class IntegerType {
+        +Name : string
+        +Size : int
+        +Validate(context: Column, value: object)
+    }
+
+    class VarcharType {
+        +Name : string
+        +Size : int
+        +MaxLength : int
+        +Validate(context: Column, value: object)
+    }
+
+    class DateTimeType {
+        +Name : string
+        +Size : int
+        +Validate(context: Column, value: object)
+    }
+
+    class BooleanType {
+        +Name : string
+        +Size : int
+        +Validate(context: Column, value: object)
+    }
+
+    class Column {
+        +Name : string
+        +IsNullable : bool
+        -DataType : IDataType
+        +Column(string name, IDataType type, bool isNullable)
+        +Validate(value: object)
+    }
+
+    DataTypeFactory o--> IDataType : Caches
+    IDataType <|.. IntegerType
+    IDataType <|.. VarcharType
+    IDataType <|.. DateTimeType
+    IDataType <|.. BooleanType
+    Column --> IDataType : Delegates Validate(this)
+```
+
+#### Sequence Diagram: Validating via Context
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Col as Column (Context)
+    participant IntType as IntegerType (Flyweight)
+
+    Client->>Col: Validate(value)
+    activate Col
+
+    Col->>IntType: Validate(this, value)
+    activate IntType
+
+    IntType->>Col: get_IsNullable()
+    Col-->>IntType: return IsNullable
+    
+    IntType-->>Col: validation complete (or throws exception)
+    deactivate IntType
+
+    Col-->>Client: returns
+    deactivate Col
 ```

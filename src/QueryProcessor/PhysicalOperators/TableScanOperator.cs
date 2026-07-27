@@ -1,11 +1,11 @@
-using System.Collections.Generic;
-
-public class TableScanOperator : PhysicalOperator {
+public class TableScanOperator : PhysicalOperator
+{
     public string TableName { get; }
     private IEnumerator<Row> _enumerator;
     private IEnumerable<Row> _tableRows;
 
-    public TableScanOperator(string tableName, IEnumerable<Row> tableRows) { 
+    public TableScanOperator(string tableName, IEnumerable<Row> tableRows)
+    {
         throw new NotImplementedException();
     }
 

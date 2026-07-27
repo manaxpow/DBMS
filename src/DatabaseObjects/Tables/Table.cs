@@ -1,4 +1,4 @@
-public class Table : ISchemaObject
+public class Table : ISchemaObject, ICatalogObject
 {
     public int Id { get; set; }
 

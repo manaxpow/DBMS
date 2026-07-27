@@ -1,5 +1,3 @@
-using DBMS.Exceptions;
-
 public class CatalogManager
 {
     private Dictionary<string, ICatalogObject> _store;

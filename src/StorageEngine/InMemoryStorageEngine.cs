@@ -6,17 +6,13 @@ public class InMemoryStorageEngine : IStorageEngine
 
     public void Mount() { }
 
-    public Page FetchPage(int pageId) 
-    { 
-        if (_pages.TryGetValue(pageId, out var page))
-        {
-            return page;
-        }
-        return new Page(new PageId(pageId), new byte[4096]); 
+    public Page FetchPage(int pageId)
+    {
+        throw new NotImplementedException();
     }
 
-    public void FlushPage(Page page) 
-    { 
-        _pages[page.PageId.Value] = page;
+    public void FlushPage(Page page)
+    {
+        throw new NotImplementedException();
     }
 }

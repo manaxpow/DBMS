@@ -8,21 +8,21 @@ This document tracks the design patterns used across the Query Processor module 
 |  🔴 High  | `[x]`  | **Visitor**                 | AST Processing              | Allows validation, semantic analysis, logical-plan generation, or expression evaluation to operate on different AST node types without putting every operation inside the AST classes.              |
 |  🔴 High  | `[x]`  | **Strategy**                | Query Optimization          | Allows QueryOptimizer to switch between optimization algorithms such as predicate pushdown, join reordering, index selection, or cost-based optimization.                                           |
 |  🔴 High  | `[x]`  | **Factory Method**          | Physical Operator Creation  | Creates physical operators such as TableScan, IndexScan, HashJoin, NestedLoopJoin, and Sort from logical-plan nodes selected by the optimizer.                                                      |
-|  🔴 High  | `[ ]`  | **Abstract Factory**        | Query Processor Factory     | Creates related families of objects (Parser, Optimizer, Executor).                                                                                                                                  |
-|  🔴 High  | `[ ]`  | **Proxy**                   | Lazy Physical Operator / Remote Table Proxy | Defers initialization of physical operators or handles remote table access.                                                                                                                         |
+|  🔴 High  | `[ ]`  | **Abstract Factory**        | Query Processor Factory     | Creates related families of objects (Parser, Optimizer, Executor).                                                                                  
+|  🔴 High  | `[x]`  | **Proxy**                   | Lazy Physical Operator      | Defers creation or initialization of physical operators until execution is required.
 | 🟡 Medium | `[x]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
 | 🟡 Medium | `[x]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
 | 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
-|  🟢 Low   | `[ ]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
+|  🟢 Low   | `[x]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
 |  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.             |
 |  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                               |
 |  🟢 Low   | `[ ]`  | **Decorator**               | Query Execution Logging     | Wraps IQueryExecutor to intercept execution, logging the SQL query and execution time without modifying the underlying executor.                                                                    |
 
 ---
 
-## 2. Pattern Implementation Details
+# 2. Pattern Implementation Details
 
-### 2.1. Interpreter (SQL / AST Evaluation)
+## 2.1. Interpreter (SQL / AST Evaluation)
 
 The **Interpreter** pattern is used in the `Expression` class hierarchy to evaluate parsed SQL structures.
 
@@ -1237,11 +1237,11 @@ sequenceDiagram
 ```
 
 
-### 2.7. Chain of Responsibility (Optimization Pipeline)
+## 2.7. Chain of Responsibility (Optimization Pipeline)
 
 The **Chain of Responsibility** pattern is used to construct a flexible optimization pipeline for query plans. Each optimization rule (e.g., constant folding, predicate pushdown) acts as a handler in the chain. The rule applies its specific transformation to the `LogicalPlan` and then passes the transformed plan to the next rule in the chain.
 
-#### Structure Diagram
+### Structure Diagram
 
 ```mermaid
 classDiagram
@@ -1281,7 +1281,7 @@ classDiagram
     QueryOptimizer --> IOptimizationRule : Uses
 ```
 
-#### Sequence Diagram: Optimization Pipeline Execution
+####Sequence Diagram: Optimization Pipeline Execution
 
 ```mermaid
 sequenceDiagram
@@ -1316,7 +1316,7 @@ sequenceDiagram
     deactivate ConstantFold
 ```
 
-#### Example Code
+### Example Code
 
 ```csharp
 public interface IOptimizationRule
@@ -1384,6 +1384,198 @@ public class QueryOptimizer
         
         // ... Convert optimizedLogicalPlan to PhysicalPlan ...
         return new PhysicalPlan();
+    }
+}
+```
+
+## 2.8. Proxy (Lazy Physical Operator)
+
+The **Proxy** pattern is used to defer the creation or initialization of a heavy physical operator until it is actually needed (e.g., when `Open()` is called during query execution). This is particularly useful for optimizing resource usage, such as deferring disk I/O, network connections for remote tables, or memory allocation until the execution phase.
+
+- Define a common `PhysicalOperator` abstract class or interface for both the real operator and the proxy.
+- Implement a `TableScanOperator` (Real Subject) that performs heavy initialization (e.g., reading from disk or network).
+- Implement a `LazyTableScanOperatorProxy` (Proxy) that holds a reference to the real subject and delays its instantiation until `Open()` is explicitly invoked by the query executor.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+
+    class Client
+    
+    class ServiceInterface {
+        <<interface>>
+        +operation()
+    }
+    
+    class Service {
+        +operation()
+    }
+    
+    class Proxy {
+        -Service realService
+        +Proxy(s: Service)
+        +checkAccess()
+        +operation()
+    }
+    
+    Client --> ServiceInterface
+    ServiceInterface <|.. Service
+    ServiceInterface <|.. Proxy
+    Proxy o--> Service
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction TB
+    class PhysicalOperator {
+        <<abstract>>
+        +Open() void
+        +Next() bool
+        +GetCurrent() Row
+        +Close() void
+    }
+
+    class TableScanOperator {
+        -Table _table
+        +Open() void
+        +Next() bool
+        +GetCurrent() Row
+        +Close() void
+    }
+
+    class LazyTableScanOperatorProxy {
+        -TableScanOperator _realOperator
+        -string _tableName
+        -CatalogManager _catalog
+        +Open() void
+        +Next() bool
+        +GetCurrent() Row
+        +Close() void
+        -InitializeRealOperator() void
+    }
+
+    PhysicalOperator <|-- TableScanOperator
+    PhysicalOperator <|-- LazyTableScanOperatorProxy
+    LazyTableScanOperatorProxy *-- TableScanOperator : controls access to
+```
+
+#### Sequence Diagram: Lazy Initialization
+
+```mermaid
+sequenceDiagram
+    participant Executor as QueryExecutor
+    participant Proxy as LazyTableScanOperatorProxy
+    participant Catalog as CatalogManager
+    participant RealOp as TableScanOperator
+
+    Executor->>Proxy: Open()
+    activate Proxy
+    Proxy->>Proxy: InitializeRealOperator()
+    Proxy->>Catalog: GetTable(tableName)
+    Catalog-->>Proxy: Table
+    Proxy->>RealOp: new TableScanOperator(Table)
+    Proxy->>RealOp: Open()
+    RealOp-->>Proxy: success
+    Proxy-->>Executor: success
+    deactivate Proxy
+
+    Executor->>Proxy: Next()
+    activate Proxy
+    Proxy->>RealOp: Next()
+    RealOp-->>Proxy: true
+    Proxy-->>Executor: true
+    deactivate Proxy
+```
+
+#### Example code
+
+```csharp
+public abstract class PhysicalOperator
+{
+    public abstract void Open();
+    public abstract bool Next();
+    public abstract Row GetCurrent();
+    public abstract void Close();
+}
+
+// Real Subject
+public class TableScanOperator : PhysicalOperator
+{
+    private readonly Table _table;
+    private IEnumerator<Row>? _enumerator;
+
+    public TableScanOperator(Table table)
+    {
+        _table = table;
+        // Heavy initialization logic might occur here
+    }
+
+    public override void Open()
+    {
+        _enumerator = _table.Rows.GetEnumerator();
+    }
+
+    public override bool Next() => _enumerator?.MoveNext() ?? false;
+    
+    public override Row GetCurrent() => _enumerator?.Current ?? throw new InvalidOperationException();
+    
+    public override void Close()
+    {
+        _enumerator?.Dispose();
+    }
+}
+
+// Proxy
+public class LazyTableScanOperatorProxy : PhysicalOperator
+{
+    private readonly string _tableName;
+    private readonly CatalogManager _catalog;
+    private TableScanOperator? _realOperator;
+
+    public LazyTableScanOperatorProxy(string tableName, CatalogManager catalog)
+    {
+        _tableName = tableName;
+        _catalog = catalog;
+        // The real operator is NOT created yet.
+    }
+
+    private void InitializeRealOperator()
+    {
+        if (_realOperator == null)
+        {
+            var table = _catalog.Find<Table>(_tableName) 
+                ?? throw new InvalidOperationException($"Table {_tableName} not found.");
+            _realOperator = new TableScanOperator(table);
+        }
+    }
+
+    public override void Open()
+    {
+        InitializeRealOperator();
+        _realOperator!.Open();
+    }
+
+    public override bool Next()
+    {
+        if (_realOperator == null)
+            throw new InvalidOperationException("Operator not opened.");
+        return _realOperator.Next();
+    }
+
+    public override Row GetCurrent()
+    {
+        if (_realOperator == null)
+            throw new InvalidOperationException("Operator not opened.");
+        return _realOperator.GetCurrent();
+    }
+
+    public override void Close()
+    {
+        _realOperator?.Close();
     }
 }
 ```

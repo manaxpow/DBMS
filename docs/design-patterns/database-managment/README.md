@@ -12,7 +12,7 @@ You could model it like this:
 |  🔴 High  | `[x]`  | **Singleton**       | DatabaseManager            | Ensures a single instance of DatabaseManager centrally manages all database objects.          |
 |  🔴 High  | `[x]`  | **Command**         | Database Operations        | Encapsulates `CreateDatabase`, `DropDatabase`, and `RenameDatabase` into command objects.     |
 |  🔴 High  | `[x]`  | **Observer**        | Database Events            | Monitoring, Logging, and Replication receive Create, Drop, Backup, Restore, and State events. |
-|  🔴 High  | `[ ]`  | **Bridge**          | Database ↔ Storage Engine  | Separates Database abstraction from different storage implementations.                        |
+|  🔴 High  | `[x]`  | **Bridge**          | Database ↔ Storage Engine  | Separates Database abstraction from different storage implementations.                        |
 |  🔴 High  | `[ ]`  | **Memento**         | Database Checkpoint / Configuration Snapshot | Captures and restores database checkpoints or configuration snapshots.                      |
 | 🟡 Medium | `[x]`  | **State**           | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.       |
 | 🟡 Medium | `[x]`  | **Template Method** | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.      |

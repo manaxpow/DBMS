@@ -588,12 +588,26 @@ flowchart LR
     Iter_FL --> FL_003["GetCurrent_ShouldReturnMatchedRow"]
     Iter_FL --> FL_004["Close_ShouldCloseChildOperator"]
 
+    %% =========================================================
+    %% Proxy Files & Methods
+    %% =========================================================
+    Proxy["Proxy"]
+
+    Proxy --> Px_LTS["LazyTableScanOperatorProxyTests.cs"]
+    Px_LTS --> Px_LTS_1["Open_WhenCalled_ShouldInitializeRealOperatorAndOpen"]
+    Px_LTS --> Px_LTS_2["Next_WhenRealOperatorNotInitialized_ShouldThrow"]
+    Px_LTS --> Px_LTS_3["GetCurrent_WhenRealOperatorNotInitialized_ShouldThrow"]
+    Px_LTS --> Px_LTS_4["Next_WhenRealOperatorInitialized_ShouldDelegate"]
+    Px_LTS --> Px_LTS_5["GetCurrent_WhenRealOperatorInitialized_ShouldDelegate"]
+    Px_LTS --> Px_LTS_6["Close_WhenRealOperatorInitialized_ShouldDelegate"]
+    Px_LTS --> Px_LTS_7["Close_WhenRealOperatorNotInitialized_ShouldNotThrow"]
+
     classDef patternNode fill:#4b5563,stroke:#9ca3af,color:#ffffff,stroke-width:2px,stroke-dasharray: 5 5
     classDef classNode fill:#1f2937,stroke:#60a5fa,color:#ffffff,stroke-width:2px
     classDef completedTest fill:#dcfce7,stroke:#22c55e,color:#111827,stroke-width:2px
 
-    class Interpreter,Strategy,FactoryMethod,Composite,Iterator patternNode
-    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL classNode
+    class Interpreter,Strategy,FactoryMethod,Composite,Iterator,Proxy patternNode
+    class Int_IT,Str_QO,Str_CB,Str_RB,FM_POFT,Comp_PO,Iter_TS,Iter_FL,Px_LTS classNode
     class Int_IT_1,Int_IT_2,Int_IT_3,Int_IT_4,Int_IT_5,Int_IT_6 completedTest
     class Str_QO_1,Str_QO_2,Str_CB_1,Str_CB_2,Str_CB_3,Str_RB_1,Str_RB_2,Str_RB_3 completedTest
     class FM_POFT_1,FM_POFT_2,FM_POFT_3,FM_POFT_4,FM_POFT_5,FM_POFT_6 completedTest

@@ -7,11 +7,11 @@ using Xunit;
 
 public class DatabaseStateTests
 {
-    private Database _database;
+    private RelationalDatabase _database;
 
     public DatabaseStateTests()
     {
-        _database = new Database();
+        _database = new RelationalDatabase();
     }
 
     private IDatabaseState GetCurrentState(Database db)

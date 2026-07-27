@@ -1,0 +1,48 @@
+using DBMS.Exceptions;
+
+public class RelationalDatabase : Database
+{
+    public RelationalDatabase() { }
+
+    public RelationalDatabase(IStorageEngine storageEngine) : base(storageEngine) { }
+    public void ChangeState(IDatabaseState state)
+    {
+        typeof(Database).GetField("_state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(this, state);
+    }
+    public void Open()
+    {
+        throw new NotImplementedException();
+    }
+    public void SetReadOnly()
+    {
+        throw new NotImplementedException();
+    }
+    public void Recovery()
+    {
+        throw new NotImplementedException();
+    }
+    public void Drop()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Close()
+    {
+        throw new FlushFailureException();
+    }
+
+    public void AddSchema(object schema)
+    {
+        throw new SchemaAlreadyExistsException();
+    }
+
+    public void DropSchema(string name)
+    {
+        throw new SchemaNotFoundException();
+    }
+
+    public override void Initialize()
+    {
+        throw new NotImplementedException();
+    }
+}

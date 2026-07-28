@@ -92,6 +92,17 @@ public class BinaryExpression : NonTerminalExpression
         return new LogicalNode();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var context = new InterpretationContext();
+        Expression expr = new ColumnExpression { ColumnName = "Id" };
+        var logicalNode = expr.Interpret(context);
+    }
+}
 ```
 
 #### Class diagram
@@ -286,6 +297,17 @@ public class LogicalPlanVisitor : IExpressionVisitor<LogicalNode>
     {
         // Generate logical node for column
         return new LogicalNode();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var columnExpr = new ColumnExpression { ColumnName = "Name" };
+        var visitor = new LogicalPlanVisitor();
+        var logicalNode = columnExpr.Accept(visitor);
     }
 }
 ```
@@ -510,6 +532,17 @@ public class QueryOptimizer
         return _strategy.Optimize(plan);
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var optimizer = new QueryOptimizer(new RuleBasedOptimizationStrategy());
+        var logicalPlan = new LogicalPlan();
+        var physicalPlan = optimizer.Optimize(logicalPlan);
+    }
+}
 ```
 
 #### Class diagram
@@ -686,6 +719,18 @@ public class PhysicalOperatorFactory : OperatorFactory
             LogicalSort sort => new SortOperator(),
             _ => throw new NotSupportedException($"Unsupported logical node: {node.GetType().Name}")
         };
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        OperatorFactory factory = new PhysicalOperatorFactory();
+        var logicalScan = new LogicalTableScan("Users");
+        var physicalOp = factory.CreateOperator(logicalScan);
+        physicalOp.Open();
     }
 }
 ```
@@ -938,6 +983,21 @@ public class HashJoinOperator : BinaryOperator
         _rightChild.Close();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var scan1 = new TableScanOperator("Users");
+        var scan2 = new TableScanOperator("Orders");
+        var join = new HashJoinOperator();
+        join.AddChild(scan1);
+        join.AddChild(scan2);
+        
+        join.Open();
+    }
+}
 ```
 
 #### Class diagram
@@ -1141,6 +1201,23 @@ public class FilterOperator : PhysicalOperator
     public override void Close()
     {
         _child.Close();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var scan = new TableScanOperator(new List<Row>());
+        var filter = new FilterOperator(scan, r => true);
+        
+        filter.Open();
+        while (filter.Next())
+        {
+            var row = filter.GetCurrent();
+        }
+        filter.Close();
     }
 }
 ```
@@ -1385,6 +1462,17 @@ public class QueryOptimizer
         return new PhysicalPlan();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var optimizer = new QueryOptimizer();
+        var plan = new LogicalPlan();
+        var optimizedPlan = optimizer.Optimize(plan);
+    }
+}
 ```
 
 ## 2.8. Proxy (Lazy Physical Operator)
@@ -1575,6 +1663,19 @@ public class LazyTableScanOperatorProxy : PhysicalOperator
     public override void Close()
     {
         _realOperator?.Close();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var catalog = new CatalogManager();
+        var proxy = new LazyTableScanOperatorProxy("Users", catalog);
+        
+        proxy.Open(); // Initializes the real operator here
+        proxy.Next();
     }
 }
 ```
@@ -2055,6 +2156,21 @@ public class QueryDispatcher
     {
         // Additional pre-execution logic (e.g., authorization, logging) can go here
         return command.Execute(_context);
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var context = new ExecutionContext();
+        var dispatcher = new QueryDispatcher(context);
+        
+        var rows = new List<Row>();
+        var command = new InsertCommand("Users", rows);
+        
+        var result = dispatcher.Dispatch(command);
     }
 }
 ```

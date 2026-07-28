@@ -91,6 +91,16 @@ public class Facade
         _c.OperationC();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var facade = new Facade(new SubsystemA(), new SubsystemB(), new SubsystemC());
+        facade.SubsystemOperation();
+    }
+}
 ```
 
 #### Class diagram
@@ -222,6 +232,19 @@ public class ConcreteObserver : IObserver
 {
     public void Update() {
         // Do concrete observer job
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var publisher = new ConcretePublisher();
+        var observer = new ConcreteObserver();
+        
+        publisher.Attach(observer);
+        publisher.Notify();
     }
 }
 ```
@@ -439,6 +462,19 @@ public class Database
         _state.Close(this);
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var db = new Database(); // Starts in OfflineState
+        db.Open(); // Transitions to OnlineState
+        db.Read();
+        db.Write("Data");
+        db.Close(); // Transitions back to OfflineState
+    }
+}
 ```
 
 #### Class diagram
@@ -616,6 +652,20 @@ public class Invoker
         throw new NotImplementedException();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var receiver = new Receiver();
+        var command = new ConcreteCommand(receiver);
+        
+        var invoker = new Invoker();
+        invoker.SetCommand(command);
+        invoker.ExecuteCommand();
+    }
+}
 ```
 
 #### Class diagram
@@ -787,6 +837,16 @@ public class ConcreteClass1 : AbstractClass
     protected override void Step3() { throw new NotImplementedException(); }
     protected override void Step4() { throw new NotImplementedException(); }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        AbstractClass backup = new ConcreteClass1();
+        backup.TemplateMethod();
+    }
+}
 ```
 
 #### Class diagram
@@ -874,6 +934,18 @@ public sealed class Singleton
     public static Singleton GetInstance()
     {
         return _instance;
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var instance1 = Singleton.GetInstance();
+        var instance2 = Singleton.GetInstance();
+        
+        Console.WriteLine(ReferenceEquals(instance1, instance2)); // Output: True
     }
 }
 ```
@@ -989,6 +1061,19 @@ public class RelationalDatabase : Database
     {
         Console.WriteLine("Executing SQL Query...");
         _storageEngine.ReadData();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        IStorageEngine diskEngine = new DiskStorageEngine();
+        Database relationalDb = new RelationalDatabase(diskEngine);
+        
+        relationalDb.Connect();
+        relationalDb.ExecuteQuery(); // Will read from disk
     }
 }
 ```

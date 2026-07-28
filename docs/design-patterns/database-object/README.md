@@ -116,6 +116,16 @@ public class PrimaryConstraint : Constraint
         return true;
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var uniqueConstraint = new UniqueConstraint();
+        // uniqueConstraint.Validate(context);
+    }
+}
 ```
 
 #### Class diagram
@@ -252,6 +262,17 @@ public class PrimaryKey : Constraint
     public void DoSomething()
     {
         // Do primary key work
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        ConstraintCreator creator = new PrimaryKeyConstraintCreator();
+        Constraint constraint = creator.FactoryMethod();
+        constraint.DoSomething();
     }
 }
 ```
@@ -406,6 +427,17 @@ public class ForeingKey
         _strategy.Execute(parentRow, childTable);
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var fk = new ForeingKey();
+        fk.SetStrategy(new CascadeAction());
+        // fk.ExecuteStrategy();
+    }
+}
 ```
 
 #### Class diagram
@@ -537,6 +569,18 @@ public class Schema : ISchemaObject
         {
             _children.Drop();
         }
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var schema = new Schema();
+        schema.Add(new Table());
+        schema.Add(new Table());
+        schema.Drop(); // Drops all tables within schema
     }
 }
 ```
@@ -674,6 +718,20 @@ public class DDLCommandExecutor
     public void ExecuteCommand()
     {
         _command.Execute();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var table = new Table();
+        var command = new CreateTableCommand(table);
+        
+        var executor = new DDLCommandExecutor();
+        executor.SetCommand(command);
+        executor.ExecuteCommand();
     }
 }
 ```
@@ -835,6 +893,20 @@ public class Schema : ISchemaObjectCollection
     public ISchemaObjectIterator CreateIterator()
     {
         return new SchemaObjectIterator(_object);
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var schema = new Schema();
+        var iterator = schema.CreateIterator();
+        while (iterator.HasMore())
+        {
+            var obj = iterator.GetNext();
+        }
     }
 }
 
@@ -1098,6 +1170,17 @@ public class Schema : ISchemaObject
         vistor.Visit(this);
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var schema = new Schema();
+        var visitor = new BackupVisitor();
+        schema.Accept(visitor);
+    }
+}
 ```
 
 #### Class diagram
@@ -1327,6 +1410,18 @@ public class Director
 
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var builder = new TableBuilder();
+        var director = new Director(builder);
+        director.Construct();
+        var table = builder.Build();
+    }
+}
 ```
 
 #### Class diagram
@@ -1475,6 +1570,16 @@ public class Table : ISchemaObjectPrototype
         }
         
         return new Table(Name + "_Clone", clonedColumns);
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var originalTable = new Table("Users", new List<Column>());
+        var clonedTable = originalTable.Clone();
     }
 }
 ```
@@ -1705,6 +1810,19 @@ public class DataTypeFactory
             _cache[name] = type;
         }
         return type;
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var factory = new DataTypeFactory();
+        var type1 = factory.GetDataType("INT");
+        var type2 = factory.GetDataType("INT");
+        
+        Console.WriteLine(ReferenceEquals(type1, type2)); // Output: True
     }
 }
 ```

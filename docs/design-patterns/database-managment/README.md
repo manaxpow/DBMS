@@ -51,44 +51,49 @@ classDiagram
 #### Example code
 
 ```csharp
-public class SubsystemA
+public class StorageEngine
 {
-    public void OperationA() {
-        Console.WriteLine("Do A");
+    public void Start(string config) {
+        Console.WriteLine("Storage Engine started.");
     }
 }
-public class SubsystemB
+public class TransactionManager
 {
-    public void OperationB() {
-        Console.WriteLine("Do B");
+    public void Start(string config) {
+        Console.WriteLine("Transaction Manager started.");
     }
 }
-public class SubsystemC
+public class QueryProcessor
 {
-    public void OperationC() {
-        Console.WriteLine("Do C");
+    public void Start(string config) {
+        Console.WriteLine("Query Processor started.");
     }
 }
 
-public class Facade
+public class DatabaseServer
 {
-    private readonly SubsystemA _a;
-    private readonly SubsystemB _b;
-    private readonly SubsystemC _c;
+    private readonly StorageEngine _storage;
+    private readonly TransactionManager _transaction;
+    private readonly QueryProcessor _query;
+    private bool _isRunning;
 
-    public Facade(SubsystemA a, SubsystemB b, SubsystemC c)
+    public DatabaseServer(StorageEngine storage, TransactionManager transaction, QueryProcessor query)
     {
-        _a = a;
-        _b = b;
-        _c = c;
+        _storage = storage;
+        _transaction = transaction;
+        _query = query;
     }
 
-    // Client use Facade without knowing about a b c
-    public void SubsystemOperation()
+    // Client uses DatabaseServer without knowing about underlying engines
+    public void Start(string config)
     {
-        _a.OperationA();
-        _b.OperationB();
-        _c.OperationC();
+        if (_isRunning) return;
+        
+        _storage.Start(config);
+        _transaction.Start(config);
+        _query.Start(config);
+        
+        _isRunning = true;
     }
 }
 
@@ -97,8 +102,8 @@ public class Program
 {
     public static void Main()
     {
-        var facade = new Facade(new SubsystemA(), new SubsystemB(), new SubsystemC());
-        facade.SubsystemOperation();
+        var server = new DatabaseServer(new StorageEngine(), new TransactionManager(), new QueryProcessor());
+        server.Start("default_config");
     }
 }
 ```
@@ -201,37 +206,41 @@ classDiagram
 #### Example code
 
 ```csharp
-public interface IObserver
+public class DatabaseEvent { }
+
+public interface IDatabaseEventObserver
 {
-    void Update();
+    void OnDatabaseEvent(DatabaseEvent dbEvent);
 }
 
-public interface IPublisher
+public class DatabaseEventPublisher
 {
-    void Attach(IObserver observer);
-    void Detach(IObserver observer);
-    void Notify();
-}
+    private readonly List<IDatabaseEventObserver> _observers = new List<IDatabaseEventObserver>();
 
-public class ConcretePublisher : IPublisher
-{
-    private readonly List<IObserver> _observers = new List<IObserver>();
-
-    public void Attach(IObserver observer) { throw new NotImplementedException(); }
-    public void Detach(IObserver observer) { throw new NotImplementedException(); }
-    public void Notify() {
-        foreach(IObserver observer in _observers)
+    public void Subscribe(IDatabaseEventObserver observer)
+    {
+        _observers.Add(observer);
+    }
+    
+    public void Unsubscribe(IDatabaseEventObserver observer)
+    {
+        _observers.Remove(observer);
+    }
+    
+    public void Notify(DatabaseEvent dbEvent)
+    {
+        foreach(var observer in _observers)
         {
-            // Notify all subcribers
-            observer.Update();
+            observer.OnDatabaseEvent(dbEvent);
         }
     }
 }
 
-public class ConcreteObserver : IObserver
+public class LoggingObserver : IDatabaseEventObserver
 {
-    public void Update() {
-        // Do concrete observer job
+    public void OnDatabaseEvent(DatabaseEvent dbEvent)
+    {
+        Console.WriteLine("Logging event...");
     }
 }
 
@@ -240,11 +249,11 @@ public class Program
 {
     public static void Main()
     {
-        var publisher = new ConcretePublisher();
-        var observer = new ConcreteObserver();
+        var publisher = new DatabaseEventPublisher();
+        var logger = new LoggingObserver();
         
-        publisher.Attach(observer);
-        publisher.Notify();
+        publisher.Subscribe(logger);
+        publisher.Notify(new DatabaseEvent());
     }
 }
 ```
@@ -374,33 +383,35 @@ classDiagram
 public interface IDatabaseState
 {
     void Open(Database database);
-    void Read(Database database);
-    void Write(Database database, string data);
-    void Close(Database database);
+    void SetReadOnly(Database database);
+    void Recover(Database database);
+    void Drop(Database database);
 }
 
-// Concrete State
-public class OfflineState  : IState
+// Concrete States
+public class OfflineState : IDatabaseState
 {
-   public void Open(Database database)
+    public void Open(Database database)
     {
         Console.WriteLine("Opening database...");
-        database.SetState(new OnlineState());
+        database.ChangeState(new OnlineState());
     }
 
-    public void Read(Database database)
+    public void SetReadOnly(Database database)
     {
-        Console.WriteLine("Cannot read: Database is offline.");
+        Console.WriteLine("Cannot set read-only: Database is offline.");
     }
 
-    public void Write(Database database, string data)
+    public void Recover(Database database)
     {
-        Console.WriteLine("Cannot write: Database is offline.");
+        Console.WriteLine("Recovering database...");
+        // database.ChangeState(new RecoveringState());
     }
 
-    public void Close(Database database)
+    public void Drop(Database database)
     {
-        Console.WriteLine("Database is already offline.");
+        Console.WriteLine("Dropping database...");
+        // database.ChangeState(new DroppedState());
     }
 }
 
@@ -411,20 +422,20 @@ public class OnlineState : IDatabaseState
         Console.WriteLine("Database is already online.");
     }
 
-    public void Read(Database database)
+    public void SetReadOnly(Database database)
     {
-        Console.WriteLine("Reading data...");
+        Console.WriteLine("Setting database to read-only...");
+        // database.ChangeState(new ReadOnlyState());
     }
 
-    public void Write(Database database, string data)
+    public void Recover(Database database)
     {
-        Console.WriteLine($"Writing: {data}");
+        Console.WriteLine("Cannot recover: Database is already online.");
     }
 
-    public void Close(Database database)
+    public void Drop(Database database)
     {
-        Console.WriteLine("Closing database...");
-        database.SetState(new OfflineState());
+        Console.WriteLine("Cannot drop: Database is online. Take offline first.");
     }
 }
 
@@ -437,30 +448,15 @@ public class Database
         _state = new OfflineState();
     }
 
-    public void SetState(IDatabaseState state)
+    public void ChangeState(IDatabaseState state)
     {
         _state = state;
     }
 
-    public void Open()
-    {
-        _state.Open(this);
-    }
-
-    public void Read()
-    {
-        _state.Read(this);
-    }
-
-    public void Write(string data)
-    {
-        _state.Write(this, data);
-    }
-
-    public void Close()
-    {
-        _state.Close(this);
-    }
+    public void Open() => _state.Open(this);
+    public void SetReadOnly() => _state.SetReadOnly(this);
+    public void Recover() => _state.Recover(this);
+    public void Drop() => _state.Drop(this);
 }
 
 // Usage Example
@@ -470,9 +466,7 @@ public class Program
     {
         var db = new Database(); // Starts in OfflineState
         db.Open(); // Transitions to OnlineState
-        db.Read();
-        db.Write("Data");
-        db.Close(); // Transitions back to OfflineState
+        db.SetReadOnly(); // Transitions to ReadOnlyState
     }
 }
 ```
@@ -613,43 +607,44 @@ classDiagram
 #### Example code
 
 ```csharp
-public interface ICommand
+public enum DDLResult { Success, Failure }
+
+public interface IDDLCommand
 {
-    void Execute();
+    DDLResult Execute();
 }
 
-public class Receiver
+public class DatabaseManager
 {
-    public void Action() { throw new NotImplementedException(); }
-}
-
-public class ConcreteCommand : ICommand
-{
-    private readonly Receiver _receiver;
-
-    public ConcreteCommand(Receiver receiver)
-    {
-        _receiver = receiver;
-    }
-
-    public void Execute()
-    {
-        throw new NotImplementedException();
+    public void CreateDatabase(string name) 
+    { 
+        Console.WriteLine($"Database {name} created."); 
     }
 }
 
-public class Invoker
+public class CreateDatabaseCommand : IDDLCommand
 {
-    private ICommand _command;
+    private readonly DatabaseManager _databaseManager;
+    private readonly string _databaseName;
 
-    public void SetCommand(ICommand command)
+    public CreateDatabaseCommand(DatabaseManager databaseManager, string databaseName)
     {
-        _command = command;
+        _databaseManager = databaseManager;
+        _databaseName = databaseName;
     }
 
-    public void ExecuteCommand()
+    public DDLResult Execute()
     {
-        throw new NotImplementedException();
+        _databaseManager.CreateDatabase(_databaseName);
+        return DDLResult.Success;
+    }
+}
+
+public class DDLCommandExecutor
+{
+    public DDLResult Execute(IDDLCommand command)
+    {
+        return command.Execute();
     }
 }
 
@@ -658,12 +653,11 @@ public class Program
 {
     public static void Main()
     {
-        var receiver = new Receiver();
-        var command = new ConcreteCommand(receiver);
+        var dbManager = new DatabaseManager();
+        var command = new CreateDatabaseCommand(dbManager, "MyDatabase");
         
-        var invoker = new Invoker();
-        invoker.SetCommand(command);
-        invoker.ExecuteCommand();
+        var executor = new DDLCommandExecutor();
+        executor.Execute(command);
     }
 }
 ```
@@ -811,31 +805,32 @@ classDiagram
 #### Example code
 
 ```csharp
-public abstract class AbstractClass
+public abstract class DatabaseBackup
 {
-    public void TemplateMethod()
+    public void ExecuteBackup()
     {
-        Step1();
-        if (Step2())
-        {
-            Step3();
-        }
-        else
-        {
-            Step4();
-        }
+        InitializeBackup();
+        ExtractData();
+        CompressData();
+        FinalizeBackup();
     }
 
-    protected void Step1() { throw new NotImplementedException(); }
-    protected virtual bool Step2() { throw new NotImplementedException(); }
-    protected abstract void Step3();
-    protected abstract void Step4();
+    protected void InitializeBackup() { Console.WriteLine("Initializing backup..."); }
+    protected abstract void ExtractData();
+    protected void CompressData() { Console.WriteLine("Compressing data..."); }
+    protected abstract void FinalizeBackup();
 }
 
-public class ConcreteClass1 : AbstractClass
+public class FullBackup : DatabaseBackup
 {
-    protected override void Step3() { throw new NotImplementedException(); }
-    protected override void Step4() { throw new NotImplementedException(); }
+    protected override void ExtractData() { Console.WriteLine("Extracting all data..."); }
+    protected override void FinalizeBackup() { Console.WriteLine("Finalizing full backup..."); }
+}
+
+public class IncrementalBackup : DatabaseBackup
+{
+    protected override void ExtractData() { Console.WriteLine("Extracting incremental changes..."); }
+    protected override void FinalizeBackup() { Console.WriteLine("Finalizing incremental backup..."); }
 }
 
 // Usage Example
@@ -843,8 +838,8 @@ public class Program
 {
     public static void Main()
     {
-        AbstractClass backup = new ConcreteClass1();
-        backup.TemplateMethod();
+        DatabaseBackup backup = new FullBackup();
+        backup.ExecuteBackup();
     }
 }
 ```
@@ -925,15 +920,20 @@ classDiagram
 #### Example code
 
 ```csharp
-public sealed class Singleton
+public class Database { }
+
+public sealed class DatabaseManager
 {
-    private static readonly Singleton _instance = new Singleton();
+    private static readonly DatabaseManager _instance = new DatabaseManager();
+    private readonly Dictionary<string, Database> _databases = new Dictionary<string, Database>();
 
-    private Singleton() { }
+    private DatabaseManager() { }
 
-    public static Singleton GetInstance()
+    public static DatabaseManager Instance => _instance;
+
+    public void CreateDatabase(string name)
     {
-        return _instance;
+        _databases[name] = new Database();
     }
 }
 
@@ -942,10 +942,10 @@ public class Program
 {
     public static void Main()
     {
-        var instance1 = Singleton.GetInstance();
-        var instance2 = Singleton.GetInstance();
+        var manager1 = DatabaseManager.Instance;
+        var manager2 = DatabaseManager.Instance;
         
-        Console.WriteLine(ReferenceEquals(instance1, instance2)); // Output: True
+        Console.WriteLine(ReferenceEquals(manager1, manager2)); // Output: True
     }
 }
 ```
@@ -1018,24 +1018,29 @@ classDiagram
 #### Example code
 
 ```csharp
+public class Page { }
+
 // Implementor
 public interface IStorageEngine
 {
-    void ReadData();
-    void WriteData();
+    void Mount();
+    Page FetchPage(int pageId);
+    void FlushPage(Page page);
 }
 
 // Concrete Implementors
 public class InMemoryStorageEngine : IStorageEngine
 {
-    public void ReadData() { Console.WriteLine("Reading from memory"); }
-    public void WriteData() { Console.WriteLine("Writing to memory"); }
+    public void Mount() { Console.WriteLine("Mounting in-memory storage..."); }
+    public Page FetchPage(int pageId) => new Page();
+    public void FlushPage(Page page) { }
 }
 
 public class DiskStorageEngine : IStorageEngine
 {
-    public void ReadData() { Console.WriteLine("Reading from disk"); }
-    public void WriteData() { Console.WriteLine("Writing to disk"); }
+    public void Mount() { Console.WriteLine("Mounting disk storage..."); }
+    public Page FetchPage(int pageId) => new Page();
+    public void FlushPage(Page page) { }
 }
 
 // Abstraction
@@ -1048,8 +1053,9 @@ public abstract class Database
         _storageEngine = storageEngine;
     }
 
-    public virtual void Connect() { Console.WriteLine("Connecting to database"); }
-    public abstract void ExecuteQuery();
+    public abstract void Initialize();
+    public Page ReadPage(int pageId) => _storageEngine.FetchPage(pageId);
+    public void WritePage(Page page) => _storageEngine.FlushPage(page);
 }
 
 // Refined Abstraction
@@ -1057,10 +1063,10 @@ public class RelationalDatabase : Database
 {
     public RelationalDatabase(IStorageEngine storageEngine) : base(storageEngine) { }
 
-    public override void ExecuteQuery()
+    public override void Initialize()
     {
-        Console.WriteLine("Executing SQL Query...");
-        _storageEngine.ReadData();
+        Console.WriteLine("Initializing Relational Database...");
+        _storageEngine.Mount();
     }
 }
 
@@ -1072,8 +1078,8 @@ public class Program
         IStorageEngine diskEngine = new DiskStorageEngine();
         Database relationalDb = new RelationalDatabase(diskEngine);
         
-        relationalDb.Connect();
-        relationalDb.ExecuteQuery(); // Will read from disk
+        relationalDb.Initialize();
+        var page = relationalDb.ReadPage(105);
     }
 }
 ```

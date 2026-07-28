@@ -72,47 +72,41 @@ classDiagram
 #### Example code
 
 ```csharp
-// Abstract class
+public class Row { }
+public class Context { public List<Row> rows = new List<Row>(); }
+
+// Abstract Class
 public abstract class Constraint
 {
-public bool IsEnaled;
+    public bool IsEnabled { get; set; } = true;
 
-    protected abstract bool Check (Context context);
+    protected abstract bool Check(Context context);
 
     public bool Validate(Context context)
     {
-        if(!IsEnabled)
+        if (!IsEnabled)
         {
             return true;
         }
         return Check(context);
     }
-
 }
 
-// Concrete Class
+// Concrete Classes
 public class UniqueConstraint : Constraint
 {
     protected override bool Check(Context context)
     {
-        foreach(Row row in context.rows)
-        {
-            if(IsDouplicate(row, context))
-                return false;
-        }
+        // Example check logic
         return true;
     }
 }
 
-public class PrimaryConstraint : Constraint
+public class PrimaryKeyConstraint : Constraint
 {
     protected override bool Check(Context context)
     {
-        foreach(Row row in context.rows)
-        {
-            if(HasNullKey(row) || IsDouplicate(row,context))
-                return false;
-        }
+        // Example check logic
         return true;
     }
 }
@@ -122,8 +116,9 @@ public class Program
 {
     public static void Main()
     {
-        var uniqueConstraint = new UniqueConstraint();
-        // uniqueConstraint.Validate(context);
+        var pkConstraint = new PrimaryKeyConstraint();
+        var context = new Context();
+        bool isValid = pkConstraint.Validate(context);
     }
 }
 ```
@@ -220,59 +215,55 @@ classDiagram
 #### Example code
 
 ```csharp
+// Metadata
+public class ConstraintMetadata
+{
+    public string Type { get; set; }
+    public string Name { get; set; }
+}
+
 // Creator
 public abstract class ConstraintCreator
 {
-    public abstract Constraint FactoryMethod();
+    public abstract Constraint CreateConstraint(ConstraintMetadata metadata);
 }
 
 // Concrete Creator
 public class ForeignKeyConstraintCreator : ConstraintCreator
 {
-    public override Constraint FactoryMethod()
+    public override Constraint CreateConstraint(ConstraintMetadata metadata)
     {
-        return new ForeignKey();
+        return new ForeignKeyConstraint { Name = metadata.Name };
     }
 }
 
 public class PrimaryKeyConstraintCreator : ConstraintCreator
 {
-    public override Constraint FactoryMethod()
+    public override Constraint CreateConstraint(ConstraintMetadata metadata)
     {
-        return new PrimaryKey();
+        return new PrimaryKeyConstraint { Name = metadata.Name };
     }
 }
 
 // Product
-public interface Constraint
+public abstract class Constraint
 {
-    void DoSomething();
+    public string Name { get; set; }
+    public bool IsEnabled { get; set; } = true;
 }
 
 // Concrete Product
-public class ForeignKey : Constraint
-{
-    public void DoSomething()
-    {
-        // Do foreign key work
-    }
-}
-public class PrimaryKey : Constraint
-{
-    public void DoSomething()
-    {
-        // Do primary key work
-    }
-}
+public class ForeignKeyConstraint : Constraint { }
+public class PrimaryKeyConstraint : Constraint { }
 
 // Usage Example
 public class Program
 {
     public static void Main()
     {
+        var metadata = new ConstraintMetadata { Type = "PrimaryKey", Name = "PK_Users" };
         ConstraintCreator creator = new PrimaryKeyConstraintCreator();
-        Constraint constraint = creator.FactoryMethod();
-        constraint.DoSomething();
+        Constraint constraint = creator.CreateConstraint(metadata);
     }
 }
 ```
@@ -393,38 +384,43 @@ classDiagram
 #### Example code
 
 ```csharp
+public class Row { public void Remove() { } }
+public class Table { public List<Row> rows = new List<Row>(); }
+public enum Result { Success, Failure }
+
 // Strategy
 public interface IReferentialAction
 {
-    void Execute(Row parentRow, Table childTable);
+    Result Execute(Row parentRow, Table childTable);
 }
 
 // Concrete Strategy
 public class CascadeAction : IReferentialAction
 {
-    public void Execute(Row parentRow, Table childTable)
+    public Result Execute(Row parentRow, Table childTable)
     {
-        // Delete all row related
+        // Delete all related rows
         foreach(Row row in childTable.rows)
         {
             row.Remove();
         }
+        return Result.Success;
     }
 }
 
 // Context
-public class ForeingKey
+public class ForeignKeyConstraint
 {
     private IReferentialAction _strategy;
 
-    public void SetStrategy(IStrategy strategy)
+    public ForeignKeyConstraint(IReferentialAction strategy)
     {
         _strategy = strategy;
     }
 
-    public void ExecuteStrategy()
+    public Result OnParentRowDeleted(Row parentRow, Table childTable)
     {
-        _strategy.Execute(parentRow, childTable);
+        return _strategy.Execute(parentRow, childTable);
     }
 }
 
@@ -433,9 +429,8 @@ public class Program
 {
     public static void Main()
     {
-        var fk = new ForeingKey();
-        fk.SetStrategy(new CascadeAction());
-        // fk.ExecuteStrategy();
+        var fk = new ForeignKeyConstraint(new CascadeAction());
+        // fk.OnParentRowDeleted(parentRow, childTable);
     }
 }
 ```
@@ -544,30 +539,37 @@ public interface ISchemaObject
     void Drop();
 }
 
-// Leaft
+// Leafs
 public class Table : ISchemaObject
 {
-    public void Drop()
-    {
-        // Table Drop
-    }
+    public void Drop() { Console.WriteLine("Table dropped."); }
+}
+
+public class View : ISchemaObject
+{
+    public void Drop() { Console.WriteLine("View dropped."); }
 }
 
 // Composite
 public class Schema : ISchemaObject
 {
-    private readonly List<ISchemaObject> _children = new List<ISchemaObject>();
+    private readonly List<ISchemaObject> _objects = new List<ISchemaObject>();
 
-    public void Add(ISchemaObject component)
+    public void AddObject(ISchemaObject obj)
     {
-        _children.Add(component);
+        _objects.Add(obj);
+    }
+    
+    public void RemoveObject(ISchemaObject obj)
+    {
+        _objects.Remove(obj);
     }
 
     public void Drop()
     {
-        foreach(ISchemaObject child in _children)
+        foreach(ISchemaObject child in _objects)
         {
-            _children.Drop();
+            child.Drop();
         }
     }
 }
@@ -578,9 +580,9 @@ public class Program
     public static void Main()
     {
         var schema = new Schema();
-        schema.Add(new Table());
-        schema.Add(new Table());
-        schema.Drop(); // Drops all tables within schema
+        schema.AddObject(new Table());
+        schema.AddObject(new View());
+        schema.Drop(); // Drops all objects within schema
     }
 }
 ```
@@ -674,50 +676,43 @@ classDiagram
 #### Example code
 
 ```csharp
+public enum DDLResult { Success, Failure }
+
+public class Schema { }
+public class Table { }
+
 // Command
 public interface IDDLCommand
 {
-    void Execute();
+    DDLResult Execute();
 }
 
-// Concrete IDDLCommand
+// Concrete Command
 public class CreateTableCommand : IDDLCommand
 {
+    private readonly Schema _schema;
     private readonly Table _table;
 
-    public ConcreteCommand(Table table)
+    public CreateTableCommand(Schema schema, Table table)
     {
+        _schema = schema;
         _table = table;
     }
 
-    public void Execute()
+    public DDLResult Execute()
     {
-        _table.Create();
-    }
-}
-
-// Receiver
-public class Table
-{
-    public void Create()
-    {
-        // Create table
+        Console.WriteLine("Creating table...");
+        // _schema.AddTable(_table);
+        return DDLResult.Success;
     }
 }
 
 // Invoker
 public class DDLCommandExecutor
 {
-    private IDDLCommand _command;
-
-    public void SetCommand(IDDLCommand command)
+    public DDLResult Execute(IDDLCommand command)
     {
-        _command = command;
-    }
-
-    public void ExecuteCommand()
-    {
-        _command.Execute();
+        return command.Execute();
     }
 }
 
@@ -726,12 +721,12 @@ public class Program
 {
     public static void Main()
     {
+        var schema = new Schema();
         var table = new Table();
-        var command = new CreateTableCommand(table);
+        var command = new CreateTableCommand(schema, table);
         
         var executor = new DDLCommandExecutor();
-        executor.SetCommand(command);
-        executor.ExecuteCommand();
+        executor.Execute(command);
     }
 }
 ```
@@ -850,49 +845,60 @@ classDiagram
 
 ```csharp
 
+public interface ISchemaObject { }
+public class Table : ISchemaObject { }
+
 // Iterator
 public interface ISchemaObjectIterator
 {
-    ISchemaObject GetNext();
-    bool HasMore();
+    bool HasNext();
+    ISchemaObject Next();
+    void Reset();
 }
 
 // Concrete Iterator
-public class SchemaObjectIterator : ISchemaObjectIterator
+public class TableIterator : ISchemaObjectIterator
 {
-    private readonly List<ISchemaObject> _collection;
-    private int _position;
+    private readonly IReadOnlyList<ISchemaObject> _objects;
+    private int _position = 0;
 
-    public SchemaObjectIterator(List<ISchemaObject> collection, int position)
+    public TableIterator(IReadOnlyList<ISchemaObject> objects)
     {
-        _collection = collection;
-        _position = position;
+        _objects = objects;
     }
 
-    public ISchemaObject GetNext()
+    public bool HasNext()
     {
-        return _collection[_position++];
+        while (_position < _objects.Count)
+        {
+            if (_objects[_position] is Table) return true;
+            _position++;
+        }
+        return false;
     }
 
-    public bool HasMore()
+    public ISchemaObject Next()
     {
-        return _collection.Length() < _postion;
+        if (HasNext())
+        {
+            return _objects[_position++];
+        }
+        throw new InvalidOperationException();
     }
+
+    public void Reset() => _position = 0;
 }
 
 // Iterable Collection
-public interface ISchemaObjectCollection
+public class Schema
 {
-    ISchemaObjectIterator CreateIterator();
-}
+    private readonly List<ISchemaObject> _objects = new List<ISchemaObject>();
+    
+    public void Add(ISchemaObject obj) => _objects.Add(obj);
 
-// Concrete Collection
-public class Schema : ISchemaObjectCollection
-{
-    private readonly List<ISchemaObject> _objects = new();
-    public ISchemaObjectIterator CreateIterator()
+    public ISchemaObjectIterator CreateTableIterator()
     {
-        return new SchemaObjectIterator(_object);
+        return new TableIterator(_objects);
     }
 }
 
@@ -902,14 +908,15 @@ public class Program
     public static void Main()
     {
         var schema = new Schema();
-        var iterator = schema.CreateIterator();
-        while (iterator.HasMore())
+        schema.Add(new Table());
+        
+        var iterator = schema.CreateTableIterator();
+        while (iterator.HasNext())
         {
-            var obj = iterator.GetNext();
+            var table = iterator.Next();
         }
     }
 }
-
 
 ```
 
@@ -1127,47 +1134,46 @@ classDiagram
 ```csharp
 
 // Visitor
-public interface ISchemaVistor
+public interface ISchemaVisitor
 {
-    void Visit(Schema element);
-    void Visit(Table element);
+    void Visit(Schema schema);
+    void Visit(Table table);
 }
 
-
 // Concrete Visitor
-public class BackupVisitor : ISchemaVistor
+public class BackupVisitor : ISchemaVisitor
 {
-    public void Visit(Schema element)
+    public void Visit(Schema schema)
     {
-        // Visit Schema
+        Console.WriteLine("Backing up Schema...");
     }
 
-    public void Visit(Table element)
+    public void Visit(Table table)
     {
-        // Visit Table
+        Console.WriteLine("Backing up Table...");
     }
 }
 
 // Element
 public interface ISchemaObject
 {
-    void Accept(ISchemaVistor visitor);
+    void Accept(ISchemaVisitor visitor);
 }
 
-// Concrete Element
+// Concrete Elements
 public class Table : ISchemaObject
 {
-    public void Accept(IVisitor visitor)
+    public void Accept(ISchemaVisitor visitor)
     {
-        vistor.Visit(this);
+        visitor.Visit(this);
     }
 }
 
 public class Schema : ISchemaObject
 {
-    public void Accept(IVisitor visitor)
+    public void Accept(ISchemaVisitor visitor)
     {
-        vistor.Visit(this);
+        visitor.Visit(this);
     }
 }
 
@@ -1177,8 +1183,11 @@ public class Program
     public static void Main()
     {
         var schema = new Schema();
+        var table = new Table();
+        
         var visitor = new BackupVisitor();
         schema.Accept(visitor);
+        table.Accept(visitor);
     }
 }
 ```
@@ -1355,18 +1364,23 @@ classDiagram
 #### Example code
 
 ```csharp
+public class Column { }
+public class Constraint { }
+
 // Product
 public class Table
 {
-    // Table details
+    public string Name { get; set; }
+    public List<Column> Columns { get; } = new List<Column>();
+    public List<Constraint> Constraints { get; } = new List<Constraint>();
 }
 
 // Builder
 public interface ITableBuilder
 {
     ITableBuilder SetName(string name);
-    ITableBuilder SetForeignKey(List<ForeignKey> fk);
-    ITableBuilder SetPrimaryKey(List<PrimaryKey> pk);
+    ITableBuilder AddColumn(Column column);
+    ITableBuilder AddConstraint(Constraint constraint);
     Table Build();
 }
 
@@ -1375,39 +1389,29 @@ public class TableBuilder : ITableBuilder
 {
     private Table _table = new Table();
 
-    public  ITableBuilder SetName(string name)
+    public ITableBuilder SetName(string name)
     {
-        _table.SetName(name);
+        _table.Name = name;
+        return this;
     }
 
-    public ITableBuilder SetPrimaryKey(List<PrimaryKey> pk)
+    public ITableBuilder AddColumn(Column column)
     {
-        _table.SetPrimaryKey(pk);
+        _table.Columns.Add(column);
+        return this;
     }
-    public ITableBuilder SetForeignKey(List<ForeignKey> fk)
+
+    public ITableBuilder AddConstraint(Constraint constraint)
     {
-        _table.SetPForeignKey(fk);
+        _table.Constraints.Add(constraint);
+        return this;
     }
 
     public Table Build()
     {
-        return _table;
-    }
-}
-
-// Director
-public class Director
-{
-    private readonly ITableBuilder _builder;
-
-    public Director(ITableBuilder builder)
-    {
-        _builder = builder;
-    }
-
-    public void Construct()
-    {
-
+        var result = _table;
+        _table = new Table(); // Reset for next build
+        return result;
     }
 }
 
@@ -1416,10 +1420,11 @@ public class Program
 {
     public static void Main()
     {
-        var builder = new TableBuilder();
-        var director = new Director(builder);
-        director.Construct();
-        var table = builder.Build();
+        ITableBuilder builder = new TableBuilder();
+        Table table = builder.SetName("Users")
+                             .AddColumn(new Column())
+                             .AddConstraint(new Constraint())
+                             .Build();
     }
 }
 ```
@@ -1542,14 +1547,26 @@ classDiagram
 #### Example code
 
 ```csharp
-// Prototype
-public interface ISchemaObjectPrototype
+public class Column
 {
-    ISchemaObjectPrototype Clone();
+    public string Name { get; }
+    public string Type { get; }
+    public Column(string name, string type) { Name = name; Type = type; }
+}
+
+public interface ISchemaObject
+{
+    string Name { get; }
+}
+
+// Prototype
+public interface ICloneableSchemaObject : ISchemaObject
+{
+    ICloneableSchemaObject Clone();
 }
 
 // Concrete Prototype
-public class Table : ISchemaObjectPrototype
+public class Table : ICloneableSchemaObject
 {
     public string Name { get; set; }
     public List<Column> Columns { get; set; }
@@ -1560,7 +1577,7 @@ public class Table : ISchemaObjectPrototype
         Columns = columns;
     }
 
-    public ISchemaObjectPrototype Clone()
+    public ICloneableSchemaObject Clone()
     {
         // Deep copy of columns
         var clonedColumns = new List<Column>();
@@ -1578,7 +1595,7 @@ public class Program
 {
     public static void Main()
     {
-        var originalTable = new Table("Users", new List<Column>());
+        var originalTable = new Table("Users", new List<Column> { new Column("Id", "INT") });
         var clonedTable = originalTable.Clone();
     }
 }

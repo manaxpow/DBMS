@@ -59,13 +59,28 @@ classDiagram
 #### Example code
 
 ```csharp
+public class LogicalNode { }
+
+public class InterpretationContext
+{
+    public LogicalNode ResolveColumn(string name) 
+    { 
+        return new LogicalNode(); 
+    }
+}
+
 // Abstract class
-public abstract class Expression
+public interface Expression
+{
+    LogicalNode Interpret(InterpretationContext context);
+}
+
+// Terminal Expression
+public abstract class TerminalExpression : Expression
 {
     public abstract LogicalNode Interpret(InterpretationContext context);
 }
 
-// Terminal Expression
 public class ColumnExpression : TerminalExpression
 {
     public string ColumnName { get; set; }
@@ -77,6 +92,11 @@ public class ColumnExpression : TerminalExpression
 }
 
 // Non-Terminal Expression
+public abstract class NonTerminalExpression : Expression
+{
+    public abstract LogicalNode Interpret(InterpretationContext context);
+}
+
 public class BinaryExpression : NonTerminalExpression
 {
     public Expression Left { get; set; }

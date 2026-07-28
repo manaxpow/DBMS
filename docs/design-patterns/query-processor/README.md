@@ -11,7 +11,7 @@ This document tracks the design patterns used across the Query Processor module 
 |  🔴 High  | `[x]`  | **Proxy**                   | Lazy Physical Operator      | Defers creation or initialization of physical operators until execution is required.
 | 🟡 Medium | `[x]`  | **Composite**               | Query Plan Tree             | Treats leaf operators such as scans and composite operators such as joins, filters, and projections uniformly as plan nodes, naturally representing LogicalPlan and PhysicalPlan as trees.          |
 | 🟡 Medium | `[x]`  | **Iterator**                | Query Result Execution      | Lets physical operators expose rows one at a time through a common Next()/MoveNext() interface, enabling pipelined query execution without materializing every intermediate result.                 |
-| 🟡 Medium | `[ ]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
+| 🟡 Medium | `[x]`  | **Command**                 | SQL Statement Execution     | Encapsulates parsed statements such as SELECT, INSERT, UPDATE, and DELETE as executable command objects and decouples statement dispatch from QueryExecutor.                                        |
 |  🟢 Low   | `[x]`  | **Chain of Responsibility** | Optimization Pipeline       | Passes a query plan through independent optimization rules such as constant folding, predicate pushdown, projection pruning, and join optimization. Each rule transforms or passes the plan onward. |
 |  🟢 Low   | `[ ]`  | **Builder**                 | Query Plan Construction     | Builds complex LogicalPlan or PhysicalPlan objects step by step from AST nodes, especially useful when plans contain scans, filters, joins, projections, grouping, sorting, and limits.             |
 |  🟢 Low   | `[ ]`  | **Template Method**         | Physical Operator Execution | Defines a common execution lifecycle such as Open() → Next() → Close() while concrete operators implement operator-specific behavior.                                                               |
@@ -59,13 +59,28 @@ classDiagram
 #### Example code
 
 ```csharp
+public class LogicalNode { }
+
+public class InterpretationContext
+{
+    public LogicalNode ResolveColumn(string name) 
+    { 
+        return new LogicalNode(); 
+    }
+}
+
 // Abstract class
-public abstract class Expression
+public interface Expression
+{
+    LogicalNode Interpret(InterpretationContext context);
+}
+
+// Terminal Expression
+public abstract class TerminalExpression : Expression
 {
     public abstract LogicalNode Interpret(InterpretationContext context);
 }
 
-// Terminal Expression
 public class ColumnExpression : TerminalExpression
 {
     public string ColumnName { get; set; }
@@ -77,6 +92,11 @@ public class ColumnExpression : TerminalExpression
 }
 
 // Non-Terminal Expression
+public abstract class NonTerminalExpression : Expression
+{
+    public abstract LogicalNode Interpret(InterpretationContext context);
+}
+
 public class BinaryExpression : NonTerminalExpression
 {
     public Expression Left { get; set; }
@@ -90,6 +110,17 @@ public class BinaryExpression : NonTerminalExpression
 
         // Return combined LogicalNode
         return new LogicalNode();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var context = new InterpretationContext();
+        Expression expr = new ColumnExpression { ColumnName = "Id" };
+        var logicalNode = expr.Interpret(context);
     }
 }
 ```
@@ -286,6 +317,17 @@ public class LogicalPlanVisitor : IExpressionVisitor<LogicalNode>
     {
         // Generate logical node for column
         return new LogicalNode();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var columnExpr = new ColumnExpression { ColumnName = "Name" };
+        var visitor = new LogicalPlanVisitor();
+        var logicalNode = columnExpr.Accept(visitor);
     }
 }
 ```
@@ -510,6 +552,17 @@ public class QueryOptimizer
         return _strategy.Optimize(plan);
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var optimizer = new QueryOptimizer(new RuleBasedOptimizationStrategy());
+        var logicalPlan = new LogicalPlan();
+        var physicalPlan = optimizer.Optimize(logicalPlan);
+    }
+}
 ```
 
 #### Class diagram
@@ -686,6 +739,18 @@ public class PhysicalOperatorFactory : OperatorFactory
             LogicalSort sort => new SortOperator(),
             _ => throw new NotSupportedException($"Unsupported logical node: {node.GetType().Name}")
         };
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        OperatorFactory factory = new PhysicalOperatorFactory();
+        var logicalScan = new LogicalTableScan("Users");
+        var physicalOp = factory.CreateOperator(logicalScan);
+        physicalOp.Open();
     }
 }
 ```
@@ -938,6 +1003,21 @@ public class HashJoinOperator : BinaryOperator
         _rightChild.Close();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var scan1 = new TableScanOperator("Users");
+        var scan2 = new TableScanOperator("Orders");
+        var join = new HashJoinOperator();
+        join.AddChild(scan1);
+        join.AddChild(scan2);
+        
+        join.Open();
+    }
+}
 ```
 
 #### Class diagram
@@ -1141,6 +1221,23 @@ public class FilterOperator : PhysicalOperator
     public override void Close()
     {
         _child.Close();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var scan = new TableScanOperator(new List<Row>());
+        var filter = new FilterOperator(scan, r => true);
+        
+        filter.Open();
+        while (filter.Next())
+        {
+            var row = filter.GetCurrent();
+        }
+        filter.Close();
     }
 }
 ```
@@ -1385,6 +1482,17 @@ public class QueryOptimizer
         return new PhysicalPlan();
     }
 }
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var optimizer = new QueryOptimizer();
+        var plan = new LogicalPlan();
+        var optimizedPlan = optimizer.Optimize(plan);
+    }
+}
 ```
 
 ## 2.8. Proxy (Lazy Physical Operator)
@@ -1575,6 +1683,19 @@ public class LazyTableScanOperatorProxy : PhysicalOperator
     public override void Close()
     {
         _realOperator?.Close();
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var catalog = new CatalogManager();
+        var proxy = new LazyTableScanOperatorProxy("Users", catalog);
+        
+        proxy.Open(); // Initializes the real operator here
+        proxy.Next();
     }
 }
 ```
@@ -1848,6 +1969,228 @@ public class Program
         
         // The execute call will now be audited, logged/timed, and profiled
         var result = executor.Execute(plan);
+    }
+}
+```
+
+---
+
+## 2.10. Command (SQL Statement Execution)
+
+The **Command** pattern encapsulates parsed statements such as `SELECT`, `INSERT`, `UPDATE`, and `DELETE` as executable command objects. This decouples the dispatching of these statements from the core query execution engine.
+
+- Define an `ISqlCommand` interface with an `Execute` method.
+- Implement concrete command classes for each type of statement (e.g., `SelectCommand`, `InsertCommand`).
+- An invoker class (e.g., `QueryDispatcher`) receives the command and calls its `Execute()` method, providing the necessary execution context.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    direction TB
+    
+    class Client
+    
+    class Invoker {
+        +SetCommand(Command)
+        +ExecuteCommand()
+    }
+    
+    class Command {
+        <<interface>>
+        +Execute()
+    }
+    
+    class ConcreteCommandA {
+        -Receiver receiver
+        +Execute()
+    }
+    
+    class ConcreteCommandB {
+        -Receiver receiver
+        +Execute()
+    }
+    
+    class Receiver {
+        +Action()
+    }
+    
+    Client --> Invoker
+    Client --> ConcreteCommandA : creates
+    Invoker o--> Command : holds
+    Command <|.. ConcreteCommandA
+    Command <|.. ConcreteCommandB
+    ConcreteCommandA --> Receiver : invokes
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    direction TB
+    
+    class QueryDispatcher {
+        <<Invoker>>
+        +Dispatch(ISqlCommand command) QueryResult
+    }
+    
+    class ISqlCommand {
+        <<interface>>
+        +Execute(ExecutionContext context) QueryResult
+    }
+    
+    class SelectCommand {
+        -LogicalPlan _plan
+        -IQueryOptimizer _optimizer
+        -IQueryExecutor _executor
+        +Execute(ExecutionContext context) QueryResult
+    }
+    
+    class InsertCommand {
+        -string _tableName
+        -IEnumerable~Row~ _rows
+        +Execute(ExecutionContext context) QueryResult
+    }
+    
+    class ExecutionContext {
+        +CatalogManager Catalog
+        +ITransaction Transaction
+    }
+    
+    QueryDispatcher --> ISqlCommand : Dispatches
+    ISqlCommand <|.. SelectCommand
+    ISqlCommand <|.. InsertCommand
+    SelectCommand --> ExecutionContext : Uses
+    InsertCommand --> ExecutionContext : Uses
+```
+
+#### Sequence Diagram: Statement Dispatch
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Dispatcher as QueryDispatcher
+    participant Cmd as InsertCommand
+    participant Context as ExecutionContext
+    
+    Client->>Cmd: new InsertCommand(tableName, rows)
+    Client->>Dispatcher: Dispatch(Cmd)
+    activate Dispatcher
+    
+    Dispatcher->>Cmd: Execute(Context)
+    activate Cmd
+    
+    Note over Cmd: Modifies catalog/storage using Context
+    Cmd->>Context: Catalog.Find(tableName)
+    Context-->>Cmd: Table
+    
+    Cmd-->>Dispatcher: QueryResult
+    deactivate Cmd
+    
+    Dispatcher-->>Client: QueryResult
+    deactivate Dispatcher
+```
+
+#### Example code
+
+```csharp
+// Execution Context
+public class ExecutionContext
+{
+    public CatalogManager Catalog { get; set; }
+    public ITransaction Transaction { get; set; }
+}
+
+public class QueryResult
+{
+    public int RowsAffected { get; set; }
+    public IEnumerable<Row> Rows { get; set; }
+}
+
+// Command Interface
+public interface ISqlCommand
+{
+    QueryResult Execute(ExecutionContext context);
+}
+
+// Concrete Commands
+public class SelectCommand : ISqlCommand
+{
+    private readonly LogicalPlan _plan;
+    private readonly IQueryOptimizer _optimizer;
+    private readonly IQueryExecutor _executor;
+
+    public SelectCommand(LogicalPlan plan, IQueryOptimizer optimizer, IQueryExecutor executor)
+    {
+        _plan = plan;
+        _optimizer = optimizer;
+        _executor = executor;
+    }
+
+    public QueryResult Execute(ExecutionContext context)
+    {
+        var physicalPlan = _optimizer.Optimize(_plan);
+        return _executor.Execute(physicalPlan);
+    }
+}
+
+public class InsertCommand : ISqlCommand
+{
+    private readonly string _tableName;
+    private readonly IEnumerable<Row> _rows;
+
+    public InsertCommand(string tableName, IEnumerable<Row> rows)
+    {
+        _tableName = tableName;
+        _rows = rows;
+    }
+
+    public QueryResult Execute(ExecutionContext context)
+    {
+        var table = context.Catalog.Find<Table>(_tableName);
+        if (table == null)
+            throw new InvalidOperationException($"Table {_tableName} not found.");
+
+        int rowsAffected = 0;
+        foreach (var row in _rows)
+        {
+            table.Insert(row);
+            rowsAffected++;
+        }
+
+        return new QueryResult { RowsAffected = rowsAffected };
+    }
+}
+
+// Invoker
+public class QueryDispatcher
+{
+    private readonly ExecutionContext _context;
+
+    public QueryDispatcher(ExecutionContext context)
+    {
+        _context = context;
+    }
+
+    public QueryResult Dispatch(ISqlCommand command)
+    {
+        // Additional pre-execution logic (e.g., authorization, logging) can go here
+        return command.Execute(_context);
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        var context = new ExecutionContext();
+        var dispatcher = new QueryDispatcher(context);
+        
+        var rows = new List<Row>();
+        var command = new InsertCommand("Users", rows);
+        
+        var result = dispatcher.Dispatch(command);
     }
 }
 ```

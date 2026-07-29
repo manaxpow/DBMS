@@ -1,10 +1,10 @@
 public class OptimizationRuleBase : IOptimizationRule
 {
-    private IOptimizationRule _next;
+    private IOptimizationRule next = null!;
 
     public void SetNext(IOptimizationRule rule)
     {
-        _next = rule;
+        this.next = rule;
     }
 
     public virtual LogicalPlan Optimize(LogicalPlan plan)

@@ -1,12 +1,8 @@
-public abstract class ConstraintMetadata
+public abstract class ConstraintMetadata(string name, bool isEnabled = true)
 {
-    public string Name { get; set; }
-    public abstract ConstraintType Type { get; }
-    public bool IsEnabled { get; set; }
+    public string Name { get; set; } = name;
 
-    protected ConstraintMetadata(string name, bool isEnabled = true)
-    {
-        Name = name;
-        IsEnabled = isEnabled;
-    }
+    public abstract ConstraintType Type { get; }
+
+    public bool IsEnabled { get; set; } = isEnabled;
 }

@@ -16,7 +16,7 @@ You could model it like this:
 |  🔴 High  | `[ ]`  | **Memento**         | Database Checkpoint / Configuration Snapshot | Captures and restores database checkpoints or configuration snapshots.                      |
 | 🟡 Medium | `[x]`  | **State**           | Database Lifecycle         | Database transitions between Offline, Online, ReadOnly, Recovering, and Dropped states.       |
 | 🟡 Medium | `[x]`  | **Template Method** | Backup/Restore             | Defines a common workflow while allowing Full and Incremental implementations to differ.      |
-|  🟢 Low   | `[ ]`  | **Builder**         | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.           |
+|  🟢 Low   | `[x]`  | **Builder**         | Database Configuration     | Builds database configuration (page size, logging, storage, security) step by step.           |
 |  🟢 Low   | `[ ]`  | **Proxy**           | Database Access            | Adds authorization, lazy opening, remote access, or logging around database access.           |
 |  🟢 Low   | `[ ]`  | **Mediator**        | Subsystem Coordination     | Coordinates Storage, Catalog, Transaction, Recovery, Security, and Monitoring modules.        |
 |  🟢 Low   | `[ ]`  | **Decorator**       | Database Service Extension | Adds metrics, tracing, caching, or auditing without changing the core service.                |
@@ -1158,4 +1158,202 @@ sequenceDiagram
 
     DB-->>Client: Page
     deactivate DB
+```
+
+### 3.8. Builder (Database Configuration)
+
+The **Builder** pattern is used to construct a complex `DatabaseConfiguration` object step by step. A database configuration can have many optional parameters (e.g., page size, logging paths, memory limits, security settings). Instead of a constructor with many parameters or multiple setter calls, the Builder provides a fluent interface to configure these options clearly and safely before passing the final configuration to the `DatabaseManager` or `DatabaseServer`.
+
+#### Structure Diagram
+
+```mermaid
+classDiagram
+    class Director {
+        -Builder builder
+        +Construct()
+    }
+    class Builder {
+        <<interface>>
+        +BuildPart()
+    }
+    class ConcreteBuilder {
+        -Product product
+        +BuildPart()
+        +GetResult()
+    }
+    class Product {
+    }
+    Director o--> Builder
+    Builder <|.. ConcreteBuilder
+    ConcreteBuilder --> Product
+```
+
+#### Example code
+
+```csharp
+public class DatabaseConfiguration
+{
+    public string DatabaseName { get; set; }
+    public int PageSize { get; set; } = 4096; // Default
+    public string LogPath { get; set; }
+    public bool EncryptionEnabled { get; set; }
+    public int MaxConnections { get; set; } = 100;
+
+    public void PrintConfiguration()
+    {
+        Console.WriteLine($"DB Name: {DatabaseName}, Page Size: {PageSize}, " +
+                          $"Logs: {LogPath}, Encrypted: {EncryptionEnabled}, Max Conns: {MaxConnections}");
+    }
+}
+
+public interface IDatabaseConfigBuilder
+{
+    IDatabaseConfigBuilder SetName(string name);
+    IDatabaseConfigBuilder SetPageSize(int size);
+    IDatabaseConfigBuilder EnableLogging(string logPath);
+    IDatabaseConfigBuilder EnableEncryption();
+    IDatabaseConfigBuilder SetMaxConnections(int maxConnections);
+    DatabaseConfiguration Build();
+}
+
+public class DatabaseConfigBuilder : IDatabaseConfigBuilder
+{
+    private DatabaseConfiguration _config = new DatabaseConfiguration();
+
+    public IDatabaseConfigBuilder SetName(string name)
+    {
+        _config.DatabaseName = name;
+        return this;
+    }
+
+    public IDatabaseConfigBuilder SetPageSize(int size)
+    {
+        _config.PageSize = size;
+        return this;
+    }
+
+    public IDatabaseConfigBuilder EnableLogging(string logPath)
+    {
+        _config.LogPath = logPath;
+        return this;
+    }
+
+    public IDatabaseConfigBuilder EnableEncryption()
+    {
+        _config.EncryptionEnabled = true;
+        return this;
+    }
+
+    public IDatabaseConfigBuilder SetMaxConnections(int maxConnections)
+    {
+        _config.MaxConnections = maxConnections;
+        return this;
+    }
+
+    public DatabaseConfiguration Build()
+    {
+        // Validation could go here
+        if (string.IsNullOrEmpty(_config.DatabaseName))
+        {
+            throw new InvalidOperationException("Database name is required.");
+        }
+        
+        var result = _config;
+        _config = new DatabaseConfiguration(); // Reset for next build
+        return result;
+    }
+}
+
+// Usage Example
+public class Program
+{
+    public static void Main()
+    {
+        IDatabaseConfigBuilder builder = new DatabaseConfigBuilder();
+        
+        DatabaseConfiguration config = builder
+            .SetName("MySecureDB")
+            .SetPageSize(8192)
+            .EnableLogging("/var/log/mydb/")
+            .EnableEncryption()
+            .SetMaxConnections(500)
+            .Build();
+            
+        config.PrintConfiguration();
+    }
+}
+```
+
+#### Class diagram
+
+```mermaid
+classDiagram
+    class Client
+    
+    class DatabaseConfiguration {
+        +string DatabaseName
+        +int PageSize
+        +string LogPath
+        +bool EncryptionEnabled
+        +int MaxConnections
+        +PrintConfiguration()
+    }
+    
+    class IDatabaseConfigBuilder {
+        <<interface>>
+        +SetName(string name) IDatabaseConfigBuilder
+        +SetPageSize(int size) IDatabaseConfigBuilder
+        +EnableLogging(string logPath) IDatabaseConfigBuilder
+        +EnableEncryption() IDatabaseConfigBuilder
+        +SetMaxConnections(int maxConnections) IDatabaseConfigBuilder
+        +Build() DatabaseConfiguration
+    }
+    
+    class DatabaseConfigBuilder {
+        -DatabaseConfiguration _config
+        +SetName(string name) IDatabaseConfigBuilder
+        +SetPageSize(int size) IDatabaseConfigBuilder
+        +EnableLogging(string logPath) IDatabaseConfigBuilder
+        +EnableEncryption() IDatabaseConfigBuilder
+        +SetMaxConnections(int maxConnections) IDatabaseConfigBuilder
+        +Build() DatabaseConfiguration
+    }
+    
+    Client --> IDatabaseConfigBuilder : uses
+    IDatabaseConfigBuilder <|.. DatabaseConfigBuilder
+    DatabaseConfigBuilder --> DatabaseConfiguration : builds
+    Client ..> DatabaseConfiguration : uses
+```
+
+#### Sequence Diagram: Configuration Building
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Builder as DatabaseConfigBuilder
+    participant Config as DatabaseConfiguration
+
+    Client->>Builder: new DatabaseConfigBuilder()
+    activate Builder
+    Builder->>Config: new DatabaseConfiguration() (default values)
+    deactivate Builder
+
+    Client->>Builder: SetName("MySecureDB")
+    activate Builder
+    Builder->>Config: set DatabaseName
+    Builder-->>Client: this
+    deactivate Builder
+
+    Client->>Builder: EnableEncryption()
+    activate Builder
+    Builder->>Config: set EncryptionEnabled
+    Builder-->>Client: this
+    deactivate Builder
+    
+    Client->>Builder: Build()
+    activate Builder
+    Builder->>Builder: Validate()
+    Builder-->>Client: DatabaseConfiguration (Product)
+    deactivate Builder
 ```

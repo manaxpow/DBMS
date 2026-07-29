@@ -10,10 +10,10 @@ public class PrototypeTests
     {
         // Arrange
         var original = new Schema("TestSchema");
-        
+
         // Act
         var clone = (Schema)original.Clone();
-        
+
         // Assert
         clone.Should().NotBeSameAs(original);
         clone.Name.Should().Be("TestSchema_Clone");
@@ -26,16 +26,16 @@ public class PrototypeTests
         // Arrange
         var original = new Table("TestTable");
         original.AddColumn(new Column("Id", typeof(int), false));
-        
+
         // Act
         var clone = (Table)original.Clone();
-        
+
         // Assert
         clone.Should().NotBeSameAs(original);
         clone.Name.Should().Be("TestTable_Clone");
         clone.Columns.Should().NotBeSameAs(original.Columns);
         clone.Columns.Should().HaveCount(original.Columns.Count);
-        
+
         // Deep copy check for Columns
         if (original.Columns.Count > 0)
         {
@@ -49,10 +49,10 @@ public class PrototypeTests
     {
         // Arrange
         var original = new View("TestView", "SELECT * FROM Table");
-        
+
         // Act
         var clone = (View)original.Clone();
-        
+
         // Assert
         clone.Should().NotBeSameAs(original);
         clone.Name.Should().Be("TestView_Clone");
@@ -64,10 +64,10 @@ public class PrototypeTests
     {
         // Arrange
         var original = new StoredProcedure("TestSp", "BEGIN END;");
-        
+
         // Act
         var clone = (StoredProcedure)original.Clone();
-        
+
         // Assert
         clone.Should().NotBeSameAs(original);
         clone.Name.Should().Be("TestSp_Clone");

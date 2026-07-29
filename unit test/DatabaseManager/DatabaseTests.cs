@@ -171,7 +171,7 @@ public class DatabaseTests
         var storageEngine = Substitute.For<IStorageEngine>();
         var expectedPage = new Page(new PageId(105), new byte[4096]);
         storageEngine.FetchPage(105).Returns(expectedPage);
-        
+
         var database = new RelationalDatabase(storageEngine);
 
         // Act

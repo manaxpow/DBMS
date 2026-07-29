@@ -2,16 +2,27 @@ using System;
 
 public class ReadOnlyState : IDatabaseState
 {
-    private Database _database;
+    private Database database;
 
     public ReadOnlyState(Database database)
     {
-        _database = database;
+        this.database = database;
     }
-    public void Open() {
+
+    public void Open()
+    {
         throw new InvalidOperationException();
     }
-    public void SetReadOnly() { }
-    public void Recovery() { }
-    public void Drop() { }
+
+    public void SetReadOnly()
+    {
+    }
+
+    public void Recovery()
+    {
+    }
+
+    public void Drop()
+    {
+    }
 }

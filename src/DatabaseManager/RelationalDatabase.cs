@@ -2,25 +2,35 @@ using DBMS.Exceptions;
 
 public class RelationalDatabase : Database
 {
-    public RelationalDatabase() { }
+    public RelationalDatabase()
+    {
+    }
 
-    public RelationalDatabase(IStorageEngine storageEngine) : base(storageEngine) { }
+    public RelationalDatabase(IStorageEngine storageEngine)
+        : base(storageEngine)
+    {
+    }
+
     public void ChangeState(IDatabaseState state)
     {
-        typeof(Database).GetField("_state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(this, state);
+        typeof(Database).GetField("state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.SetValue(this, state);
     }
+
     public void Open()
     {
         throw new NotImplementedException();
     }
+
     public void SetReadOnly()
     {
         throw new NotImplementedException();
     }
+
     public void Recovery()
     {
         throw new NotImplementedException();
     }
+
     public void Drop()
     {
         throw new NotImplementedException();

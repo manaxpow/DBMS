@@ -2,16 +2,16 @@ using DBMS.Exceptions;
 
 public class DatabaseManager
 {
-    private CatalogManager _catalog;
-    private static DatabaseManager _instance;
-    public static DatabaseManager Instance => throw new NotImplementedException();
-    private Dictionary<string, Database> _databases;
+    private CatalogManager catalog;
+    private Dictionary<string, Database> databases;
 
     public DatabaseManager()
     {
-        _catalog = new CatalogManager();
-        _databases = new Dictionary<string, Database>();
+        this.catalog = new CatalogManager();
+        this.databases = new Dictionary<string, Database>();
     }
+
+    public static DatabaseManager Instance => throw new NotImplementedException();
 
     public void CreateDatabase(string name)
     {

@@ -1,3 +1,7 @@
-﻿public class LogicalNestedLoopJoin : LogicalNode {
-    public LogicalNestedLoopJoin() { Type = LogicalNodeType.Join; }
+public class LogicalNestedLoopJoin : LogicalNode
+{
+    public LogicalNestedLoopJoin()
+    {
+        this.Type = LogicalNodeType.Join;
+    }
 }

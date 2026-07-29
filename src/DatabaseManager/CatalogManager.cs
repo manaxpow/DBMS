@@ -1,13 +1,12 @@
 public class CatalogManager
 {
-    private Dictionary<string, ICatalogObject> _store;
-
     public void Register(ICatalogObject obj)
     {
         throw new NotImplementedException();
     }
 
-    public T Find<T>(string name) where T : class, ICatalogObject
+    public T Find<T>(string name)
+        where T : class, ICatalogObject
     {
         throw new NotImplementedException();
     }

@@ -1,9 +1,10 @@
 public class StoredProcedureIterator : ISchemaObjectIterator
 {
-    private IReadOnlyList<ISchemaObject> _storedProcedures;
+    private IReadOnlyList<ISchemaObject> storedProcedures;
+
     public StoredProcedureIterator(IReadOnlyList<ISchemaObject> storedProcedures)
     {
-        _storedProcedures = storedProcedures;
+        this.storedProcedures = storedProcedures;
     }
 
     public bool HasNext()

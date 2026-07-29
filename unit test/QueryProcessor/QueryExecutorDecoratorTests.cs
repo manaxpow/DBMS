@@ -1,7 +1,7 @@
 using System;
 using FluentAssertions;
 using Xunit;
-using Moq;
+using NSubstitute;
 
 public class QueryExecutorDecoratorTests
 {
@@ -9,65 +9,65 @@ public class QueryExecutorDecoratorTests
     public void QueryExecutionLoggerDecorator_Execute_ShouldLogStartAndSuccess()
     {
         // Arrange
-        var mockExecutor = new Mock<IQueryExecutor>();
-        var mockLogger = new Mock<ILogger>();
+        var mockExecutor = Substitute.For<IQueryExecutor>();
+        var mockLogger = Substitute.For<ILogger>();
         var plan = new PhysicalPlan();
-        var expectedResult = new QueryResult();
+        var expectedResult = new ResultSet();
 
-        mockExecutor.Setup(e => e.Execute(plan)).Returns(expectedResult);
+        mockExecutor.Execute(plan).Returns(expectedResult);
 
-        var decorator = new QueryExecutionLoggerDecorator(mockExecutor.Object, mockLogger.Object);
+        var decorator = new QueryExecutionLoggerDecorator(mockExecutor, mockLogger);
 
         // Act
         var result = decorator.Execute(plan);
 
         // Assert
         result.Should().Be(expectedResult);
-        mockLogger.Verify(l => l.Log(It.Is<string>(s => s.Contains("[Start]"))), Times.Once);
-        mockLogger.Verify(l => l.Log(It.Is<string>(s => s.Contains("[Success]"))), Times.Once);
-        mockExecutor.Verify(e => e.Execute(plan), Times.Once);
+        mockLogger.Received(1).Log(Arg.Is<string>(s => s.Contains("[Start]")));
+        mockLogger.Received(1).Log(Arg.Is<string>(s => s.Contains("[Success]")));
+        mockExecutor.Received(1).Execute(plan);
     }
 
     [Fact]
     public void ProfilingDecorator_Execute_ShouldExecuteInner()
     {
         // Arrange
-        var mockExecutor = new Mock<IQueryExecutor>();
+        var mockExecutor = Substitute.For<IQueryExecutor>();
         var plan = new PhysicalPlan();
-        var expectedResult = new QueryResult();
+        var expectedResult = new ResultSet();
 
-        mockExecutor.Setup(e => e.Execute(plan)).Returns(expectedResult);
+        mockExecutor.Execute(plan).Returns(expectedResult);
 
-        var decorator = new ProfilingDecorator(mockExecutor.Object);
+        var decorator = new ProfilingDecorator(mockExecutor);
 
         // Act
         var result = decorator.Execute(plan);
 
         // Assert
         result.Should().Be(expectedResult);
-        mockExecutor.Verify(e => e.Execute(plan), Times.Once);
+        mockExecutor.Received(1).Execute(plan);
     }
 
     [Fact]
     public void AuditDecorator_Execute_ShouldRecordStartAndEnd()
     {
         // Arrange
-        var mockExecutor = new Mock<IQueryExecutor>();
-        var mockAuditLogger = new Mock<IAuditLogger>();
+        var mockExecutor = Substitute.For<IQueryExecutor>();
+        var mockAuditLogger = Substitute.For<IAuditLogger>();
         var plan = new PhysicalPlan();
-        var expectedResult = new QueryResult();
+        var expectedResult = new ResultSet();
 
-        mockExecutor.Setup(e => e.Execute(plan)).Returns(expectedResult);
+        mockExecutor.Execute(plan).Returns(expectedResult);
 
-        var decorator = new AuditDecorator(mockExecutor.Object, mockAuditLogger.Object);
+        var decorator = new AuditDecorator(mockExecutor, mockAuditLogger);
 
         // Act
         var result = decorator.Execute(plan);
 
         // Assert
         result.Should().Be(expectedResult);
-        mockAuditLogger.Verify(a => a.Record(It.Is<string>(s => s.Contains("requested"))), Times.Once);
-        mockAuditLogger.Verify(a => a.Record(It.Is<string>(s => s.Contains("completed"))), Times.Once);
-        mockExecutor.Verify(e => e.Execute(plan), Times.Once);
+        mockAuditLogger.Received(1).Record(Arg.Is<string>(s => s.Contains("requested")));
+        mockAuditLogger.Received(1).Record(Arg.Is<string>(s => s.Contains("completed")));
+        mockExecutor.Received(1).Execute(plan);
     }
 }

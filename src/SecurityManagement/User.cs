@@ -2,7 +2,7 @@ using System;
 
 public class User
 {
-    public string Username { get; set; }
+    public string Username { get; set; } = null!;
 
     public void AssignRole(Role role)
     {

@@ -1,9 +1,7 @@
-public sealed class CheckConstraintMetadata : ConstraintMetadata
+public sealed class CheckConstraintMetadata(string expression, string name, bool isEnabled = true)
+    : ConstraintMetadata(name, isEnabled)
 {
     public override ConstraintType Type => ConstraintType.Check;
-    public string Expression { get; }
-    public CheckConstraintMetadata(string expression, string name, bool isEnabled = true) : base(name, isEnabled)
-    {
-        Expression = expression;
-    }
+
+    public string IExpression { get; } = expression;
 }

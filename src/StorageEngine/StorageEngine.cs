@@ -1,22 +1,10 @@
 using System;
 
-
-
 public class StorageEngine : IServerComponent
 {
     public EngineState State { get; set; }
 
     public void Start(object configuration)
-    {
-        throw new NotImplementedException();
-    }
-
-    private bool ValidateConfiguration(object configuration)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void SetState(object state)
     {
         throw new NotImplementedException();
     }
@@ -37,6 +25,16 @@ public class StorageEngine : IServerComponent
     }
 
     public void DropTableStorage(int tableId)
+    {
+        throw new NotImplementedException();
+    }
+
+    private bool ValidateConfiguration(object configuration)
+    {
+        throw new NotImplementedException();
+    }
+
+    private void SetState(object state)
     {
         throw new NotImplementedException();
     }

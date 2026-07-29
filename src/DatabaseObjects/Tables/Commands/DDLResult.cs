@@ -1,5 +1,5 @@
 public enum DDLResult
 {
     Success,
-    Failure
+    Failure,
 }

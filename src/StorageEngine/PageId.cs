@@ -1,1 +1,1 @@
-public record PageId(int Value);
+public record PageId(int value);

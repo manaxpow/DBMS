@@ -1,11 +1,7 @@
-public sealed class PrimaryKeyConstraintMetadata : ConstraintMetadata
+public sealed class PrimaryKeyConstraintMetadata(string name, IEnumerable<string> columnNames, bool isEnabled = true)
+    : ConstraintMetadata(name, isEnabled)
 {
     public override ConstraintType Type => ConstraintType.PrimaryKey;
 
-    public IReadOnlyList<string> ColumnNames { get; }
-
-    public PrimaryKeyConstraintMetadata(string name, IEnumerable<string> columnNames, bool isEnabled = true) : base(name, isEnabled)
-    {
-        ColumnNames = columnNames.ToList().AsReadOnly();
-    }
+    public IReadOnlyList<string> ColumnNames { get; } = columnNames.ToList().AsReadOnly();
 }

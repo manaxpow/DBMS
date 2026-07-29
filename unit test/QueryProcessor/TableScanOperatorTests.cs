@@ -23,7 +23,7 @@ public class TableScanOperatorTests
 
         // Act
         sut.Open();
-        
+
         // Assert
         var hasNext = sut.Next();
         hasNext.Should().BeTrue();
@@ -74,7 +74,7 @@ public class TableScanOperatorTests
         // Act
         sut.Next();
         var current1 = sut.GetCurrent();
-        
+
         sut.Next();
         var current2 = sut.GetCurrent();
 

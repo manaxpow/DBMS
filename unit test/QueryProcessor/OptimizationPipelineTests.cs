@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
-using Moq;
+using NSubstitute;
 
 public class OptimizationPipelineTests
 {
@@ -10,34 +10,34 @@ public class OptimizationPipelineTests
     public void Optimize_ShouldPassThroughChainInCorrectOrder()
     {
         // Arrange
-        var mockRule1 = new Mock<IOptimizationRule>();
-        var mockRule2 = new Mock<IOptimizationRule>();
-        var mockRule3 = new Mock<IOptimizationRule>();
+        var mockRule1 = Substitute.For<IOptimizationRule>();
+        var mockRule2 = Substitute.For<IOptimizationRule>();
+        var mockRule3 = Substitute.For<IOptimizationRule>();
         var plan = new LogicalPlan();
 
         // Setup the chain manually for the test
         var callOrder = new List<string>();
 
-        mockRule1.Setup(r => r.Optimize(It.IsAny<LogicalPlan>())).Returns((LogicalPlan p) => 
+        mockRule1.Optimize(Arg.Any<LogicalPlan>()).Returns(x =>
         {
             callOrder.Add("Rule1");
-            return mockRule2.Object.Optimize(p);
-        });
-        
-        mockRule2.Setup(r => r.Optimize(It.IsAny<LogicalPlan>())).Returns((LogicalPlan p) => 
-        {
-            callOrder.Add("Rule2");
-            return mockRule3.Object.Optimize(p);
+            return mockRule2.Optimize(x.Arg<LogicalPlan>());
         });
 
-        mockRule3.Setup(r => r.Optimize(It.IsAny<LogicalPlan>())).Returns((LogicalPlan p) => 
+        mockRule2.Optimize(Arg.Any<LogicalPlan>()).Returns(x =>
+        {
+            callOrder.Add("Rule2");
+            return mockRule3.Optimize(x.Arg<LogicalPlan>());
+        });
+
+        mockRule3.Optimize(Arg.Any<LogicalPlan>()).Returns(x =>
         {
             callOrder.Add("Rule3");
-            return p;
+            return x.Arg<LogicalPlan>();
         });
 
         // Act
-        var result = mockRule1.Object.Optimize(plan);
+        var result = mockRule1.Optimize(plan);
 
         // Assert
         callOrder.Should().ContainInOrder("Rule1", "Rule2", "Rule3");
@@ -93,9 +93,9 @@ public class OptimizationPipelineTests
     public void Rule_WhenNextIsNull_ShouldReturnPlan()
     {
         // Arrange
-        var rule = new ConstantFoldingRule(); 
+        var rule = new ConstantFoldingRule();
         var plan = new LogicalPlan();
-        
+
         // Act
         // SetNext is not called, so _next is null
         var result = rule.Optimize(plan);

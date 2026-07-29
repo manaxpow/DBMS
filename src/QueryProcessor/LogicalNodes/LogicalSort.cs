@@ -1,3 +1,7 @@
-﻿public class LogicalSort : LogicalNode {
-    public LogicalSort() { Type = LogicalNodeType.Sort; }
+public class LogicalSort : LogicalNode
+{
+    public LogicalSort()
+    {
+        this.Type = LogicalNodeType.Sort;
+    }
 }

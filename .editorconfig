@@ -1,0 +1,28 @@
+root = true
+
+[*.cs]
+
+# comment XML and file header
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1601.severity = none
+dotnet_diagnostic.SA1602.severity = none
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1649.severity = none
+
+# keep
+dotnet_diagnostic.SA1128.severity = warning
+dotnet_diagnostic.SA1502.severity = warning
+dotnet_diagnostic.SA1302.severity = warning
+dotnet_diagnostic.SA1401.severity = warning
+dotnet_diagnostic.SA1402.severity = warning
+
+# _ rule
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.severity = warning
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_should_be_prefixed_with_underscore.style = underscore_prefix
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.underscore_prefix.required_prefix = _
+dotnet_naming_style.underscore_prefix.capitalization = camel_case

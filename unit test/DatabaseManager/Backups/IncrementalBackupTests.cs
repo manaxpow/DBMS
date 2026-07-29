@@ -18,7 +18,7 @@ namespace DBMS.UnitTests.DatabaseManager.Backups
             // Assert
             act.Should().NotThrow();
         }
-        
+
         [Fact]
         public void FinalizeBackup_ShouldExecuteWithoutError()
         {

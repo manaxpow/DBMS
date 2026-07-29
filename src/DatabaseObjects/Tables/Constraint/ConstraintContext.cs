@@ -1,15 +1,10 @@
-public class ConstraintContext
+public class ConstraintContext(Row candidateRow, Table table, Schema schema, Row? existingRow = null)
 {
-    public Row CandidateRow { get; }
-    public Row? ExistingRow { get; }
-    public Table Table { get; }
-    public Schema Schema { get; }
+    public Row CandidateRow { get; } = candidateRow;
 
-    public ConstraintContext(Row candidateRow, Table table, Schema schema, Row? existingRow = null)
-    {
-        CandidateRow = candidateRow;
-        Table = table;
-        Schema = schema;
-        ExistingRow = existingRow;
-    }
+    public Row? ExistingRow { get; } = existingRow;
+
+    public Table Table { get; } = table;
+
+    public Schema Schema { get; } = schema;
 }

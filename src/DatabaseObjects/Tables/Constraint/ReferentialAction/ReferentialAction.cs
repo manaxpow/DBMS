@@ -4,5 +4,5 @@ public enum ReferentialAction
     Restrict,
     Cascade,
     SetNull,
-    SetDefault
+    SetDefault,
 }

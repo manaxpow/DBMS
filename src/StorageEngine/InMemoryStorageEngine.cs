@@ -2,9 +2,11 @@ using System.Collections.Generic;
 
 public class InMemoryStorageEngine : IStorageEngine
 {
-    private readonly Dictionary<int, Page> _pages = new();
+    private readonly Dictionary<PageId, Page> memoryPages = new Dictionary<PageId, Page>();
 
-    public void Mount() { }
+    public void Mount()
+    {
+    }
 
     public Page FetchPage(int pageId)
     {

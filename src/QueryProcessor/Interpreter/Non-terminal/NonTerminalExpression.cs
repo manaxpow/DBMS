@@ -1,4 +1,4 @@
-public abstract class NonTerminalExpression : Expression
+public abstract class NonTerminalExpression : IExpression
 {
     public abstract T Accept<T>(IExpressionVisitor<T> visitor);
 

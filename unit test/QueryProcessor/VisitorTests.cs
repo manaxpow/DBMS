@@ -11,7 +11,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void ColumnExpression_Accept_ShouldCallVisitColumnExpression()
-    {
+        {
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<bool>>();
             visitor.Visit(Arg.Any<ColumnExpression>()).Returns(true);
@@ -28,7 +28,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void LiteralExpression_Accept_ShouldCallVisitLiteralExpression()
-    {
+        {
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<int>>();
             visitor.Visit(Arg.Any<LiteralExpression>()).Returns(42);
@@ -45,7 +45,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void BinaryExpression_Accept_ShouldCallVisitBinaryExpression()
-    {
+        {
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<string>>();
             visitor.Visit(Arg.Any<BinaryExpression>()).Returns("ok");
@@ -62,7 +62,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void WhereExpression_Accept_ShouldCallVisitWhereExpression()
-    {
+        {
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<bool>>();
             visitor.Visit(Arg.Any<WhereExpression>()).Returns(false);
@@ -79,7 +79,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void SelectExpression_Accept_ShouldCallVisitSelectExpression()
-    {
+        {
             // Arrange
             var visitor = Substitute.For<IExpressionVisitor<int>>();
             visitor.Visit(Arg.Any<SelectExpression>()).Returns(1);
@@ -100,7 +100,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void SemanticAnalysVisitor_Visit_ColumnExpression_ShouldReturnTrueForValidColumn()
-    {
+        {
             // Arrange
             var visitor = new SemanticAnalysVisitor();
             var expr = new ColumnExpression { ColumnName = "name" };
@@ -116,14 +116,14 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void SemanticAnalysVisitor_Visit_BinaryExpression_ShouldTraverseLeftAndRight()
-    {
+        {
             // Arrange
             var visitor = new SemanticAnalysVisitor();
-            
-            var left = Substitute.For<Expression>();
+
+            var left = Substitute.For<IExpression>();
             left.Accept(visitor).Returns(true);
-            
-            var right = Substitute.For<Expression>();
+
+            var right = Substitute.For<IExpression>();
             right.Accept(visitor).Returns(true);
 
             var expr = new BinaryExpression { Left = left, Right = right };
@@ -140,25 +140,25 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void SemanticAnalysVisitor_Visit_SelectExpression_ShouldTraverseColumnsAndWhere()
-    {
+        {
             // Arrange
             var visitor = new SemanticAnalysVisitor();
-            
-            var col1 = Substitute.For<Expression>();
+
+            var col1 = Substitute.For<IExpression>();
             col1.Accept(visitor).Returns(true);
-            
-            var col2 = Substitute.For<Expression>();
+
+            var col2 = Substitute.For<IExpression>();
             col2.Accept(visitor).Returns(true);
 
-            var where = Substitute.For<Expression>();
+            var where = Substitute.For<IExpression>();
             where.Accept(visitor).Returns(true);
 
-            var from = Substitute.For<Expression>();
+            var from = Substitute.For<IExpression>();
             from.Accept(visitor).Returns(true);
 
-            var expr = new SelectExpression 
-            { 
-                Columns = new List<Expression> { col1, col2 },
+            var expr = new SelectExpression
+            {
+                Columns = new List<IExpression> { col1, col2 },
                 Where = where,
                 From = from
             };
@@ -181,7 +181,7 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void LogicalPlanVisitor_Visit_ColumnExpression_ShouldReturnLogicalNode()
-    {
+        {
             // Arrange
             var visitor = new LogicalPlanVisitor();
             var expr = new ColumnExpression { ColumnName = "name" };
@@ -197,14 +197,14 @@ namespace DBMS.UnitTests.QueryProcessor
         [Trait("Category", "Important")]
         [Fact]
         public void LogicalPlanVisitor_Visit_BinaryExpression_ShouldCombineLeftAndRightNodes()
-    {
+        {
             // Arrange
             var visitor = new LogicalPlanVisitor();
-            
-            var left = Substitute.For<Expression>();
+
+            var left = Substitute.For<IExpression>();
             left.Accept(visitor).Returns(new LogicalNode());
-            
-            var right = Substitute.For<Expression>();
+
+            var right = Substitute.For<IExpression>();
             right.Accept(visitor).Returns(new LogicalNode());
 
             var expr = new BinaryExpression { Left = left, Right = right, Operator = "=" };

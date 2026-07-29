@@ -1,16 +1,26 @@
 public class OfflineState : IDatabaseState
 {
-    private Database _database;
+    private Database database;
 
     public OfflineState(Database database)
     {
-        _database = database;
+        this.database = database;
     }
-    public void Open() {
+
+    public void Open()
+    {
         throw new NotImplementedException();
     }
-    public void SetReadOnly() { }
-    public void Recovery() { }
-    public void Drop() { }
-}
 
+    public void SetReadOnly()
+    {
+    }
+
+    public void Recovery()
+    {
+    }
+
+    public void Drop()
+    {
+    }
+}

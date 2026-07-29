@@ -1,12 +1,12 @@
 public class DropTableCommand : IDDLCommand
 {
-    private readonly Schema _schema;
-    private readonly string _tableName;
+    private readonly Schema schema;
+    private readonly string tableName;
 
     public DropTableCommand(Schema schema, string tableName)
     {
-        _schema = schema;
-        _tableName = tableName;
+        this.schema = schema;
+        this.tableName = tableName;
     }
 
     public DDLResult Execute()

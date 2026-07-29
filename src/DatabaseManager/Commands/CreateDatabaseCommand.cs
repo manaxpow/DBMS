@@ -1,16 +1,16 @@
 public class CreateDatabaseCommand : IDDLCommand
 {
-    private DatabaseManager _databaseManager;
-    private string _databaseName;
+    private DatabaseManager databaseManager;
+    private string databaseName;
 
     public CreateDatabaseCommand(DatabaseManager databaseManager, string databaseName)
     {
-        _databaseManager = databaseManager;
-        _databaseName = databaseName;
+        this.databaseManager = databaseManager;
+        this.databaseName = databaseName;
     }
+
     public DDLResult Execute()
     {
         throw new NotImplementedException();
     }
 }
-

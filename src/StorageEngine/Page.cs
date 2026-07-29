@@ -1,22 +1,16 @@
 using System;
 using System.Collections.Generic;
 
-
-
-public class Page
+public class Page(PageId pageId, byte[] data)
 {
-    public PageId PageId { get; set; }
-    public int FreeSpace { get; set; }
-    public byte[] Data { get; set; }
-    public List<Slot> SlotDirectory { get; set; }
+    public PageId PageId { get; set; } = pageId;
 
-    public Page(PageId pageId, byte[] data)
-    {
-        PageId = pageId;
-        Data = data;
-        FreeSpace = data.Length;
-        SlotDirectory = new List<Slot>();
-    }
+    public int FreeSpace { get; set; } = data.Length;
+
+    public byte[] Data { get; set; } = data;
+
+    public List<Slot> SlotDirectory { get; set; } = new List<Slot>();
+
     public object InsertRecord(object record)
     {
         throw new NotImplementedException();
@@ -28,6 +22,11 @@ public class Page
     }
 
     public void DeleteRecord(object slotId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object Read()
     {
         throw new NotImplementedException();
     }
@@ -68,11 +67,6 @@ public class Page
     }
 
     private void RemoveOrInvalidateSlot(object slotId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public object Read()
     {
         throw new NotImplementedException();
     }

@@ -2,8 +2,6 @@ using System.IO;
 
 public class DiskStorageEngine : IStorageEngine
 {
-    private readonly string _storageDir = "disk_storage";
-
     public void Mount()
     {
         throw new NotImplementedException();

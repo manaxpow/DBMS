@@ -1,13 +1,12 @@
 public class SchemaObjectsIterator : ISchemaObjectIterator
 {
-    private IReadOnlyList<ISchemaObject> _objects;
-    private int _index;
+    private IReadOnlyList<ISchemaObject> objects;
 
     public SchemaObjectsIterator(IReadOnlyList<ISchemaObject> objects)
     {
-        _objects = objects;
-        _index = 0;
+        this.objects = objects;
     }
+
     public bool HasNext()
     {
         throw new NotImplementedException();

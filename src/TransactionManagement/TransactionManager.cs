@@ -11,6 +11,7 @@ public class TransactionManager : IServerComponent
     {
         throw new NotImplementedException();
     }
+
     public Transaction BeginTransaction()
     {
         throw new NotImplementedException();

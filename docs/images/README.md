@@ -27,3 +27,7 @@
 ## Clean Architecture
 
 ![CleanArchitecture](./CleanArchitecture.png)
+
+## EFCore
+
+![EFCore](./EFCore.png)

@@ -19,3 +19,15 @@
 ## OAuth 2.0
 
 ![OAuth 2.0](./OAuth2.0.png)
+
+## MVC
+
+![MVC](./MVC.png)
+
+## Clean Architecture
+
+![CleanArchitecture](./CleanArchitecture.png)
+
+## EFCore
+
+![EFCore](./EFCore.png)

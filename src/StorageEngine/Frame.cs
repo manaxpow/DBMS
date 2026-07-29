@@ -1,26 +1,10 @@
-public sealed class Frame
+public sealed class Frame(FrameId id, Page? page = null)
 {
-    public FrameId Id { get; init; }
+    public FrameId Id { get; init; } = id;
 
-    public Page? Page { get; internal set; }
+    public Page? Page { get; internal set; } = page;
 
-    public bool IsDirty { get; internal set; }
+    public bool IsDirty { get; internal set; } = false;
 
-    public int PinCount { get; internal set; }
-
-    public Frame(FrameId id)
-    {
-        Id = id;
-        Page = null;
-        IsDirty = false;
-        PinCount = 0;
-    }
-
-    public Frame(FrameId id, Page page)
-    {
-        Id = id;
-        Page = page;
-        IsDirty = false;
-        PinCount = 0;
-    }
+    public int PinCount { get; internal set; } = 0;
 }

@@ -296,10 +296,10 @@ public class TableTests
         _table.AddColumn(column1);
         var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
         _table.AddConstraint(constraint);
-        
+
         var row1 = new Row(_table, new List<object> { 1 });
         var row2 = new Row(_table, new List<object> { 1 });
-        
+
         _table.InsertRow(row1);
 
         // Act
@@ -319,12 +319,12 @@ public class TableTests
         _table.AddColumn(column1);
         var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
         _table.AddConstraint(constraint);
-        
+
         var row1 = new Row(_table, new List<object> { 1 });
         var row2 = new Row(_table, new List<object> { 2 });
         _table.InsertRow(row1);
         _table.InsertRow(row2);
-        
+
         var updatedRow2 = new Row(_table, new List<object> { 1 });
 
         // Act

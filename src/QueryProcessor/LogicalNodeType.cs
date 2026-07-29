@@ -5,5 +5,5 @@ public enum LogicalNodeType
     Scan,
     Join,
     IndexScan,
-    Sort
+    Sort,
 }

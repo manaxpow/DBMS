@@ -6,9 +6,9 @@ public class CostBasedOptimizationStrategy : IOptimizationStrategy
 {
     public PhysicalPlan Optimize(LogicalPlan plan)
     {
-        var candidates = GenerateCandidatePlans(plan);
-        EstimateCost(candidates);
-        return SelectBestPlan(candidates);
+        var candidates = this.GenerateCandidatePlans(plan);
+        this.EstimateCost(candidates);
+        return this.SelectBestPlan(candidates);
     }
 
     public virtual List<PhysicalPlan> GenerateCandidatePlans(LogicalPlan plan)

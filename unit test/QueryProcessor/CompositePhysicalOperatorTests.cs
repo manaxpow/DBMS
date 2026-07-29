@@ -24,7 +24,7 @@ public class CompositePhysicalOperatorTests
         // Arrange
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
-        
+
         // Act
         composite.AddChild(child);
 
@@ -41,7 +41,7 @@ public class CompositePhysicalOperatorTests
         var composite = new TestCompositeOperator();
         var child = new TestLeafOperator();
         composite.AddChild(child);
-        
+
         // Act
         composite.RemoveChild(child);
 

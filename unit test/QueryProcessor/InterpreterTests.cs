@@ -68,11 +68,11 @@ namespace DBMS.UnitTests.QueryProcessor
             // Arrange
             var context = Substitute.For<InterpretationContext>();
 
-            var leftExpr = Substitute.For<Expression>();
+            var leftExpr = Substitute.For<IExpression>();
             var leftNode = new LogicalNode();
             leftExpr.Interpret(context).Returns(leftNode);
 
-            var rightExpr = Substitute.For<Expression>();
+            var rightExpr = Substitute.For<IExpression>();
             var rightNode = new LogicalNode();
             rightExpr.Interpret(context).Returns(rightNode);
 
@@ -98,7 +98,7 @@ namespace DBMS.UnitTests.QueryProcessor
         {
             // Arrange
             var context = Substitute.For<InterpretationContext>();
-            var conditionExpr = Substitute.For<Expression>();
+            var conditionExpr = Substitute.For<IExpression>();
             var conditionNode = new LogicalNode();
             conditionExpr.Interpret(context).Returns(conditionNode);
 
@@ -119,20 +119,20 @@ namespace DBMS.UnitTests.QueryProcessor
             // Arrange
             var context = Substitute.For<InterpretationContext>();
 
-            var fromExpr = Substitute.For<Expression>();
+            var fromExpr = Substitute.For<IExpression>();
             fromExpr.Interpret(context).Returns(new LogicalNode());
 
-            var whereExpr = Substitute.For<Expression>();
+            var whereExpr = Substitute.For<IExpression>();
             whereExpr.Interpret(context).Returns(new LogicalNode());
 
-            var colExpr = Substitute.For<Expression>();
+            var colExpr = Substitute.For<IExpression>();
             colExpr.Interpret(context).Returns(new LogicalNode());
 
             var expr = new SelectExpression
             {
                 From = fromExpr,
                 Where = whereExpr,
-                Columns = new List<Expression> { colExpr }
+                Columns = new List<IExpression> { colExpr }
             };
 
             // Act

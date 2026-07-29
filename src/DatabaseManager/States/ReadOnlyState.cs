@@ -6,12 +6,23 @@ public class ReadOnlyState : IDatabaseState
 
     public ReadOnlyState(Database database)
     {
-        _database = database;
+        this._database = database;
     }
-    public void Open() {
+
+    public void Open()
+    {
         throw new InvalidOperationException();
     }
-    public void SetReadOnly() { }
-    public void Recovery() { }
-    public void Drop() { }
+
+    public void SetReadOnly()
+    {
+    }
+
+    public void Recovery()
+    {
+    }
+
+    public void Drop()
+    {
+    }
 }

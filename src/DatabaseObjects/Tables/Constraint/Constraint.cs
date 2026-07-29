@@ -1,29 +1,23 @@
-public abstract class Constraint
+public abstract class Constraint(string name)
 {
+    protected Constraint()
+        : this(string.Empty)
+    {
+    }
+
     public int Id { get; set; }
 
-    public string Name { get; set; }
-    public bool IsEnabled { get; private set; }
+    public string Name { get; set; } = name;
 
-    protected Constraint()
-    {
-        IsEnabled = true;
-    }
-
-    protected Constraint(string name)
-    {
-        Name = name;
-        IsEnabled = true;
-    }
-
-    protected abstract bool Check(ConstraintContext context);
+    public bool IsEnabled { get; private set; } = true;
 
     public bool Validate(ConstraintContext context)
     {
-        if (!IsEnabled)
+        if (!this.IsEnabled)
         {
             throw new NotImplementedException();
         }
+
         throw new NotImplementedException();
     }
 
@@ -36,5 +30,6 @@ public abstract class Constraint
     {
         throw new NotImplementedException();
     }
-}
 
+    protected abstract bool Check(ConstraintContext context);
+}

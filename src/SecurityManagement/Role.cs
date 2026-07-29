@@ -2,7 +2,7 @@ using System;
 
 public class Role
 {
-    public string RoleName { get; set; }
+    public string RoleName { get; set; } = null!;
 
     public void AddPermission(Permission permission)
     {

@@ -4,5 +4,5 @@ public enum DatabaseEventType
     Dropped,
     BackedUpCompleted,
     Restored,
-    StateChanged
+    StateChanged,
 }

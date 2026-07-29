@@ -2,7 +2,7 @@ using System;
 
 public class AST
 {
-    public Node Root { get; set; }
+    public Node Root { get; set; } = null!;
 
     public void GetRoot()
     {

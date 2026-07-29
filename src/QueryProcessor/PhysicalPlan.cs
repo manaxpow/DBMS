@@ -4,12 +4,13 @@ public enum PhysicalOperatorType
 {
     IndexScan,
     TableScan,
-    NestedLoopJoin
+    NestedLoopJoin,
 }
 
 public class PhysicalPlan
 {
     public int Cost { get; set; }
+
     public PhysicalOperatorType OperatorType { get; set; }
 
     public void Build()

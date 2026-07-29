@@ -1,9 +1,10 @@
 public class TableIterator : ISchemaObjectIterator
 {
     private IReadOnlyList<ISchemaObject> _tables;
+
     public TableIterator(IReadOnlyList<ISchemaObject> tables)
     {
-        _tables = tables;
+        this._tables = tables;
     }
 
     public bool HasNext()
@@ -15,6 +16,6 @@ public class TableIterator : ISchemaObjectIterator
     {
         throw new NotImplementedException();
     }
-    
+
     public void Reset() => throw new NotImplementedException();
 }

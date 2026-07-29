@@ -1,16 +1,16 @@
-public class TableScanOperator : PhysicalOperator
+public class TableScanOperator(string tableName, IEnumerable<Row> tableRows)
+    : PhysicalOperator
 {
-    public string TableName { get; }
-    private IEnumerator<Row> _enumerator;
-    private IEnumerable<Row> _tableRows;
+    // private IEnumerator<Row> _enumerator = null!;
+    private IEnumerable<Row> _tableRows = tableRows;
 
-    public TableScanOperator(string tableName, IEnumerable<Row> tableRows)
-    {
-        throw new NotImplementedException();
-    }
+    public string TableName { get; } = tableName;
 
     public override void Open() => throw new NotImplementedException();
+
     public override bool Next() => throw new NotImplementedException();
+
     public override Row GetCurrent() => throw new NotImplementedException();
+
     public override void Close() => throw new NotImplementedException();
 }

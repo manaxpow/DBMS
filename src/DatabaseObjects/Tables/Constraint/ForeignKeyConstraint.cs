@@ -1,32 +1,31 @@
-
-public class ForeignKeyConstraint : Constraint
+public class ForeignKeyConstraint(
+    string name,
+    string childColumnName,
+    string referencedTableName,
+    string referencedColumnName,
+    IReferentialAction onDelete,
+    IReferentialAction onUpdate)
+    : Constraint(name)
 {
-    public string ChildColumnName { get; set; }
-    public string ReferencedTableName { get; set; }
-    public string ReferencedColumnName { get; set; }
-    public IReferentialAction OnDelete { get; set; }
-    public IReferentialAction OnUpdate { get; set; }
+    public string ChildColumnName { get; set; } = childColumnName;
+
+    public string ReferencedTableName { get; set; } = referencedTableName;
+
+    public string ReferencedColumnName { get; set; } = referencedColumnName;
+
+    public IReferentialAction OnDelete { get; set; } = onDelete;
+
+    public IReferentialAction OnUpdate { get; set; } = onUpdate;
+
     public bool IsNullable { get; set; }
 
-    public ForeignKeyConstraint(
-        string name, string childColumnName, string referencedTableName,
-        string referencedColumnName, IReferentialAction onDelete, IReferentialAction onUpdate)
-        : base(name)
+    public void OnParentRowDeleted(Row parentRow, Table childTable)
     {
-        ChildColumnName = childColumnName;
-        ReferencedTableName = referencedTableName;
-        ReferencedColumnName = referencedColumnName;
-        OnDelete = onDelete;
-        OnUpdate = onUpdate;
+        this.OnDelete.Execute(parentRow, childTable);
     }
 
     protected override bool Check(ConstraintContext context)
     {
         throw new NotImplementedException();
-    }
-
-    public void OnParentRowDeleted(Row parentRow, Table childTable)
-    {
-        OnDelete.Execute(parentRow, childTable);
     }
 }

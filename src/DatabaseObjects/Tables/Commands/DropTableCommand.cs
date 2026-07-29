@@ -5,8 +5,8 @@ public class DropTableCommand : IDDLCommand
 
     public DropTableCommand(Schema schema, string tableName)
     {
-        _schema = schema;
-        _tableName = tableName;
+        this._schema = schema;
+        this._tableName = tableName;
     }
 
     public DDLResult Execute()

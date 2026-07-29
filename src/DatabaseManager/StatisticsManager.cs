@@ -2,14 +2,15 @@ using DBMS.Exceptions;
 
 public class StatisticsManager
 {
-    private Dictionary<string, object> _stats;
+    private Dictionary<string, object> stats;
     private object _store;
 
     public StatisticsManager(object store)
     {
-        _store = store;
-        _stats = new Dictionary<string, object>();
+        this._store = store;
+        this.stats = new Dictionary<string, object>();
     }
+
     public void UpdateStatistics(object obj)
     {
         throw new ObjectNotFoundException();

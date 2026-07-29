@@ -1,4 +1,6 @@
 public class ReplicationObserver : IDatabaseEventObserver
 {
-    public void OnDatabaseEvent(DatabaseEvent database) { }
+    public void OnDatabaseEvent(DatabaseEvent database)
+    {
+    }
 }

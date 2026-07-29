@@ -1,5 +1,7 @@
-﻿public class LogicalIndexScan : LogicalNode {
-    public string TableName { get; }
-    public string IndexName { get; }
-    public LogicalIndexScan(string tableName, string indexName) { Type = LogicalNodeType.IndexScan; TableName = tableName; IndexName = indexName; }
+public class LogicalIndexScan(string tableName, string indexName)
+    : LogicalNode
+{
+    public string TableName { get; } = tableName;
+
+    public string IndexName { get; } = indexName;
 }

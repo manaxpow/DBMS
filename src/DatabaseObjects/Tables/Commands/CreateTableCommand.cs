@@ -6,9 +6,9 @@ public class CreateTableCommand : IDDLCommand
 
     public CreateTableCommand(Schema schema, string tableName, ITableBuilder tableBuilder)
     {
-        _schema = schema;
-        _tableName = tableName;
-        _tableBuilder = tableBuilder;
+        this._schema = schema;
+        this._tableName = tableName;
+        this._tableBuilder = tableBuilder;
     }
 
     public DDLResult Execute()

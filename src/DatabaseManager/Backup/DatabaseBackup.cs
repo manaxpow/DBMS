@@ -4,8 +4,12 @@ public abstract class DatabaseBackup
     {
         throw new NotImplementedException();
     }
+
     public abstract void InitializeBackup();
+
     public abstract void ExtractData();
+
     public abstract void CompressData();
+
     public abstract void FinalizeBackup();
 }

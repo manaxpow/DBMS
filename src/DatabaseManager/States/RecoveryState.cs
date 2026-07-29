@@ -4,10 +4,22 @@ public class RecoveryState : IDatabaseState
 
     public RecoveryState(Database database)
     {
-        _database = database;
+        this._database = database;
     }
-    public void Open() { }
-    public void SetReadOnly() { }
-    public void Recovery() { }
-    public void Drop() { }
+
+    public void Open()
+    {
+    }
+
+    public void SetReadOnly()
+    {
+    }
+
+    public void Recovery()
+    {
+    }
+
+    public void Drop()
+    {
+    }
 }

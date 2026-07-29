@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
 
-
-
 public class FileManager : IFileManager
 {
-    public string RootDirectory { get; set; }
-    public Dictionary<string, FileHandle> OpenFiles { get; set; }
+    public string RootDirectory { get; set; } = null!;
+
+    public Dictionary<string, FileHandle> OpenFiles { get; set; } = null!;
 
     public void Initialize(object fileSettings)
     {

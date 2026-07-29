@@ -32,9 +32,9 @@ public class QueryOptimizerTests
         // Arrange
         var mockStrategy = Substitute.For<IOptimizationStrategy>();
         var expectedPhysicalPlan = new PhysicalPlan { Cost = 42, OperatorType = PhysicalOperatorType.TableScan };
-        
+
         mockStrategy.Optimize(Arg.Any<LogicalPlan>()).Returns(expectedPhysicalPlan);
-        
+
         var optimizer = new QueryOptimizer(mockStrategy);
         var logicalPlan = new LogicalPlan();
 

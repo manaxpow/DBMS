@@ -1,19 +1,20 @@
 using System;
 using System.Collections.Generic;
 
-
-
 public class BufferPool
 {
-    public int Capacity { get; set; }
-    public Dictionary<PageId, Frame> PageTable { get; set; }
     private readonly IFileManager _fileManager;
+
     public BufferPool(int capacity, IFileManager fileManager)
     {
-        Capacity = capacity;
-        _fileManager = fileManager;
-        PageTable = new Dictionary<PageId, Frame>();
+        this.Capacity = capacity;
+        this._fileManager = fileManager;
+        this.PageTable = new Dictionary<PageId, Frame>();
     }
+
+    public int Capacity { get; set; }
+
+    public Dictionary<PageId, Frame> PageTable { get; set; }
 
     public Frame FetchPage(PageId pageId)
     {
@@ -30,6 +31,16 @@ public class BufferPool
         throw new NotImplementedException();
     }
 
+    public void Flush(PageId pageId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Evict(object frame)
+    {
+        throw new NotImplementedException();
+    }
+
     private object FindBufferedFrame(object pageId)
     {
         throw new NotImplementedException();
@@ -42,12 +53,14 @@ public class BufferPool
 
     private Frame? ExistingFrame(PageId pageId)
     {
-        if (PageTable.TryGetValue(pageId, out var frame))
+        if (this.PageTable.TryGetValue(pageId, out var frame))
         {
             throw new NotImplementedException();
         }
+
         throw new NotImplementedException();
     }
+
     private object FindUnpinnedVictim()
     {
         throw new NotImplementedException();
@@ -67,15 +80,4 @@ public class BufferPool
     {
         throw new NotImplementedException();
     }
-
-    public void Flush(PageId pageId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Evict(object frame)
-    {
-        throw new NotImplementedException();
-    }
 }
-

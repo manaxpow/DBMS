@@ -2,39 +2,39 @@ using System;
 
 public abstract class Database
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    protected readonly IStorageEngine _storage;
-    private object _schemaManager;
-    private bool _isOpen;
-    private IDatabaseState _state;
+    private readonly IStorageEngine _storage = null!;
+    private IDatabaseState _state = null!;
 
     public Database()
     {
-        _isOpen = false;
     }
 
     public Database(string name, IDatabaseState state)
     {
-        Name = name;
-        _isOpen = false;
-        _state = state;
+        this.Name = name;
+        this._state = state;
     }
 
     public Database(IStorageEngine storage)
     {
-        _storage = storage;
+        this._storage = storage;
     }
+
+    public int Id { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    protected IStorageEngine Storage => this._storage;
 
     public abstract void Initialize();
 
     public virtual Page ReadPage(int pageId)
     {
-        return _storage.FetchPage(pageId);
+        return this._storage.FetchPage(pageId);
     }
 
     public virtual void WritePage(Page page)
     {
-        _storage.FlushPage(page);
+        this._storage.FlushPage(page);
     }
 }

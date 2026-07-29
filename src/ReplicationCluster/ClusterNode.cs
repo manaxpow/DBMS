@@ -2,7 +2,7 @@ using System;
 
 public class ClusterNode
 {
-    public string NodeId { get; set; }
+    public string NodeId { get; set; } = null!;
 
     public void ReceiveHeartbeat()
     {

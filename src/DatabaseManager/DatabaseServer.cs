@@ -4,14 +4,15 @@ using DBMS.Exceptions;
 
 public class DatabaseServer
 {
-    private object? _config;
+    // private object? _config;
     private readonly IReadOnlyList<IServerComponent> _components;
-    private bool _isRunning;
 
     public DatabaseServer(IReadOnlyList<IServerComponent> components)
     {
-        _components = components ?? new List<IServerComponent>();
+        this._components = components ?? new List<IServerComponent>();
     }
+
+    public bool IsRunning { get; private set; }
 
     public void Start(object config)
     {
@@ -22,6 +23,4 @@ public class DatabaseServer
     {
         throw new NotImplementedException();
     }
-
-    public bool IsRunning => _isRunning;
 }

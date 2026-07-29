@@ -1,1 +1,1 @@
-public record FrameId(int Value);
+public record FrameId(int value);

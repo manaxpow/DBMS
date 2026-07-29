@@ -9,14 +9,14 @@ public class SchemaManager
 
     public SchemaManager()
     {
-        _catalogManager = new CatalogManager();
-        _storageEngine = new StorageEngine();
+        this._catalogManager = new CatalogManager();
+        this._storageEngine = new StorageEngine();
     }
 
     public SchemaManager(CatalogManager catalogManager, StorageEngine storageEngine)
     {
-        _catalogManager = catalogManager;
-        _storageEngine = storageEngine;
+        this._catalogManager = catalogManager;
+        this._storageEngine = storageEngine;
     }
 
     public void DropSchema(Schema schema, bool cascade = false)

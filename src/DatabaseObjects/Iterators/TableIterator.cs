@@ -1,10 +1,10 @@
 public class TableIterator : ISchemaObjectIterator
 {
-    private IReadOnlyList<ISchemaObject> tables;
+    private IReadOnlyList<ISchemaObject> _tables;
 
     public TableIterator(IReadOnlyList<ISchemaObject> tables)
     {
-        this.tables = tables;
+        this._tables = tables;
     }
 
     public bool HasNext()

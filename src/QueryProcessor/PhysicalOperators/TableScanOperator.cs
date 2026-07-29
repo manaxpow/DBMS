@@ -1,8 +1,8 @@
 public class TableScanOperator(string tableName, IEnumerable<Row> tableRows)
     : PhysicalOperator
 {
-    // private IEnumerator<Row> enumerator = null!;
-    private IEnumerable<Row> tableRows = tableRows;
+    // private IEnumerator<Row> _enumerator = null!;
+    private IEnumerable<Row> _tableRows = tableRows;
 
     public string TableName { get; } = tableName;
 

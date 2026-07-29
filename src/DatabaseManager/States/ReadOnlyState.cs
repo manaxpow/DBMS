@@ -2,11 +2,11 @@ using System;
 
 public class ReadOnlyState : IDatabaseState
 {
-    private Database database;
+    private Database _database;
 
     public ReadOnlyState(Database database)
     {
-        this.database = database;
+        this._database = database;
     }
 
     public void Open()

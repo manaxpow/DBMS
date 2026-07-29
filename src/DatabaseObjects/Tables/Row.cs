@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 public class Row
 {
-    private List<object> values;
+    private List<object> _values;
 
     public Row(Table table, List<object> values)
     {
         this.Table = table;
-        this.values = values;
-        this.Values = this.values.AsReadOnly();
+        this._values = values;
+        this.Values = this._values.AsReadOnly();
     }
 
     public int Id { get; set; }

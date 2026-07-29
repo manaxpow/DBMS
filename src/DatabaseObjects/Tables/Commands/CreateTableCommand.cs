@@ -1,14 +1,14 @@
 public class CreateTableCommand : IDDLCommand
 {
-    private readonly Schema schema;
-    private readonly string tableName;
-    private ITableBuilder tableBuilder;
+    private readonly Schema _schema;
+    private readonly string _tableName;
+    private ITableBuilder _tableBuilder;
 
     public CreateTableCommand(Schema schema, string tableName, ITableBuilder tableBuilder)
     {
-        this.schema = schema;
-        this.tableName = tableName;
-        this.tableBuilder = tableBuilder;
+        this._schema = schema;
+        this._tableName = tableName;
+        this._tableBuilder = tableBuilder;
     }
 
     public DDLResult Execute()

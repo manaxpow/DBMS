@@ -1,10 +1,10 @@
 public class ViewIterator : ISchemaObjectIterator
 {
-    private IReadOnlyList<ISchemaObject> views;
+    private IReadOnlyList<ISchemaObject> _views;
 
     public ViewIterator(IReadOnlyList<ISchemaObject> views)
     {
-        this.views = views;
+        this._views = views;
     }
 
     public bool HasNext()

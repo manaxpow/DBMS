@@ -3,11 +3,11 @@ using DBMS.Exceptions;
 public class StatisticsManager
 {
     private Dictionary<string, object> stats;
-    private object store;
+    private object _store;
 
     public StatisticsManager(object store)
     {
-        this.store = store;
+        this._store = store;
         this.stats = new Dictionary<string, object>();
     }
 

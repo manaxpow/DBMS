@@ -1,10 +1,10 @@
 public class RecoveryState : IDatabaseState
 {
-    private Database database;
+    private Database _database;
 
     public RecoveryState(Database database)
     {
-        this.database = database;
+        this._database = database;
     }
 
     public void Open()

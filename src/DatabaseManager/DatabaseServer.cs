@@ -4,12 +4,12 @@ using DBMS.Exceptions;
 
 public class DatabaseServer
 {
-    // private object? config;
-    private readonly IReadOnlyList<IServerComponent> components;
+    // private object? _config;
+    private readonly IReadOnlyList<IServerComponent> _components;
 
     public DatabaseServer(IReadOnlyList<IServerComponent> components)
     {
-        this.components = components ?? new List<IServerComponent>();
+        this._components = components ?? new List<IServerComponent>();
     }
 
     public bool IsRunning { get; private set; }

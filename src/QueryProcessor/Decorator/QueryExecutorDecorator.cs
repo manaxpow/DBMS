@@ -1,10 +1,10 @@
 public abstract class QueryExecutorDecorator : IQueryExecutor
 {
-    private readonly IQueryExecutor innerExecutor;
+    private readonly IQueryExecutor _innerExecutor;
 
-    public QueryExecutorDecorator(IQueryExecutor innerExecutor) => this.innerExecutor = innerExecutor;
+    public QueryExecutorDecorator(IQueryExecutor innerExecutor) => this._innerExecutor = innerExecutor;
 
-    protected IQueryExecutor InnerExecutor => this.innerExecutor;
+    protected IQueryExecutor InnerExecutor => this._innerExecutor;
 
     public abstract ResultSet Execute(PhysicalPlan plan);
 }

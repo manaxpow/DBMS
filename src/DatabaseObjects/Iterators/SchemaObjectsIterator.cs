@@ -1,10 +1,10 @@
 public class SchemaObjectsIterator : ISchemaObjectIterator
 {
-    private IReadOnlyList<ISchemaObject> objects;
+    private IReadOnlyList<ISchemaObject> _objects;
 
     public SchemaObjectsIterator(IReadOnlyList<ISchemaObject> objects)
     {
-        this.objects = objects;
+        this._objects = objects;
     }
 
     public bool HasNext()

@@ -1,24 +1,24 @@
 public class Table : ISchemaObject, ICatalogObject
 {
-    private List<Column> columns;
-    private List<Row> rows;
-    private List<Constraint> constraints;
-    private List<Index> indexes;
-    private List<Partition> partitions;
+    private List<Column> _columns;
+    private List<Row> _rows;
+    private List<Constraint> _constraints;
+    private List<Index> _indexes;
+    private List<Partition> _partitions;
 
     public Table(string name)
     {
         this.Name = name;
-        this.columns = new List<Column>();
-        this.rows = new List<Row>();
-        this.constraints = new List<Constraint>();
-        this.indexes = new List<Index>();
-        this.partitions = new List<Partition>();
-        this.Columns = this.columns.AsReadOnly();
-        this.Rows = this.rows.AsReadOnly();
-        this.Constraints = this.constraints.AsReadOnly();
-        this.Indexes = this.indexes.AsReadOnly();
-        this.Partitions = this.partitions.AsReadOnly();
+        this._columns = new List<Column>();
+        this._rows = new List<Row>();
+        this._constraints = new List<Constraint>();
+        this._indexes = new List<Index>();
+        this._partitions = new List<Partition>();
+        this.Columns = this._columns.AsReadOnly();
+        this.Rows = this._rows.AsReadOnly();
+        this.Constraints = this._constraints.AsReadOnly();
+        this.Indexes = this._indexes.AsReadOnly();
+        this.Partitions = this._partitions.AsReadOnly();
     }
 
     public int Id { get; set; }

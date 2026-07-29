@@ -1,12 +1,12 @@
 public class Partition
 {
-    private List<PartitionRange> ranges;
+    private List<PartitionRange> _ranges;
 
     public Partition(string name)
     {
         this.Name = name;
-        this.ranges = new List<PartitionRange>();
-        this.Ranges = this.ranges.AsReadOnly();
+        this._ranges = new List<PartitionRange>();
+        this.Ranges = this._ranges.AsReadOnly();
     }
 
     public int Id { get; set; }

@@ -1,18 +1,18 @@
 public class TableBuilder : ITableBuilder
 {
-    private string name;
-    private List<Column> columns;
-    private List<Constraint> constraints;
-    private List<Index> indexes;
-    private List<Partition> partitions;
+    private string _name;
+    private List<Column> _columns;
+    private List<Constraint> _constraints;
+    private List<Index> _indexes;
+    private List<Partition> _partitions;
 
     public TableBuilder()
     {
-        this.name = string.Empty;
-        this.columns = new List<Column>();
-        this.constraints = new List<Constraint>();
-        this.indexes = new List<Index>();
-        this.partitions = new List<Partition>();
+        this._name = string.Empty;
+        this._columns = new List<Column>();
+        this._constraints = new List<Constraint>();
+        this._indexes = new List<Index>();
+        this._partitions = new List<Partition>();
     }
 
     public Table Build() => throw new NotImplementedException();

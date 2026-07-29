@@ -1,12 +1,12 @@
 public class LazyTableScanOperatorProxy : PhysicalOperator
 {
-    private readonly string tableName;
-    private readonly CatalogManager catalog;
+    private readonly string _tableName;
+    private readonly CatalogManager _catalog;
 
     public LazyTableScanOperatorProxy(string tableName, CatalogManager catalog)
     {
-        this.tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
-        this.catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+        this._tableName = tableName ?? throw new ArgumentNullException(nameof(tableName));
+        this._catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
     }
 
     public override void Open()

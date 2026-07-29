@@ -2,11 +2,11 @@ using System;
 
 public class QueryOptimizer
 {
-    private IOptimizationStrategy strategy;
+    private IOptimizationStrategy _strategy;
 
     public QueryOptimizer(IOptimizationStrategy strategy)
     {
-        this.strategy = strategy;
+        this._strategy = strategy;
     }
 
     public void SetStrategy(IOptimizationStrategy strategy) => throw new NotImplementedException();

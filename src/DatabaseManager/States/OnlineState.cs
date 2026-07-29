@@ -1,10 +1,10 @@
 public class OnlineState : IDatabaseState
 {
-    private Database database;
+    private Database _database;
 
     public OnlineState(Database database)
     {
-        this.database = database;
+        this._database = database;
     }
 
     public void Open()

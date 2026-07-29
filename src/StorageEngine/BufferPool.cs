@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 public class BufferPool
 {
-    private readonly IFileManager fileManager;
+    private readonly IFileManager _fileManager;
 
     public BufferPool(int capacity, IFileManager fileManager)
     {
         this.Capacity = capacity;
-        this.fileManager = fileManager;
+        this._fileManager = fileManager;
         this.PageTable = new Dictionary<PageId, Frame>();
     }
 

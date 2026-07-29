@@ -1,12 +1,12 @@
 public class RenameDatabaseCommand : IDDLCommand
 {
-    private DatabaseManager databaseManager;
-    private string databaseName;
+    private DatabaseManager _databaseManager;
+    private string _databaseName;
 
     public RenameDatabaseCommand(DatabaseManager databaseManager, string databaseName)
     {
-        this.databaseManager = databaseManager;
-        this.databaseName = databaseName;
+        this._databaseManager = databaseManager;
+        this._databaseName = databaseName;
     }
 
     public DDLResult Execute()

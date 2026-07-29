@@ -13,7 +13,8 @@ public class RelationalDatabase : Database
 
     public void ChangeState(IDatabaseState state)
     {
-        typeof(Database).GetField("state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!.SetValue(this, state);
+        var field = typeof(Database).GetField("_state", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        field!.SetValue(this, state);
     }
 
     public void Open()

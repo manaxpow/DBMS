@@ -1,8 +1,8 @@
 public class DatabaseEventPublisher
 {
-    private List<IDatabaseEventObserver> observers = new List<IDatabaseEventObserver>();
+    private List<IDatabaseEventObserver> _observers = new List<IDatabaseEventObserver>();
 
-    public void AddListener(IDatabaseEventObserver listener) => this.observers.Add(listener);
+    public void AddListener(IDatabaseEventObserver listener) => this._observers.Add(listener);
 
-    public void RemoveListener(IDatabaseEventObserver listener) => this.observers.Remove(listener);
+    public void RemoveListener(IDatabaseEventObserver listener) => this._observers.Remove(listener);
 }

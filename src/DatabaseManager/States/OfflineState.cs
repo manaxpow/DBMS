@@ -1,10 +1,10 @@
 public class OfflineState : IDatabaseState
 {
-    private Database database;
+    private Database _database;
 
     public OfflineState(Database database)
     {
-        this.database = database;
+        this._database = database;
     }
 
     public void Open()

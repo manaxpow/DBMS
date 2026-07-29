@@ -2,12 +2,12 @@ using DBMS.Exceptions;
 
 public class DatabaseManager
 {
-    private CatalogManager catalog;
+    private CatalogManager _catalog;
     private Dictionary<string, Database> databases;
 
     public DatabaseManager()
     {
-        this.catalog = new CatalogManager();
+        this._catalog = new CatalogManager();
         this.databases = new Dictionary<string, Database>();
     }
 

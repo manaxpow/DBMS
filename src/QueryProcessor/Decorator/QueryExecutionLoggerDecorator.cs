@@ -7,20 +7,20 @@ public interface ILogger
 
 public class QueryExecutionLoggerDecorator : QueryExecutorDecorator
 {
-    private readonly ILogger logger;
+    private readonly ILogger _logger;
 
     public QueryExecutionLoggerDecorator(IQueryExecutor innerExecutor, ILogger logger)
         : base(innerExecutor)
     {
-        this.logger = logger;
+        this._logger = logger;
     }
 
     public override ResultSet Execute(PhysicalPlan plan)
     {
         // Implementation would log and call base
-        this.logger.Log("[Start] Executing query");
+        this._logger.Log("[Start] Executing query");
         var result = this.InnerExecutor.Execute(plan);
-        this.logger.Log("[Success] Execution successful");
+        this._logger.Log("[Success] Execution successful");
         return result;
     }
 }

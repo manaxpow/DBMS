@@ -1,10 +1,10 @@
 public class DroppedState : IDatabaseState
 {
-    private Database database;
+    private Database _database;
 
     public DroppedState(Database database)
     {
-        this.database = database;
+        this._database = database;
     }
 
     public void Open()

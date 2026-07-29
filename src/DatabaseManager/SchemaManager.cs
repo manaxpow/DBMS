@@ -4,19 +4,19 @@ using DBMS.Exceptions;
 
 public class SchemaManager
 {
-    private CatalogManager catalogManager;
-    private StorageEngine storageEngine;
+    private CatalogManager _catalogManager;
+    private StorageEngine _storageEngine;
 
     public SchemaManager()
     {
-        this.catalogManager = new CatalogManager();
-        this.storageEngine = new StorageEngine();
+        this._catalogManager = new CatalogManager();
+        this._storageEngine = new StorageEngine();
     }
 
     public SchemaManager(CatalogManager catalogManager, StorageEngine storageEngine)
     {
-        this.catalogManager = catalogManager;
-        this.storageEngine = storageEngine;
+        this._catalogManager = catalogManager;
+        this._storageEngine = storageEngine;
     }
 
     public void DropSchema(Schema schema, bool cascade = false)

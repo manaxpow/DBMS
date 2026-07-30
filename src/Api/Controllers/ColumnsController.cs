@@ -8,7 +8,7 @@ public class ColumnsController(IColumnService columnService) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(string tableName, [FromBody] CreateColumnRequest request, CancellationToken cancellationToken)
     {
-        var column = new Column(request.Name, request.DataType, request.IsNullable);
+        var column = new Column(request.Name, DataTypeFactory.Create(request.DataType), request.IsNullable);
         var columnResult = await _columnService.CreateAsync(tableName, column, cancellationToken);
 
         var result = new ColumnResponse(columnResult.Name, columnResult.DataType, columnResult.IsNullable);
@@ -26,7 +26,7 @@ public class ColumnsController(IColumnService columnService) : ControllerBase
     [HttpPut("{columnName}")]
     public async Task<IActionResult> Update(string tableName, string columnName, [FromBody] CreateColumnRequest request, CancellationToken cancellationToken)
     {
-        var column = new Column(request.Name, request.DataType, request.IsNullable);
+        var column = new Column(request.Name, DataTypeFactory.Create(request.DataType), request.IsNullable);
         var columnResult = await _columnService.UpdateAsync(tableName, columnName, column, cancellationToken);
 
         var result = new ColumnResponse(columnResult.Name, columnResult.DataType, columnResult.IsNullable);

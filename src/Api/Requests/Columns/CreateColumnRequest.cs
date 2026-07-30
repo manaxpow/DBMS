@@ -1,6 +1,6 @@
 public sealed record CreateColumnRequest(
     string Name,
-    IDataType DataType,
+    string DataType,
     bool IsNullable);
 
 public sealed record GetColumnRequest(
@@ -8,7 +8,7 @@ public sealed record GetColumnRequest(
 
 public sealed record UpdateColumnRequest(
     string Name,
-    IDataType DataType,
+    string DataType,
     bool IsNullable);
 
 public sealed record DeleteColumnRequest(

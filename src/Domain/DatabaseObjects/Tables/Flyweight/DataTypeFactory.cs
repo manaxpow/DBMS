@@ -1,13 +1,12 @@
-public class DataTypeFactory
+public static class DataTypeFactory
 {
-    private Dictionary<string, IDataType> cache = new ();
+    private static readonly Dictionary<string, IDataType> cache = new(StringComparer.OrdinalIgnoreCase);
 
-    public IDataType GetDataType(string name)
+    public static IDataType Create(string name)
     {
-        name = name.ToUpper();
-        if (!this.cache.TryGetValue(name, out var type))
+        if (!cache.TryGetValue(name, out var type))
         {
-            type = name switch
+            type = name.ToUpper() switch
             {
                 "INT" => new IntegerType(),
                 "VARCHAR" => new VarcharType(),
@@ -15,7 +14,7 @@ public class DataTypeFactory
                 "BOOLEAN" => new BooleanType(),
                 _ => throw new NotSupportedException($"Data type {name} not supported.")
             };
-            this.cache[name] = type;
+            cache[name] = type;
         }
 
         return type;

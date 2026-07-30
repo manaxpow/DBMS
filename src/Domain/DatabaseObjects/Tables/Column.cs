@@ -1,16 +1,5 @@
 public class Column(string name, IDataType dataType, bool isNullable = false)
 {
-    // Legacy constructors for test suite compatibility
-    public Column(string name, System.Type type)
-        : this(name, type == typeof(string) ? (IDataType)new VarcharType() : new IntegerType(), false)
-    {
-    }
-
-    public Column(string name, System.Type type, bool isNullable)
-        : this(name, type == typeof(string) ? (IDataType)new VarcharType() : new IntegerType(), isNullable)
-    {
-    }
-
     public int Id { get; set; }
 
     public string Name { get; set; } = name;

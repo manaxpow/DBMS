@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\DBMS.Core.csproj" />
+    <ProjectReference Include="..\src\Core\DBMS.Core.csproj" />
   </ItemGroup>
 
 </Project>

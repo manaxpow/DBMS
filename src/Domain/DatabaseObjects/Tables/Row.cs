@@ -12,6 +12,12 @@ public class Row
         this.Values = this._values.AsReadOnly();
     }
 
+    public Row(List<object> values)
+    {
+        this._values = values;
+        this.Values = this._values.AsReadOnly();
+    }
+
     public int Id { get; set; }
 
     public Table Table { get; set; } = null!;

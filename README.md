@@ -2,6 +2,16 @@
 
 Database management system
 
+## How to run
+
+1. Open a terminal in the root directory of the project.
+2. Run the API project using the .NET CLI:
+   ```bash
+   dotnet run --project src/Api/Api.csproj
+   ```
+3. Once the application is running, open your browser and navigate to the **Swagger UI** to explore and test the endpoints:
+   - **http://localhost:5126/swagger**
+
 ```mermaid
 flowchart LR
     %% Left side
@@ -211,7 +221,7 @@ classDiagram
         +DeleteRecord(object slotId) void
         +Read() object
     }
-    
+
     class Slot {
         +int Offset
         +int Length
@@ -248,7 +258,7 @@ classDiagram
 
     DiskStorageEngine *-- BufferPool
     DiskStorageEngine *-- IFileManager
-    
+
     IFileManager <|.. FileManager
 
     BufferPool *-- Frame
@@ -348,11 +358,11 @@ classDiagram
         +CalculateCost() void
         +Validate() void
     }
-    
+
     class LogicalNode {
         <<abstract>>
     }
-    
+
     class PhysicalOperator {
         <<abstract>>
         +Open() void
@@ -376,11 +386,11 @@ classDiagram
     SQLParser --> AST : Creates
     SemanticAnalyzer --> LogicalPlan : Creates
     QueryOptimizer --> PhysicalPlan : Creates
-    
+
     SemanticAnalyzer ..> AST : Uses
     QueryOptimizer ..> LogicalPlan : Uses
     QueryExecutor ..> PhysicalPlan : Uses
-    
+
     QueryOptimizer *-- IOptimizationStrategy
     IOptimizationStrategy <|.. CostBasedOptimizationStrategy
     IOptimizationStrategy <|.. RuleBasedOptimizationStrategy
@@ -395,12 +405,12 @@ classDiagram
 
     Expression ..> InterpretationContext : Interpret
     Expression ..> IExpressionVisitor : Accept
-    
+
     IExpressionVisitor <|.. LogicalPlanVisitor
     IExpressionVisitor <|.. SemanticAnalysVisitor
 
     PhysicalOperatorFactory --> PhysicalOperator : Creates
-    
+
     LogicalPlan *-- LogicalNode
     PhysicalPlan *-- PhysicalOperator
     CompositePhysicalOperator --|> PhysicalOperator
@@ -1002,6 +1012,7 @@ classDiagram
     %% Procedures
     StoredProcedure --> ProcedureBody
 ```
+
 ### 8. Replication and Cluster
 
 ```mermaid
@@ -1991,5 +2002,3 @@ flowchart LR
 ```
 
 ---
-
-

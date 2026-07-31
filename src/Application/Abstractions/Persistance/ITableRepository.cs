@@ -7,6 +7,11 @@ public interface ITableRepository
     Task DeleteAsync(string tableName, CancellationToken cancellationToken);
     Task SaveAsync(Table table, CancellationToken cancellationToken);
 
+    // Columns
     Task<List<Column>> GetAllColumnsAsync(string tableName, CancellationToken cancellationToken);
     Task<Column?> GetColumnAsync(string tableName, string columnName, CancellationToken cancellationToken);
+
+    // Rows
+    Task<List<Row>> GetRowsAsync(string tableName, CancellationToken cancellationToken);
+    Task<Row?> GetRowAsync(string tableName, int rowId, CancellationToken cancellationToken);
 }

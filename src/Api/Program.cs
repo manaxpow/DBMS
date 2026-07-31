@@ -21,7 +21,19 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc(
+        "v1",
+        new Microsoft.OpenApi.OpenApiInfo
+        {
+            Title = "DBMS API",
+            Version = "v1",
+            Description =
+                "REST API documentation for the DBMS project."
+        });
+}
+);
 
 var app = builder.Build();
 
@@ -31,7 +43,14 @@ if (app.Environment.IsDevelopment())
 {
     // Swagger
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint(
+            "/swagger/v1/swagger.json",
+            "DBMS API v1");
+
+        options.RoutePrefix = "swagger";
+    });
 }
 
 // app.UseHttpsRedirection();

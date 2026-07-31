@@ -8,18 +8,9 @@ public static class DependencyInjection
         services.AddScoped<IColumnService, ColumnService>();
 
         // Repositories
-        services.AddScoped<ITableRepository>(provider =>
-        {
-            var environment =
-                provider.GetRequiredService<IWebHostEnvironment>();
-
-            var filePath = Path.Combine(
-                environment.ContentRootPath,
-                "Datas",
-                "tables.json");
-
-            return new TableRepository(filePath);
-        });
+        services.AddSingleton<ITableRepository, TableRepository>();
+        services.AddSingleton<IDatabaseRepository, MockDatabaseRepository>();
+        services.AddSingleton<ISchemaRepository, MockSchemaRepository>();
         return services;
     }
 }

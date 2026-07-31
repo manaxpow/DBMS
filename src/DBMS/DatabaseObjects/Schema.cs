@@ -20,15 +20,31 @@ public class Schema(string name)
 
     public void Drop() => throw new NotImplementedException();
 
-    public void AddTable(Table table) => throw new NotImplementedException();
+    public void AddTable(Table table)
+    {
+        if (objects.ContainsKey(table.Name))
+            throw new Exception($"Table {table.Name} already exists.");
+        objects[table.Name] = table;
+    }
 
-    public void DropTable(string tableName) => throw new NotImplementedException();
+    public void DropTable(string tableName)
+    {
+        objects.Remove(tableName);
+    }
 
     public void AlterTable(string tableName, Table newTable) => throw new NotImplementedException();
 
-    public Table GetTable(string tableName) => throw new NotImplementedException();
+    public Table? GetTable(string tableName)
+    {
+        if (objects.TryGetValue(tableName, out var obj) && obj is Table table)
+            return table;
+        return null;
+    }
 
-    public bool ContainsTable(string tableName) => throw new NotImplementedException();
+    public bool ContainsTable(string tableName)
+    {
+        return objects.TryGetValue(tableName, out var obj) && obj is Table;
+    }
 
     public bool ContainsObject(string objectName) => throw new NotImplementedException();
 

@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 
 public abstract class Database
 {
     private readonly IStorageEngine _storage = null!;
     private IDatabaseState _state = null!;
+    private readonly Dictionary<string, Schema> _schemas = new();
 
     public Database()
     {
@@ -23,6 +25,27 @@ public abstract class Database
     public int Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
+    
+    public IReadOnlyCollection<Schema> Schemas => _schemas.Values;
+
+    public virtual void AddSchema(Schema schema)
+    {
+        if (_schemas.ContainsKey(schema.Name))
+            throw new Exception($"Schema {schema.Name} already exists.");
+        
+        _schemas[schema.Name] = schema;
+    }
+
+    public virtual void DropSchema(string name)
+    {
+        _schemas.Remove(name);
+    }
+
+    public virtual Schema? GetSchema(string name)
+    {
+        _schemas.TryGetValue(name, out var schema);
+        return schema;
+    }
 
     protected IStorageEngine Storage => this._storage;
 

@@ -2,38 +2,42 @@ public class RowService(ITableRepository tableRepository) : IRowService
 {
     private readonly ITableRepository _tableRepository = tableRepository;
 
-    public async Task<List<Row>> GetAllAsync(string tableName, CancellationToken cancellationToken)
+    public async Task<PagedResponse<Row>> GetAllAsync(TablePath tablePath, GetRowsRequest request, CancellationToken cancellationToken)
     {
-        var rows = await _tableRepository.GetRowsAsync(tableName, cancellationToken);
-        return rows;
+        return await _tableRepository.GetRowsAsync(tablePath, request, cancellationToken);
     }
 
-    public async Task<Row?> GetAsync(string tableName, int rowId, CancellationToken cancellationToken)
+    public async Task<Row?> GetAsync(TablePath tablePath, int rowId, CancellationToken cancellationToken)
     {
-        var row = await _tableRepository.GetRowAsync(tableName, rowId, cancellationToken);
+        var row = await _tableRepository.GetRowAsync(tablePath, rowId, cancellationToken);
         return row;
     }
 
-    public async Task<Row> CreateAsync(string tableName, Row row, CancellationToken cancellationToken)
+    public async Task<Row> CreateAsync(TablePath tablePath, Row row, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
+        var table = await _tableRepository.GetByNameAsync(tablePath, cancellationToken);
+        if (table == null) throw new Exception("Table not found");
         table.InsertRow(row);
-        await _tableRepository.SaveAsync(table, cancellationToken);
+        await _tableRepository.SaveAsync(tablePath.DatabaseName, tablePath.SchemaName, table, cancellationToken);
         return row;
     }
 
-    public async Task<Row> UpdateAsync(string tableName, int rowId, Row row, CancellationToken cancellationToken)
+    public async Task<Row> UpdateAsync(TablePath tablePath, int rowId, Row row, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
+        var table = await _tableRepository.GetByNameAsync(tablePath, cancellationToken);
+        if (table == null) throw new Exception("Table not found");
         table.UpdateRow(rowId, row);
-        await _tableRepository.SaveAsync(table, cancellationToken);
+        await _tableRepository.SaveAsync(tablePath.DatabaseName, tablePath.SchemaName, table, cancellationToken);
         return row;
     }
 
-    public async Task DeleteAsync(string tableName, int rowId, CancellationToken cancellationToken)
+    public async Task DeleteAsync(TablePath tablePath, int rowId, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
+        var table = await _tableRepository.GetByNameAsync(tablePath, cancellationToken);
+        if (table == null) throw new Exception("Table not found");
         table.DeleteRow(rowId);
-        await _tableRepository.SaveAsync(table, cancellationToken);
+        await _tableRepository.SaveAsync(tablePath.DatabaseName, tablePath.SchemaName, table, cancellationToken);
     }
 }
+
+

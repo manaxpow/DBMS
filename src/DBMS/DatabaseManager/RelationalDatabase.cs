@@ -42,15 +42,7 @@ public class RelationalDatabase : Database
         throw new FlushFailureException();
     }
 
-    public void AddSchema(object schema)
-    {
-        throw new SchemaAlreadyExistsException();
-    }
-
-    public void DropSchema(string name)
-    {
-        throw new SchemaNotFoundException();
-    }
+    // Base class handles AddSchema and DropSchema
 
     public override void Initialize()
     {

@@ -1,2 +1,1 @@
-public sealed record GetColumnRequest(
-    string Name);
+public record GetColumnRequest(bool? IncludeDependencies);

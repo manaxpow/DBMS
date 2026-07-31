@@ -9,8 +9,8 @@ Database management system
    ```bash
    dotnet run --project src/Api/Api.csproj
    ```
-3. Once the application is running, open your browser and navigate to the **Swagger UI** to explore and test the endpoints:
-   - **http://localhost:5126/swagger**
+3. Click here to see swagger documentation
+   - **https://manaxpow.github.io/DBMS/swagger/**
 
 ```mermaid
 flowchart LR

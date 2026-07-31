@@ -6,14 +6,14 @@
     "version": "v1"
   },
   "paths": {
-    "/databases/{dbName}/schemas/{schemaName}/tables/{tableName}/columns": {
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables/{TableName}/columns": {
       "post": {
         "tags": [
           "Columns"
         ],
         "parameters": [
           {
-            "name": "dbName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -21,7 +21,7 @@
             }
           },
           {
-            "name": "schemaName",
+            "name": "SchemaName",
             "in": "path",
             "required": true,
             "schema": {
@@ -29,7 +29,7 @@
             }
           },
           {
-            "name": "tableName",
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -68,7 +68,7 @@
         ],
         "parameters": [
           {
-            "name": "dbName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -76,7 +76,7 @@
             }
           },
           {
-            "name": "schemaName",
+            "name": "SchemaName",
             "in": "path",
             "required": true,
             "schema": {
@@ -84,7 +84,7 @@
             }
           },
           {
-            "name": "tableName",
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -143,14 +143,14 @@
         }
       }
     },
-    "/databases/{dbName}/schemas/{schemaName}/tables/{tableName}/columns/{columnName}": {
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables/{TableName}/columns/{columnName}": {
       "put": {
         "tags": [
           "Columns"
         ],
         "parameters": [
           {
-            "name": "dbName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -158,7 +158,7 @@
             }
           },
           {
-            "name": "schemaName",
+            "name": "SchemaName",
             "in": "path",
             "required": true,
             "schema": {
@@ -166,7 +166,7 @@
             }
           },
           {
-            "name": "tableName",
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -213,7 +213,7 @@
         ],
         "parameters": [
           {
-            "name": "dbName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -221,7 +221,7 @@
             }
           },
           {
-            "name": "schemaName",
+            "name": "SchemaName",
             "in": "path",
             "required": true,
             "schema": {
@@ -229,7 +229,7 @@
             }
           },
           {
-            "name": "tableName",
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -271,7 +271,7 @@
         ],
         "parameters": [
           {
-            "name": "dbName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -279,7 +279,7 @@
             }
           },
           {
-            "name": "schemaName",
+            "name": "SchemaName",
             "in": "path",
             "required": true,
             "schema": {
@@ -287,7 +287,7 @@
             }
           },
           {
-            "name": "tableName",
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -317,18 +317,85 @@
         }
       }
     },
-    "/api/v1/tables/{tableName}/rows": {
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables/{TableName}/rows": {
       "get": {
         "tags": [
           "Rows"
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Filter",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Columns",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Sort",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IncludeTotal",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "TransactionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -344,7 +411,23 @@
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -378,14 +461,30 @@
         }
       }
     },
-    "/api/v1/tables/{tableName}/rows/{rowId}": {
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables/{TableName}/rows/{rowId}": {
       "get": {
         "tags": [
           "Rows"
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -414,7 +513,23 @@
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -462,7 +577,23 @@
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -486,34 +617,14 @@
         }
       }
     },
-    "/{tableName}": {
-      "delete": {
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables": {
+      "get": {
         "tags": [
           "Tables"
         ],
         "parameters": [
           {
-            "name": "tableName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Tables"
-        ],
-        "parameters": [
-          {
-            "name": "tableName",
+            "name": "DatabaseName",
             "in": "path",
             "required": true,
             "schema": {
@@ -521,11 +632,11 @@
             }
           },
           {
-            "name": "Id",
-            "in": "query",
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           },
           {
@@ -536,60 +647,40 @@
             }
           },
           {
-            "name": "ObjectType",
+            "name": "HasRows",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/SchemaObjectType"
+              "type": "boolean"
             }
           },
           {
-            "name": "Columns",
+            "name": "Partitioned",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Column"
-              }
+              "type": "boolean"
             }
           },
           {
-            "name": "Rows",
+            "name": "Sort",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Row"
-              }
+              "type": "string"
             }
           },
           {
-            "name": "Constraints",
+            "name": "Page",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Constraint"
-              }
+              "type": "integer",
+              "format": "int32"
             }
           },
           {
-            "name": "Indexes",
+            "name": "PageSize",
             "in": "query",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Index"
-              }
-            }
-          },
-          {
-            "name": "Partitions",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/Partition"
-              }
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -599,17 +690,191 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/Table"
+                  "$ref": "#/components/schemas/TableResponsePagedResponse"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Table"
+                  "$ref": "#/components/schemas/TableResponsePagedResponse"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Table"
+                  "$ref": "#/components/schemas/TableResponsePagedResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tables"
+        ],
+        "parameters": [
+          {
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTableRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTableRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{DatabaseName}/schemas/{SchemaName}/tables/{TableName}": {
+      "delete": {
+        "tags": [
+          "Tables"
+        ],
+        "parameters": [
+          {
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tables"
+        ],
+        "parameters": [
+          {
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTableRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTableRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTableRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableResponse"
                 }
               }
             }
@@ -622,7 +887,23 @@
         ],
         "parameters": [
           {
-            "name": "tableName",
+            "name": "DatabaseName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "SchemaName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "TableName",
             "in": "path",
             "required": true,
             "schema": {
@@ -674,44 +955,6 @@
         },
         "additionalProperties": false
       },
-      "Column": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "dataType": {
-            "$ref": "#/components/schemas/IDataType"
-          },
-          "isNullable": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "Constraint": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "isEnabled": {
-            "type": "boolean",
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
       "CreateRowRequest": {
         "type": "object",
         "properties": {
@@ -723,72 +966,17 @@
         },
         "additionalProperties": false
       },
-      "IDataType": {
+      "CreateTableRequest": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "nullable": true,
-            "readOnly": true
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32",
-            "readOnly": true
+            "nullable": true
           }
         },
         "additionalProperties": false
       },
-      "Index": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "isUnique": {
-            "type": "boolean"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true,
-            "readOnly": true
-          },
-          "allowsNull": {
-            "type": "boolean"
-          },
-          "columnNames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true,
-            "readOnly": true
-          },
-          "type": {
-            "$ref": "#/components/schemas/IndexType"
-          },
-          "entries": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": { }
-            },
-            "nullable": true,
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "IndexType": {
-        "enum": [
-          0,
-          1
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "Partition": {
+      "TableResponse": {
         "type": "object",
         "properties": {
           "id": {
@@ -798,120 +986,31 @@
           "name": {
             "type": "string",
             "nullable": true
-          },
-          "ranges": {
+          }
+        },
+        "additionalProperties": false
+      },
+      "TableResponsePagedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PartitionRange"
+              "$ref": "#/components/schemas/TableResponse"
             },
-            "nullable": true,
-            "readOnly": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "PartitionRange": {
-        "type": "object",
-        "properties": {
-          "start": {
             "nullable": true
           },
-          "end": {
-            "nullable": true
-          },
-          "includeStart": {
-            "type": "boolean"
-          },
-          "includeEnd": {
-            "type": "boolean"
-          },
-          "target": {
-            "$ref": "#/components/schemas/Partition"
-          }
-        },
-        "additionalProperties": false
-      },
-      "Row": {
-        "type": "object",
-        "properties": {
-          "id": {
+          "totalCount": {
             "type": "integer",
             "format": "int32"
           },
-          "table": {
-            "$ref": "#/components/schemas/Table"
-          },
-          "values": {
-            "type": "array",
-            "items": { },
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "SchemaObjectType": {
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "type": "integer",
-        "format": "int32"
-      },
-      "Table": {
-        "type": "object",
-        "properties": {
-          "id": {
+          "page": {
             "type": "integer",
             "format": "int32"
           },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "objectType": {
-            "$ref": "#/components/schemas/SchemaObjectType"
-          },
-          "columns": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Column"
-            },
-            "nullable": true,
-            "readOnly": true
-          },
-          "rows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Row"
-            },
-            "nullable": true,
-            "readOnly": true
-          },
-          "constraints": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Constraint"
-            },
-            "nullable": true,
-            "readOnly": true
-          },
-          "indexes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Index"
-            },
-            "nullable": true,
-            "readOnly": true
-          },
-          "partitions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Partition"
-            },
-            "nullable": true,
-            "readOnly": true
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -922,6 +1021,16 @@
           "values": {
             "type": "array",
             "items": { },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdateTableRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
             "nullable": true
           }
         },

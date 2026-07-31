@@ -4,10 +4,10 @@ public sealed class MockDatabaseRepository : IDatabaseRepository
 
     public MockDatabaseRepository()
     {
-        var database = new RelationalDatabase { Name = "TestDB" };
+        var database = new RelationalDatabase { Name = "test" };
 
-        var schema = new Schema("public");
-        var table = new Table("TestTable");
+        var schema = new Schema("test");
+        var table = new Table("test");
 
         schema.AddTable(table);
         database.AddSchema(schema);

@@ -1,8 +1,10 @@
 public interface IRowService
 {
-    Task<List<Row>> GetAllAsync(string tableName, CancellationToken cancellationToken);
-    Task<Row?> GetAsync(string tableName, int rowId, CancellationToken cancellationToken);
-    Task<Row> CreateAsync(string tableName, Row row, CancellationToken cancellationToken);
-    Task<Row> UpdateAsync(string tableName, int rowId, Row row, CancellationToken cancellationToken);
-    Task DeleteAsync(string tableName, int rowId, CancellationToken cancellationToken);
+    Task<PagedResponse<Row>> GetAllAsync(TablePath tablePath, GetRowsRequest request, CancellationToken cancellationToken);
+    Task<Row?> GetAsync(TablePath tablePath, int rowId, CancellationToken cancellationToken);
+    Task<Row> CreateAsync(TablePath tablePath, Row row, CancellationToken cancellationToken);
+    Task<Row> UpdateAsync(TablePath tablePath, int rowId, Row row, CancellationToken cancellationToken);
+    Task DeleteAsync(TablePath tablePath, int rowId, CancellationToken cancellationToken);
 }
+
+

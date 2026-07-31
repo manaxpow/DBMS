@@ -1,41 +1,52 @@
 using Microsoft.AspNetCore.Mvc;
 
+[ApiController]
+[Route("databases/{DatabaseName}/schemas/{SchemaName}/tables")]
 public class TablesController(ITableService tableService) : ControllerBase
 {
     private readonly ITableService _tableService = tableService;
 
     [HttpGet]
-    public async Task<List<Table>> GetAll(CancellationToken cancellationToken)
+    public async Task<PagedResponse<TableResponse>> GetAll(string DatabaseName, string SchemaName, [FromQuery] GetTablesRequest request, CancellationToken cancellationToken)
     {
-        var tables = await _tableService.GetAllAsync(cancellationToken);
-        return tables;
+        var pagedResult = await _tableService.GetAllAsync(DatabaseName, SchemaName, request, cancellationToken);
+        var responseData = pagedResult.Data.Select(t => new TableResponse(t.Id, t.Name)).ToList();
+        return new PagedResponse<TableResponse>(responseData, pagedResult.TotalCount, pagedResult.Page, pagedResult.PageSize);
     }
 
     [HttpPost]
-    public async Task<Table> Create(Table table, CancellationToken cancellationToken)
+    public async Task<TableResponse> Create(string DatabaseName, string SchemaName, CreateTableRequest request, CancellationToken cancellationToken)
     {
-        var createdTable = await _tableService.CreateAsync(table, cancellationToken);
-        return createdTable;
+        var tablePath = new TablePath(DatabaseName, SchemaName, request.Name);
+        var table = new Table(request.Name);
+        var createdTable = await _tableService.CreateAsync(tablePath, table, cancellationToken);
+        return new TableResponse(createdTable.Id, createdTable.Name);
     }
 
-    [HttpDelete("{tableName}")]
-    public async Task Delete(string tableName, CancellationToken cancellationToken)
+    [HttpDelete("{TableName}")]
+    public async Task Delete([FromRoute] TablePath tablePath, CancellationToken cancellationToken)
     {
-        await _tableService.DeleteAsync(tableName, cancellationToken);
+        await _tableService.DeleteAsync(tablePath, cancellationToken);
     }
 
-    [HttpPut("{tableName}")]
-    public async Task<Table> Update(string tableName, Table table, CancellationToken cancellationToken)
+    [HttpPut("{TableName}")]
+    public async Task<TableResponse> Update([FromRoute] TablePath tablePath, UpdateTableRequest request, CancellationToken cancellationToken)
     {
-        var updatedTable = await _tableService.UpdateAsync(tableName, table, cancellationToken);
-        return updatedTable;
+        var table = new Table(request.Name);
+        var updatedTable = await _tableService.UpdateAsync(tablePath, table, cancellationToken);
+        return new TableResponse(updatedTable.Id, updatedTable.Name);
     }
 
-    [HttpGet("{tableName}")]
-    public async Task<IActionResult> Get(string tableName, CancellationToken cancellationToken)
+    [HttpGet("{TableName}")]
+    public async Task<IActionResult> Get([FromRoute] TablePath tablePath, CancellationToken cancellationToken)
     {
-        var table = await _tableService.GetAsync(tableName, cancellationToken);
+        var table = await _tableService.GetAsync(tablePath, cancellationToken);
         if (table == null) return NotFound();
-        return Ok(table);
+        
+        var columns = table.Columns.Select(c => new ColumnResponse(c.Id, c.Name, c.DataType, c.IsNullable)).ToList();
+        var response = new TableDetailResponse(table.Id, table.Name, columns);
+        return Ok(response);
     }
 }
+
+

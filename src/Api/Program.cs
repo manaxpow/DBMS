@@ -1,10 +1,20 @@
+using FluentValidation;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddValidatorsFromAssemblyContaining<
+    CreateRowRequestValidator>();
+
+builder.Services.AddScoped<FluentValidationFilter>();
 
 // Add Dependency Injection
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FluentValidationFilter>();
+});
 
 // Add Exception Handler
 builder.Services.AddProblemDetails();

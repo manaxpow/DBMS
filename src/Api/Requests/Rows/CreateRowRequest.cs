@@ -1,1 +1,1 @@
-public record CreateRowRequest(params object[] Values);
+public record CreateRowRequest(List<object> Values);

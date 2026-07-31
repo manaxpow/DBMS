@@ -21,16 +21,21 @@ public sealed class RowsController(IRowService rowService) : ControllerBase
     }
 
     [HttpPut("{rowId}")]
-    public async Task<IActionResult> Update(string tableName, int rowId, [FromBody] CreateRowRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Update(string tableName, int rowId, [FromBody] UpdateRowRequest request, CancellationToken cancellationToken)
     {
-        var row = await _rowService.UpdateAsync(tableName, rowId, request, cancellationToken);
+
+        var row = new Row(request.Values);
+        var rowResult = await _rowService.UpdateAsync(tableName, rowId, row, cancellationToken);
+
+        var result = new RowResponse(rowResult.Values.ToList());
         return Ok(row);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create(string tableName, [FromBody] CreateRowRequest request, CancellationToken cancellationToken)
     {
-        var row = await _rowService.CreateAsync(tableName, request, cancellationToken);
+        var row = new Row(request.Values);
+        var rowResult = await _rowService.CreateAsync(tableName, row, cancellationToken);
         return CreatedAtAction(nameof(Get), new { tableName }, row);
     }
 

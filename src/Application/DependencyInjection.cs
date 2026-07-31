@@ -6,6 +6,7 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         services.AddScoped<IColumnService, ColumnService>();
+        services.AddScoped<IRowService, RowService>();
         return services;
     }
 }

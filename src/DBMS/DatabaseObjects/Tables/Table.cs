@@ -5,6 +5,8 @@ public class Table : ISchemaObject, ICatalogObject
     private List<Constraint> _constraints;
     private List<Index> _indexes;
     private List<Partition> _partitions;
+    private int _nextRowId = 1;
+    private int _nextColumnId = 1;
 
     public Table(string name)
     {
@@ -37,9 +39,16 @@ public class Table : ISchemaObject, ICatalogObject
 
     public IReadOnlyList<Partition> Partitions { get; }
 
-    public void AddColumn(Column column) => throw new NotImplementedException();
+    public void AddColumn(Column column)
+    {
+        column.Id = _nextColumnId++;
+        _columns.Add(column);
+    }
 
-    public void DropColumn(string columnName) => throw new NotImplementedException();
+    public void DropColumn(string columnName)
+    {
+        _columns.RemoveAll(c => c.Name == columnName);
+    }
 
     public void AlterColumn(string columnName, Column newColumn) => throw new NotImplementedException();
 
@@ -47,19 +56,45 @@ public class Table : ISchemaObject, ICatalogObject
 
     public void DropConstraint(string constraintName) => throw new NotImplementedException();
 
-    public void InsertRow(Row row) => throw new NotImplementedException();
+    public void InsertRow(Row row)
+    {
+        row.Id = _nextRowId++;
+        row.Table = this;
+        _rows.Add(row);
+    }
 
-    public void UpdateRow(int id, Row newRow) => throw new NotImplementedException();
+    public void UpdateRow(int id, Row newRow)
+    {
+        var index = _rows.FindIndex(r => r.Id == id);
+        if (index >= 0)
+        {
+            newRow.Id = id;
+            newRow.Table = this;
+            _rows[index] = newRow;
+        }
+    }
 
-    public bool DeleteRow(int id) => throw new NotImplementedException();
+    public bool DeleteRow(int id)
+    {
+        return _rows.RemoveAll(r => r.Id == id) > 0;
+    }
 
     public void Drop() => throw new NotImplementedException();
 
-    public bool ContainsColumn(string columnName) => throw new NotImplementedException();
+    public bool ContainsColumn(string columnName)
+    {
+        return this._columns.Any(c => c.Name == columnName);
+    }
 
-    public bool ContainsRow(Row row) => throw new NotImplementedException();
+    public bool ContainsRow(Row row)
+    {
+        return this._rows.Contains(row);
+    }
 
-    public Column GetColumn(string columnName) => throw new NotImplementedException();
+    public Column? GetColumn(string columnName)
+    {
+        return this._columns.FirstOrDefault(c => c.Name == columnName);
+    }
 
     public int GetColumnIndex(Column column) => throw new NotImplementedException();
 

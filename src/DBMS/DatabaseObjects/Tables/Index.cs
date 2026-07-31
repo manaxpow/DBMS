@@ -18,6 +18,8 @@ public partial class Index
         this.Type = type;
     }
 
+    public int Id { get; set; }
+
     public bool IsUnique { get; set; }
 
     public string Name { get; } = string.Empty;

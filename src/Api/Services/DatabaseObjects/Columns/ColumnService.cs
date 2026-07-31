@@ -1,39 +1,49 @@
-public class ColumnService(ITableRepository tableRepository) : IColumnService
+public class ColumnService(ITableRepository tableRepository, ICatalogRepository catalogRepository) : IColumnService
 {
     private readonly ITableRepository _tableRepository = tableRepository;
+    private readonly ICatalogRepository _catalogRepository = catalogRepository;
 
-    public async Task<Column> CreateAsync(string tableName, Column column, CancellationToken cancellationToken)
+    public async Task<Column> CreateAsync(string databaseName, string schemaName, string tableName, Column column, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
+        var tableId = await _catalogRepository.FindTableIdAsync(databaseName, schemaName, tableName, cancellationToken);
+        if (tableId is null) throw new TableNotFoundException();
 
-        table.AddColumn(column);
+        var table = await _tableRepository.GetAsync(tableId.Value, cancellationToken);
+
+        table!.AddColumn(column);
 
         await _tableRepository.SaveAsync(table, cancellationToken);
         return column;
     }
 
-    public async Task DeleteAsync(string tableName, string columnName, CancellationToken cancellationToken)
+    public async Task DeleteAsync(string databaseName, string schemaName, string tableName, string columnName, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
-        table.DropColumn(columnName);
+        var tableId = await _catalogRepository.FindTableIdAsync(databaseName, schemaName, tableName, cancellationToken);
+        if (tableId is null) throw new TableNotFoundException();
+
+        var table = await _tableRepository.GetAsync(tableId.Value, cancellationToken);
+        table!.DropColumn(columnName);
         await _tableRepository.SaveAsync(table, cancellationToken);
         return;
     }
 
-    public async Task<List<Column>> GetAllAsync(string tableName, CancellationToken cancellationToken)
+    public async Task<List<Column>> GetAllAsync(string databaseName, string schemaName, string tableName, CancellationToken cancellationToken)
     {
         return await _tableRepository.GetAllColumnsAsync(tableName, cancellationToken);
     }
 
-    public async Task<Column?> GetAsync(string tableName, string columnName, CancellationToken cancellationToken)
+    public async Task<Column?> GetAsync(string databaseName, string schemaName, string tableName, string columnName, CancellationToken cancellationToken)
     {
         return await _tableRepository.GetColumnAsync(tableName, columnName, cancellationToken);
     }
 
-    public async Task<Column> UpdateAsync(string tableName, string columnName, Column column, CancellationToken cancellationToken)
+    public async Task<Column> UpdateAsync(string databaseName, string schemaName, string tableName, string columnName, Column column, CancellationToken cancellationToken)
     {
-        var table = await _tableRepository.GetAsync(tableName, cancellationToken);
-        table.AlterColumn(columnName, column);
+        var tableId = await _catalogRepository.FindTableIdAsync(databaseName, schemaName, tableName, cancellationToken);
+        if (tableId is null) throw new TableNotFoundException();
+        var table = await _tableRepository.GetAsync(tableId.Value, cancellationToken);
+
+        table!.AlterColumn(columnName, column);
         await _tableRepository.SaveAsync(table, cancellationToken);
         return column;
     }

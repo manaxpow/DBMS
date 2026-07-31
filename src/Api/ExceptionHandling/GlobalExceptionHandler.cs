@@ -7,7 +7,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
     private readonly ILogger<GlobalExceptionHandler> _logger = logger;
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        logger.LogError(
+        _logger.LogError(
             exception,
             "Unhandled exception occurred: {Message}",
             exception.Message);

@@ -10,14 +10,17 @@ public sealed class RowsController(IRowService rowService) : ControllerBase
     public async Task<IActionResult> GetAll(string tableName, CancellationToken cancellationToken)
     {
         var rows = await _rowService.GetAllAsync(tableName, cancellationToken);
-        return Ok(rows);
+        var result = rows.Select(x => new RowResponse(x.Id, x.Values.ToList()));
+        return Ok(result);
     }
 
     [HttpGet("{rowId}")]
     public async Task<IActionResult> Get(string tableName, int rowId, CancellationToken cancellationToken)
     {
         var row = await _rowService.GetAsync(tableName, rowId, cancellationToken);
-        return Ok(row);
+        if (row == null) return NotFound();
+        var result = new RowResponse(row.Id, row.Values.ToList());
+        return Ok(result);
     }
 
     [HttpPut("{rowId}")]
@@ -27,8 +30,8 @@ public sealed class RowsController(IRowService rowService) : ControllerBase
         var row = new Row(request.Values);
         var rowResult = await _rowService.UpdateAsync(tableName, rowId, row, cancellationToken);
 
-        var result = new RowResponse(rowResult.Values.ToList());
-        return Ok(row);
+        var result = new RowResponse(rowResult.Id, rowResult.Values.ToList());
+        return Ok(result);
     }
 
     [HttpPost]
@@ -36,7 +39,8 @@ public sealed class RowsController(IRowService rowService) : ControllerBase
     {
         var row = new Row(request.Values);
         var rowResult = await _rowService.CreateAsync(tableName, row, cancellationToken);
-        return CreatedAtAction(nameof(Get), new { tableName }, row);
+        var result = new RowResponse(rowResult.Id, rowResult.Values.ToList());
+        return CreatedAtAction(nameof(Get), new { tableName, rowId = rowResult.Id }, result);
     }
 
     [HttpDelete("{rowId}")]

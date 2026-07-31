@@ -1,8 +1,8 @@
 using FluentValidation;
 
-public class UpdateColumnRequestValidator : AbstractValidator<UpdateColumnRequest>
+public class AddColumnRequestValidator : AbstractValidator<AddColumnRequest>
 {
-    public UpdateColumnRequestValidator()
+    public AddColumnRequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()

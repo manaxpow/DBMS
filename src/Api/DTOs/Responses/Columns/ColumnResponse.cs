@@ -1,1 +1,1 @@
-public record ColumnResponse(string Name, IDataType DataType, bool IsNullable);
+public record ColumnResponse(int Id, string Name, IDataType DataType, bool IsNullable);

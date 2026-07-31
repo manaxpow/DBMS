@@ -49,9 +49,9 @@ public class Table : ISchemaObject, ICatalogObject
 
     public void InsertRow(Row row) => throw new NotImplementedException();
 
-    public void UpdateRow(Row oldRow, Row newRow) => throw new NotImplementedException();
+    public void UpdateRow(int id, Row newRow) => throw new NotImplementedException();
 
-    public bool DeleteRow(Row row) => throw new NotImplementedException();
+    public bool DeleteRow(int id) => throw new NotImplementedException();
 
     public void Drop() => throw new NotImplementedException();
 

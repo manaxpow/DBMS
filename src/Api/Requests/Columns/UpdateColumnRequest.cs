@@ -1,4 +1,4 @@
-public sealed record CreateColumnRequest(
+public sealed record UpdateColumnRequest(
     string Name,
     string DataType,
     bool IsNullable);

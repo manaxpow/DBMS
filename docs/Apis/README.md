@@ -23,35 +23,36 @@ flowchart LR
 
         DB1["POST /databases"] --- Database
         DB2["GET /databases"] --- Database
-        DB3["GET /databases/{db}"] --- Database
-        DB4["DELETE /databases/{db}"] --- Database
-        DB5["POST /databases/{db}/open"] --- Database
-        DB6["POST /databases/{db}/close"] --- Database
-        DB7["POST /databases/{db}/readonly"] --- Database
-        DB8["POST /databases/{db}/recovery"] --- Database
+        DB3["GET /databases/{dbName}"] --- Database
+        DB4["DELETE /databases/{dbName}"] --- Database
+        DB5["POST /databases/{dbName}/open"] --- Database
+        DB6["POST /databases/{dbName}/close"] --- Database
+        DB7["POST /databases/{dbName}/readonly"] --- Database
+        DB8["POST /databases/{dbName}/recovery"] --- Database
 
-        SC1["POST /databases/{db}/schemas"] --- Schema
-        SC2["GET /databases/{db}/schemas"] --- Schema
-        SC3["GET /databases/{db}/schemas/{schema}"] --- Schema
-        SC4["PUT /databases/{db}/schemas/{schema}"] --- Schema
-        SC5["DELETE /databases/{db}/schemas/{schema}"] --- Schema
+        SC1["POST /databases/{dbName}/schemas"] --- Schema
+        SC2["GET /databases/{dbName}/schemas"] --- Schema
+        SC3["GET /databases/{dbName}/schemas/{schemaName}"] --- Schema
+        SC4["PUT /databases/{dbName}/schemas/{schemaName}"] --- Schema
+        SC5["DELETE /databases/{dbName}/schemas/{schemaName}"] --- Schema
 
-        TB1["POST /schemas/{schema}/tables"] --- Table
-        TB2["GET /schemas/{schema}/tables"] --- Table
-        TB3["GET /schemas/{schema}/tables/{table}"] --- Table
-        TB4["PUT /schemas/{schema}/tables/{table}"] --- Table
-        TB5["DELETE /schemas/{schema}/tables/{table}"] --- Table
+        TB1["POST /schemas/{schemaName}/tables"] --- Table
+        TB2["GET /schemas/{schemaName}/tables"] --- Table
+        TB3["GET /schemas/{schemaName}/tables/{tableName}"] --- Table
+        TB4["PUT /schemas/{schemaName}/tables/{tableName}"] --- Table
+        TB5["DELETE /schemas/{schemaName}/tables/{tableName}"] --- Table
 
-        C1["POST /tables/{table}/columns"] --- Column
-        C2["GET /tables/{table}/columns"] --- Column
-        C3["PUT /tables/{table}/columns/{column}"] --- Column
-        C4["DELETE /tables/{table}/columns/{column}"] --- Column
+        C1["POST /tables/{tableName}/columns"] --- Column
+        C2["GET /tables/{tableName}/columns"] --- Column
+        C2_5["GET /tables/{tableName}/columns/{columnName}"] --- Column
+        C3["PUT /tables/{tableName}/columns/{columnName}"] --- Column
+        C4["DELETE /tables/{tableName}/columns/{columnName}"] --- Column
 
-        R1["POST /tables/{table}/rows"] --- Row
-        R2["GET /tables/{table}/rows"] --- Row
-        R3["GET /tables/{table}/rows/{id}"] --- Row
-        R4["PUT /tables/{table}/rows/{id}"] --- Row
-        R5["DELETE /tables/{table}/rows/{id}"] --- Row
+        R1["POST /tables/{tableName}/rows"] --- Row
+        R2["GET /tables/{tableName}/rows"] --- Row
+        R3["GET /tables/{tableName}/rows/{id}"] --- Row
+        R4["PUT /tables/{tableName}/rows/{id}"] --- Row
+        R5["DELETE /tables/{tableName}/rows/{id}"] --- Row
 
         CT1["POST CheckConstraint"] --- Constraints
         CT2["POST PrimaryKey"] --- Constraints
@@ -60,9 +61,9 @@ flowchart LR
         CT5["PUT Constraint"] --- Constraints
         CT6["DELETE Constraint"] --- Constraints
 
-        I1["POST /tables/{table}/indexes"] --- Indexes
-        I2["GET /tables/{table}/indexes"] --- Indexes
-        I3["DELETE /tables/{table}/indexes/{index}"] --- Indexes
+        I1["POST /tables/{tableName}/indexes"] --- Indexes
+        I2["GET /tables/{tableName}/indexes"] --- Indexes
+        I3["DELETE /tables/{tableName}/indexes/{indexName}"] --- Indexes
         I4["POST Search"] --- Indexes
         I5["POST RangeSearch"] --- Indexes
 
@@ -226,7 +227,7 @@ flowchart LR
     class Health,Indexes,Partition,Views,StoredProcedures module
     class Network,Config,QueryProcessor,Transaction,MVCC,LockManager,StorageEngine,BufferPool,FileManager,Recovery,Security,Catalog,Monitoring,Diagnostics,Replication module
 
-    class H1,H2,DB2,DB3,SC2,SC3,TB2,TB3,C2,R2,R3,I2,P2,V2,NW1,NW2,CFG1,TX4,MV1,MV2,LM3,SE1,SE2,BP1,FM3,RC4,CAT1,CAT2,M1,M2,M3,M4,DIAG1,DIAG2,REP1 get
+    class H1,H2,DB2,DB3,SC2,SC3,TB2,TB3,C2,C2_5,R2,R3,I2,P2,V2,NW1,NW2,CFG1,TX4,MV1,MV2,LM3,SE1,SE2,BP1,FM3,RC4,CAT1,CAT2,M1,M2,M3,M4,DIAG1,DIAG2,REP1 get
 
     class DB1,DB5,DB6,DB7,DB8,SC1,TB1,C1,R1,CT1,CT2,CT3,CT4,I1,I4,I5,P1,V1,SP1,SP2,NW3,QP1,QP2,QP3,QP4,TX1,TX2,TX3,LM1,LM2,SE4,SE5,SE6,SE7,BP2,BP3,BP4,FM1,FM2,RC1,RC2,RC3,SEC1,SEC2,SEC3,SEC4,SEC5,CAT3,REP2,REP3 post
 

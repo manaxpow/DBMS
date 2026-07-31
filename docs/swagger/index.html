@@ -21,7 +21,7 @@
     <script>
       window.onload = function () {
         SwaggerUIBundle({
-          url: "./dbms-openapi.json",
+          url: `./dbms-openapi.json?v=${Date.now()}`,
           dom_id: "#swagger-ui",
 
           deepLinking: true,

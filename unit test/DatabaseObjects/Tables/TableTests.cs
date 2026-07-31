@@ -11,7 +11,7 @@ public class TableTests
     public void AddColumn_WhenColumnIsValid_ShouldAddColumn()
     {
         // Arrange
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
 
         // Act
         _table.AddColumn(column);
@@ -36,11 +36,11 @@ public class TableTests
     public void AddColumn_WhenNameAlreadyExists_ShouldThrow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column1);
 
         // Duplicate name
-        var column2 = new Column("Id", typeof(string));
+        var column2 = new Column("Id", DataTypeFactory.Create("VARCHAR"));
 
         // Act
         Action act = () => _table.AddColumn(column2);
@@ -81,8 +81,8 @@ public class TableTests
     public void InsertRow_WhenValueCountDoesNotMatch_ShouldThrow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
-        var column2 = new Column("Name", typeof(string));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"));
         _table.AddColumn(column1);
         _table.AddColumn(column2);
 
@@ -102,8 +102,8 @@ public class TableTests
     public void InsertRow_WhenValueTypeDoesNotMatch_ShouldThrow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
-        var column2 = new Column("Name", typeof(string));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"));
         _table.AddColumn(column1);
         _table.AddColumn(column2);
 
@@ -122,8 +122,8 @@ public class TableTests
     public void InsertRow_WhenNullValueIsAllowed_ShouldInsertRow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
-        var column2 = new Column("Name", typeof(string), isNullable: true);
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"), isNullable: true);
         _table.AddColumn(column1);
         _table.AddColumn(column2);
 
@@ -143,8 +143,8 @@ public class TableTests
     public void InsertRow_WhenNullValueIsNotAllowed_ShouldThrow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
-        var column2 = new Column("Name", typeof(string), isNullable: false);
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"), isNullable: false);
         _table.AddColumn(column1);
         _table.AddColumn(column2);
 
@@ -164,14 +164,14 @@ public class TableTests
     public void DeleteRow_WhenRowExists_ShouldRemoveRow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column1);
         var row = new Row(_table, new List<object> { 1 });
         _table.InsertRow(row);
         var isRowAddSuccess = _table.ContainsRow(row);
 
         // Act
-        _table.DeleteRow(row);
+        _table.DeleteRow(row.Id);
 
         // Assert
         isRowAddSuccess.Should().Be(true);
@@ -185,7 +185,7 @@ public class TableTests
         var row = new Row(_table, new List<object> { 1 });
 
         // Act
-        var isDeleted = _table.DeleteRow(row);
+        var isDeleted = _table.DeleteRow(row.Id);
 
         // Assert
         isDeleted.Should().BeFalse();
@@ -195,7 +195,7 @@ public class TableTests
     public void DropColumn_WhenColumnExists_ShouldRemoveColumn()
     {
         // Arrange
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column);
         var isColumnAddSuccess = _table.ContainsColumn(column.Name);
 
@@ -223,7 +223,7 @@ public class TableTests
     {
         // Arrange
         var referencedTable = new Table("ReferencedTable");
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column);
         var constraint = new ForeignKeyConstraint("FK_TestTable_Id", "Id", referencedTableName: "ReferencedTable", referencedColumnName: "Id", new RestrictAction(), new RestrictAction());
         _table.AddConstraint(constraint);
@@ -240,8 +240,8 @@ public class TableTests
     public void DropColumn_WhenRowsExist_ShouldRemoveCorrespondingValues()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
-        var column2 = new Column("Name", typeof(string));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"));
         _table.AddColumn(column1);
         _table.AddColumn(column2);
         var row1 = new Row(_table, new List<object> { 1, "Alice" });
@@ -264,23 +264,23 @@ public class TableTests
     public void AlterColumn_WhenColumnExists_ShouldUpdateDefinition()
     {
         // Arrange
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column);
-        var newColumnDefinition = new Column("Id", typeof(long));
+        var newColumnDefinition = new Column("Id", DataTypeFactory.Create("VARCHAR"));
 
         // Act
         _table.AlterColumn(column.Name, newColumnDefinition);
 
         // Assert
         var updatedColumn = _table.GetColumn(column.Name);
-        updatedColumn.DataType.Should().Be(typeof(long));
+        updatedColumn.DataType.Should().Be(DataTypeFactory.Create("VARCHAR"));
     }
 
     [Fact]
     public void AlterColumn_WhenColumnDoesNotExist_ShouldThrow()
     {
         // Act
-        var column = new Column("NonExistentColumn", typeof(string));
+        var column = new Column("NonExistentColumn", DataTypeFactory.Create("VARCHAR"));
         Action act = () => _table.AlterColumn("NonExistentColumn", column);
 
         // Assert
@@ -292,7 +292,7 @@ public class TableTests
     public void InsertRow_WhenConstraintFails_ShouldNotInsertRow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column1);
         var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
         _table.AddConstraint(constraint);
@@ -315,7 +315,7 @@ public class TableTests
     public void UpdateRow_WhenConstraintFails_ShouldPreserveExistingRow()
     {
         // Arrange
-        var column1 = new Column("Id", typeof(int));
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"));
         _table.AddColumn(column1);
         var constraint = new PrimaryKeyConstraint("PK_Id", new[] { "Id" });
         _table.AddConstraint(constraint);
@@ -328,7 +328,7 @@ public class TableTests
         var updatedRow2 = new Row(_table, new List<object> { 1 });
 
         // Act
-        Action act = () => _table.UpdateRow(row2, updatedRow2);
+        Action act = () => _table.UpdateRow(row2.Id, updatedRow2);
 
         // Assert
         act.Should().Throw<ConstraintViolationException>();
@@ -336,3 +336,4 @@ public class TableTests
         _table.ContainsRow(updatedRow2).Should().Be(false);
     }
 }
+

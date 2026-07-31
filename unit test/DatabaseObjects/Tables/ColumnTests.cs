@@ -6,7 +6,7 @@ public class ColumnTests
 
     public ColumnTests()
     {
-        _column = new Column("Id", typeof(int));
+        _column = new Column("Id", DataTypeFactory.Create("INT"));
     }
 
     [Trait("Category", "Important")]
@@ -22,7 +22,7 @@ public class ColumnTests
 
         // Assert
         column.Name.Should().Be(name);
-        column.DataType.Should().Be(typeof(string));
+        column.DataType.Should().Be(DataTypeFactory.Create("VARCHAR"));
         column.IsNullable.Should().BeFalse();
     }
 
@@ -113,5 +113,6 @@ public class ColumnTests
         isValid.Should().BeFalse();
     }
 }
+
 
 

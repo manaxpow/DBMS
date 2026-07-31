@@ -8,7 +8,7 @@ public class CheckConstraintTests
     {
         var schema = new Schema("TestSchema");
         var table = new Table("TestTable");
-        var column = new Column("Value", typeof(int));
+        var column = new Column("Value", DataTypeFactory.Create("INT"));
         table.AddColumn(column);
 
         var candidateRow = new Row(table, new List<object>(values));
@@ -52,8 +52,8 @@ public class CheckConstraintTests
         // Arrange
         var schema = new Schema("TestSchema");
         var table = new Table("TestTable");
-        table.AddColumn(new Column("Min", typeof(int)));
-        table.AddColumn(new Column("Max", typeof(int)));
+        table.AddColumn(new Column("Min", DataTypeFactory.Create("INT")));
+        table.AddColumn(new Column("Max", DataTypeFactory.Create("INT")));
 
         var validRow = new Row(table, new List<object> { 10, 20 });
         var invalidRow = new Row(table, new List<object> { 30, 20 });
@@ -72,6 +72,7 @@ public class CheckConstraintTests
         invalidResult.Should().BeFalse();
     }
 }
+
 
 
 

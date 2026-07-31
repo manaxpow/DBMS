@@ -9,11 +9,11 @@ public class ForeignKeyConstraintTests
         var schema = new Schema("TestSchema");
 
         var parentTable = new Table("ParentTable");
-        parentTable.AddColumn(new Column("Id", typeof(int)));
+        parentTable.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
         schema.AddTable(parentTable);
 
         var childTable = new Table("ChildTable");
-        childTable.AddColumn(new Column("ParentId", typeof(int)));
+        childTable.AddColumn(new Column("ParentId", DataTypeFactory.Create("INT")));
         schema.AddTable(childTable);
 
         return (schema, parentTable, childTable);
@@ -85,7 +85,7 @@ public class ForeignKeyConstraintTests
         // Arrange
         var schema = new Schema("TestSchema");
         var childTable = new Table("ChildTable");
-        childTable.AddColumn(new Column("ParentId", typeof(int)));
+        childTable.AddColumn(new Column("ParentId", DataTypeFactory.Create("INT")));
         schema.AddTable(childTable);
 
         var constraint = new ForeignKeyConstraint("FK_Parent", "ParentId", "NonExistentTable", "Id", new RestrictAction(), new RestrictAction());
@@ -120,3 +120,4 @@ public class ForeignKeyConstraintTests
         act.Should().Throw<ColumnNotFoundException>();
     }
 }
+

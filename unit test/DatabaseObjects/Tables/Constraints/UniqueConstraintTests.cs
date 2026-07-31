@@ -6,8 +6,8 @@ public class UniqueConstraintTests
     {
         var schema = new Schema("TestSchema");
         var table = new Table("TestTable");
-        table.AddColumn(new Column("Id", typeof(int)));
-        table.AddColumn(new Column("Name", typeof(string)));
+        table.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
+        table.AddColumn(new Column("Name", DataTypeFactory.Create("VARCHAR")));
         schema.AddTable(table);
         return (table, schema);
     }
@@ -97,3 +97,4 @@ public class UniqueConstraintTests
         result2.Should().BeFalse();
     }
 }
+

@@ -8,8 +8,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<
 builder.Services.AddScoped<FluentValidationFilter>();
 
 // Add Dependency Injection
-builder.Services.AddApplication();
-builder.Services.AddInfrastructure();
+builder.Services.AddApi();
 
 builder.Services.AddControllers(options =>
 {

@@ -25,7 +25,7 @@ public class PrototypeTests
     {
         // Arrange
         var original = new Table("TestTable");
-        original.AddColumn(new Column("Id", typeof(int), false));
+        original.AddColumn(new Column("Id", DataTypeFactory.Create("INT"), false));
 
         // Act
         var clone = (Table)original.Clone();
@@ -74,3 +74,4 @@ public class PrototypeTests
         clone.Body.Should().NotBeSameAs(original.Body);
     }
 }
+

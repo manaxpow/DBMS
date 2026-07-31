@@ -121,11 +121,11 @@ public class SchemaTests
     {
         // Arrange
         var childTable = new Table("TestTable");
-        childTable.AddColumn(new Column("Id", typeof(int)));
-        childTable.AddColumn(new Column("ForeignKeyId", typeof(int)));
+        childTable.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
+        childTable.AddColumn(new Column("ForeignKeyId", DataTypeFactory.Create("INT")));
 
         var referencedTable = new Table("TableReferenced");
-        referencedTable.AddColumn(new Column("Id", typeof(int)));
+        referencedTable.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
         _schema.AddTable(referencedTable);
         _schema.AddTable(childTable);
 
@@ -156,7 +156,7 @@ public class SchemaTests
         _schema.AddTable(originalTable);
 
         var newTable = new Table("TestTable");
-        newTable.AddColumn(new Column("NewColumn", typeof(int)));
+        newTable.AddColumn(new Column("NewColumn", DataTypeFactory.Create("INT")));
 
         // Act
         _schema.AlterTable("TestTable", newTable);
@@ -225,3 +225,4 @@ public class SchemaTests
         schema.Objects.Should().BeEmpty();
     }
 }
+

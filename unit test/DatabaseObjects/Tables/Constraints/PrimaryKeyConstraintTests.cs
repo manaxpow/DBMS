@@ -9,7 +9,7 @@ public class PrimaryKeyConstraintTests
     {
         var schema = new Schema("TestSchema");
         var table = new Table("TestTable");
-        table.AddColumn(new Column("Id", typeof(int)));
+        table.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
         schema.AddTable(table);
         return (table, schema);
     }
@@ -92,6 +92,7 @@ public class PrimaryKeyConstraintTests
         result.Should().BeTrue();
     }
 }
+
 
 
 

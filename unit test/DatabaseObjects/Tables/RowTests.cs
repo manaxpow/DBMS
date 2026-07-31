@@ -7,8 +7,8 @@ public class RowTests
     public RowTests()
     {
         var table = new Table("TestTable");
-        var column1 = new Column("Id", typeof(int), isNullable: false);
-        var column2 = new Column("Name", typeof(string), isNullable: true);
+        var column1 = new Column("Id", DataTypeFactory.Create("INT"), isNullable: false);
+        var column2 = new Column("Name", DataTypeFactory.Create("VARCHAR"), isNullable: true);
         table.AddColumn(column1);
         table.AddColumn(column2);
 
@@ -136,5 +136,6 @@ public class RowTests
         _row.GetValue(columnName).Should().Be(originalValue);
     }
 }
+
 
 

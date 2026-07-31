@@ -114,12 +114,12 @@ public class DatabaseTests
         // Arrange
         var parentSchema = new Schema("ParentSchema");
         var parentTable = new Table("ParentTable");
-        parentTable.AddColumn(new Column("Id", typeof(int)));
+        parentTable.AddColumn(new Column("Id", DataTypeFactory.Create("INT")));
         parentSchema.AddTable(parentTable);
 
         var childSchema = new Schema("ChildSchema");
         var childTable = new Table("ChildTable");
-        childTable.AddColumn(new Column("ParentId", typeof(int)));
+        childTable.AddColumn(new Column("ParentId", DataTypeFactory.Create("INT")));
 
         var foreignKey = new ForeignKeyConstraint("FK_Child_Parent", "ParentId", parentTable.Name, "Id", new RestrictAction(), new RestrictAction());
         childTable.AddConstraint(foreignKey);

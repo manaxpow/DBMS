@@ -7,14 +7,11 @@ public class DataTypeFactoryTests
     [Fact]
     public void GetDataType_WhenValidType_ShouldReturnSharedInstance()
     {
-        // Arrange
-        var factory = new DataTypeFactory();
-
         // Act
-        var intType1 = factory.GetDataType("INT");
-        var intType2 = factory.GetDataType("int");
-        var varcharType1 = factory.GetDataType("VARCHAR");
-        var varcharType2 = factory.GetDataType("VARCHAR");
+        var intType1 = DataTypeFactory.Create("INT");
+        var intType2 = DataTypeFactory.Create("int");
+        var varcharType1 = DataTypeFactory.Create("VARCHAR");
+        var varcharType2 = DataTypeFactory.Create("VARCHAR");
 
         // Assert
         intType1.Should().NotBeNull();
@@ -29,11 +26,8 @@ public class DataTypeFactoryTests
     [Fact]
     public void GetDataType_WhenInvalidType_ShouldThrow()
     {
-        // Arrange
-        var factory = new DataTypeFactory();
-
         // Act
-        Action act = () => factory.GetDataType("INVALID_TYPE");
+        Action act = () => DataTypeFactory.Create("INVALID_TYPE");
 
         // Assert
         act.Should().Throw<NotSupportedException>();
@@ -43,8 +37,7 @@ public class DataTypeFactoryTests
     public void Validate_ShouldDelegateToConcreteFlyweight()
     {
         // Arrange
-        var factory = new DataTypeFactory();
-        var intType = factory.GetDataType("INT");
+        var intType = DataTypeFactory.Create("INT");
         var column = new Column("Age", intType, isNullable: false);
 
         // Act

@@ -31,7 +31,7 @@ public class TableBuilderTests
     public void AddColumn_ShouldReturnBuilder_AndAddColumn()
     {
         // Arrange
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
 
         // Act
         var result = _builder.AddColumn(column);
@@ -89,7 +89,7 @@ public class TableBuilderTests
     {
         // Arrange
         var tableName = "Orders";
-        var column = new Column("Id", typeof(int));
+        var column = new Column("Id", DataTypeFactory.Create("INT"));
         Constraint constraint = null!;
         Index index = null!;
         Partition partition = null!;
@@ -112,3 +112,4 @@ public class TableBuilderTests
         table.Partitions.Should().Contain(partition);
     }
 }
+

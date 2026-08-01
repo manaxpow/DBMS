@@ -8,11 +8,10 @@ public class StoreController(IStoreService storeService) : ControllerBase
 {
     private readonly IStoreService _storeService = storeService;
 
-    [Authorize(Roles = "Owner")]
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> GetMyStore(
-        [FromQuery] bool includeOwner = false,
-        [FromQuery] bool includeSettings = false,
+        [FromQuery] GetMyStoreQuery query,
         CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -21,8 +20,8 @@ public class StoreController(IStoreService storeService) : ControllerBase
             return Unauthorized();
         }
 
-        var store = await _storeService.GetStoreAsync(Guid.Parse(userId), includeOwner, includeSettings, cancellationToken);
-        if (store is null)
+        var store = await _storeService.GetStoreAsync(Guid.Parse(userId), query.IncludeOwner ?? false, query.IncludeSettings ?? false, cancellationToken);
+        if (store is null)  
         {
             return NotFound();
         }
@@ -30,7 +29,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
         return Ok(store);
     }
 
-    [Authorize(Roles = "Owner")]
+    [Authorize(Roles = "Admin")]
     [HttpPut]
     public async Task<IActionResult> UpdateMyStore([FromBody] UpdateStoreRequest request, CancellationToken cancellationToken)
     {
@@ -44,11 +43,11 @@ public class StoreController(IStoreService storeService) : ControllerBase
         return Ok(updatedStore);
     }
 
-    [Authorize(Roles = "Owner")]
+    [Authorize(Roles = "Admin")]
     [HttpPost("logo")]
     public async Task<IActionResult> UpdateMyStoreLogo(
         [FromForm] UpdateStoreLogoRequest request,
-        [FromQuery] bool replaceExisting = false,
+        [FromQuery] UpdateMyStoreLogoQuery query,
         CancellationToken cancellationToken = default)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -57,7 +56,7 @@ public class StoreController(IStoreService storeService) : ControllerBase
             return Unauthorized();
         }
 
-        var updatedStore = await _storeService.UpdateStoreLogoAsync(Guid.Parse(userId), request.LogoFile, replaceExisting, cancellationToken);
+        var updatedStore = await _storeService.UpdateStoreLogoAsync(Guid.Parse(userId), request.LogoFile, query.ReplaceExisting ?? false, cancellationToken);
         return Ok(updatedStore);
     }
 }

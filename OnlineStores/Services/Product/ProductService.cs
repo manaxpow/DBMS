@@ -52,14 +52,14 @@ public class ProductService(IProductRepository productRepository) : IProductServ
     public async Task DeleteProductAsync(Guid productId, bool force = false, bool deleteAssets = false, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
-        if (product is null) throw new Exception("Product not found");
+        if (product is null) throw new NotFoundException("Product not found");
         await _productRepository.DeleteAsync(product, cancellationToken);
     }
 
     public async Task<ProductResponse> UploadProductImageAsync(Guid productId, IFormFile image, bool setAsPrimary = false, int? position = null, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
-        if (product is null) throw new Exception("Product not found");
+        if (product is null) throw new NotFoundException("Product not found");
         // Mock image upload handling
         return MapToProductResponse(product);
     }

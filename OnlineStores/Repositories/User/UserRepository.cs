@@ -4,10 +4,10 @@ public class UserRepository : IUserRepository
     [
         User.Create
         (
-            email: "admin@onlinestore.com",
+            email: "admin@example.com",
             fullName: "Store Administrator",
-            passwordHash: "Admin@123",
-            role: "Admin",
+            passwordHash: DevOne.Security.Cryptography.BCrypt.BCryptHelper.HashPassword("Password123!", DevOne.Security.Cryptography.BCrypt.BCryptHelper.GenerateSalt()),
+            role: "Owner", // Using Owner/Admin role
             isActive: true
         )
     ];

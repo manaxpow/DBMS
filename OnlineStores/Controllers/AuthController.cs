@@ -47,8 +47,7 @@ public class AuthController(IAuthService authService) : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("refresh-token")]
-    [ProducesResponseType<RefreshTokenResponse>(
-        StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> RefreshToken(CancellationToken cancellationToken)
     {
         var refreshToken = CookieHelper.GetCookie(Request, "RefreshToken");

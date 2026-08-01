@@ -1,5 +1,7 @@
 ﻿
 public sealed record LoginResponse(
     string AccessToken,
-    DateTime ExpiresAt,
+    string RefreshToken,
+    int AccessTokenExpiresAt,
+    int RefreshTokenExpiresAt,
     CurrentUserResponse User);

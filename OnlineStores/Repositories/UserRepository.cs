@@ -1,18 +1,15 @@
-﻿public class UserRepository : IUserRepository
+public class UserRepository : IUserRepository
 {
-    private readonly IReadOnlyCollection<User> _users =
+    private readonly List<User> _users =
     [
-        new User
-        {
-            Id = Guid.Parse("2f11942f-339e-46dd-b08c-bc540893a807"),
-            Email = "admin@onlinestore.com",
-            FullName = "Store Administrator",
-
-            PasswordHash = "Admin@123",
-
-            Role = "Admin",
-            IsActive = true
-        }
+        User.Create
+        (
+            email: "admin@onlinestore.com",
+            fullName: "Store Administrator",
+            passwordHash: "Admin@123",
+            role: "Admin",
+            isActive: true
+        )
     ];
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
@@ -26,4 +23,27 @@
         var user = _users.FirstOrDefault(u => u.Id == id);
         return Task.FromResult(user);
     }
+
+    public Task UpdateRefreshTokenAsync(Guid userId, string refreshToken, DateTime refreshTokenExpiryTime, CancellationToken cancellationToken)
+    {
+        var user = _users.FirstOrDefault(u => u.Id == userId);
+        if (user != null)
+        {
+            user.SetRefreshToken(refreshToken, refreshTokenExpiryTime);
+        }
+        return Task.CompletedTask;
+    }
+
+    public Task AddAsync(User user, CancellationToken cancellationToken)
+    {
+        _users.Add(user);
+        return Task.CompletedTask;
+    }
+
+    public Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        var user = _users.FirstOrDefault(u => u.RefreshToken == refreshToken && u.RefreshTokenExpiryTime > DateTime.UtcNow);
+        return Task.FromResult(user);
+    }
+
 }

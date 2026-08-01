@@ -5,13 +5,15 @@ using Microsoft.IdentityModel.Tokens;
 
 public static class AuthExtensions
 {
-    public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         var jwtOptions = configuration
-        .GetSection(JwtOptions.SectionName)
-        .Get<JwtOptions>()
-        ?? throw new InvalidOperationException(
-        "JWT configuration is missing.");
+            .GetSection(JwtOptions.SectionName)
+            .Get<JwtOptions>()
+            ?? throw new InvalidOperationException(
+                "JWT configuration is missing.");
 
         if (string.IsNullOrWhiteSpace(jwtOptions.SecretKey))
         {
@@ -31,7 +33,9 @@ public static class AuthExtensions
             .AddJwtBearer(options =>
             {
                 options.RequireHttpsMetadata =
-                    !configuration.GetSection("Environment").GetValue<bool>("IsDevelopment");
+                    !configuration
+                        .GetSection("Environment")
+                        .GetValue<bool>("IsDevelopment");
 
                 options.SaveToken = true;
 
@@ -51,14 +55,30 @@ public static class AuthExtensions
                                     jwtOptions.SecretKey)),
 
                         ValidateLifetime = true,
-
                         ClockSkew = TimeSpan.Zero,
 
                         NameClaimType = ClaimTypes.Name,
                         RoleClaimType = ClaimTypes.Role
                     };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken =
+                            context.Request.Cookies["AccessToken"];
+
+                        if (!string.IsNullOrWhiteSpace(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
+        services.AddAuthorization();
 
         return services;
     }

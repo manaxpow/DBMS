@@ -1,3 +1,5 @@
+using FluentValidation;
+
 public static class DependencyInjection
 {
     public static IServiceCollection AddOnlineStores(this IServiceCollection services, IConfiguration configuration)
@@ -23,6 +25,9 @@ public static class DependencyInjection
         // Register services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+
+        // Register validators
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
 
         return services;
     }

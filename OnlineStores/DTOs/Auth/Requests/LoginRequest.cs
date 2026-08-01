@@ -1,5 +1,5 @@
 using System.ComponentModel;
 
 public sealed record LoginRequest(
-    [property: DefaultValue("example@gmail.com")] string Email,
-    [property: DefaultValue("password")] string Password);
+    [property: DefaultValue("admin@example.com")] string Email,
+    [property: DefaultValue("Password123!")] string Password);

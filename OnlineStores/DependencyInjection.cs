@@ -25,12 +25,14 @@ public static class DependencyInjection
         services.AddSingleton<IUserRepository, UserRepository>();
         services.AddSingleton<IStoreRepository, StoreRepository>();
         services.AddSingleton<IProductRepository, ProductRepository>();
+        services.AddSingleton<ICustomerRepository, CustomerRepository>();
 
         // Register services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IStoreService, StoreService>();
         services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<ICustomerService, CustomerService>();
 
         // Register validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

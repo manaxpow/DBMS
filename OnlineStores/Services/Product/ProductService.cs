@@ -1,7 +1,7 @@
-using OnlineStores.Entities;
-using OnlineStores.Repositories;
 
-namespace OnlineStores.Services;
+
+
+
 
 public class ProductService(IProductRepository productRepository) : IProductService
 {

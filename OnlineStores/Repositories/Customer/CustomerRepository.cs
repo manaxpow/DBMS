@@ -1,6 +1,6 @@
-using OnlineStores.Entities;
 
-namespace OnlineStores.Repositories;
+
+
 
 public class CustomerRepository : ICustomerRepository
 {

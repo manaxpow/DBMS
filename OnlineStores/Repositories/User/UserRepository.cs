@@ -6,7 +6,7 @@ public class UserRepository : IUserRepository
         (
             email: "admin@example.com",
             fullName: "Store Administrator",
-            passwordHash: DevOne.Security.Cryptography.BCrypt.BCryptHelper.HashPassword("Password123!", DevOne.Security.Cryptography.BCrypt.BCryptHelper.GenerateSalt()),
+            passwordHash: BCrypt.Net.BCrypt.HashPassword("Password123!", BCrypt.Net.BCrypt.GenerateSalt()),
             role: "Admin", // Using Owner/Admin role
             isActive: true
         )

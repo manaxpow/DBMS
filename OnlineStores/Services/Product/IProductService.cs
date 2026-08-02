@@ -1,4 +1,4 @@
-namespace OnlineStores.Services;
+
 
 public interface IProductService
 {

@@ -44,7 +44,10 @@ Click here to see swagger documentation
 | ------ | ------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | --------- |
 | GET    | /orders                  | None            | search, customerId, status, paymentStatus, fulfillmentStatus, createdFrom, createdTo, minTotal, maxTotal, sort, page, pageSize | None                     | Admin     |
 | GET    | /orders/{orderId}        | orderId         | includeItems, includeCustomer, includePayments, includeHistory                                                                 | None                     | Admin     |
+| POST   | /orders                  | None            | None                                                                                                                           | CreateOrderRequest       | Admin     |
+| PUT    | /orders/{orderId}        | orderId         | None                                                                                                                           | UpdateOrderRequest       | Admin     |
 | PATCH  | /orders/{orderId}/status | orderId         | notifyCustomer                                                                                                                 | UpdateOrderStatusRequest | Admin     |
+| DELETE | /orders/{orderId}        | orderId         | None                                                                                                                           | None                     | Admin     |
 
 ## 6. Customers
 

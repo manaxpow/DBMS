@@ -17,6 +17,8 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<FluentValidationFilter>();
 });
 
+builder.Services.AddMemoryCache();
+
 // Register Dependency Injection
 builder.Services.AddOnlineStores(builder.Configuration);
 

@@ -27,6 +27,7 @@ public static class DependencyInjection
         services.AddSingleton<IProductRepository, ProductRepository>();
         services.AddSingleton<ICustomerRepository, CustomerRepository>();
         services.AddSingleton<IOrderRepository, OrderRepository>();
+        services.AddSingleton<IDiscountRepository, DiscountRepository>();
 
         // Register services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -35,6 +36,7 @@ public static class DependencyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IDiscountService, DiscountService>();
 
         // Register validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

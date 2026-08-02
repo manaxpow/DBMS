@@ -3,9 +3,12 @@
 
 
 
-public class ProductService(IProductRepository productRepository) : IProductService
+using Microsoft.Extensions.Caching.Memory;
+
+public class ProductService(IProductRepository productRepository, IMemoryCache memoryCache) : IProductService
 {
     private readonly IProductRepository _productRepository = productRepository;
+    private readonly IMemoryCache _memoryCache = memoryCache;
 
     public async Task<PagedResponse<ProductResponse>> GetProductsAsync(GetProductsQuery query, CancellationToken cancellationToken = default)
     {
@@ -16,9 +19,22 @@ public class ProductService(IProductRepository productRepository) : IProductServ
 
     public async Task<ProductResponse?> GetProductByIdAsync(Guid productId, bool includeImages = false, bool includeVariants = false, bool includeStatistics = false, CancellationToken cancellationToken = default)
     {
+
+        // Check cache first
+        var cacheKey = CacheKeys.Product.ById(productId);
+        if (_memoryCache.TryGetValue(cacheKey, out ProductResponse? cachedProduct))
+        {
+            return cachedProduct;
+        }
+
         var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
         if (product is null) return null;
-        return MapToProductResponse(product);
+
+        var productResponse = MapToProductResponse(product);
+
+        // Cache
+        _memoryCache.Set(cacheKey, productResponse, TimeSpan.FromMinutes(10));
+        return productResponse;
     }
 
     public async Task<ProductResponse> CreateProductAsync(CreateProductRequest request, bool publishImmediately = false, CancellationToken cancellationToken = default)
@@ -46,6 +62,10 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         product.Update(request.Name, request.Description, request.Price, request.StockQuantity, request.Type, request.CategoryId, request.Status);
 
         await _productRepository.UpdateAsync(product, cancellationToken);
+
+        // Invalidate cache
+        string cacheKey = CacheKeys.Product.ById(productId);
+        _memoryCache.Remove(cacheKey);
         return MapToProductResponse(product);
     }
 
@@ -54,13 +74,16 @@ public class ProductService(IProductRepository productRepository) : IProductServ
         var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
         if (product is null) throw new NotFoundException("Product not found");
         await _productRepository.DeleteAsync(product, cancellationToken);
+
+        // Invalidate cache
+        string cacheKey = CacheKeys.Product.ById(productId);
+        _memoryCache.Remove(cacheKey);
     }
 
     public async Task<ProductResponse> UploadProductImageAsync(Guid productId, IFormFile image, bool setAsPrimary = false, int? position = null, CancellationToken cancellationToken = default)
     {
         var product = await _productRepository.GetByIdAsync(productId, cancellationToken);
         if (product is null) throw new NotFoundException("Product not found");
-        // Mock image upload handling
         return MapToProductResponse(product);
     }
 

@@ -91,16 +91,4 @@ Click here to see swagger documentation
 | ------ | ---------------- | --------------- | ----------------------------------------------- | ------------ | --------- |
 | GET    | /reports/revenue | None            | from, to, interval, currency, timezone, groupBy | None         | Admin     |
 
-## 9. Design
 
-| Method | Endpoint      | Path parameters | Query / filters & Pagination    | Request body       | Authorize |
-| ------ | ------------- | --------------- | ------------------------------- | ------------------ | --------- |
-| GET    | /design/theme | None            | includeCustomCss, includeAssets | None               | None      |
-| PUT    | /design/theme | None            | publishImmediately              | UpdateThemeRequest | Admin     |
-
-## 10. Settings
-
-| Method | Endpoint          | Path parameters | Query / filters & Pagination    | Request body                 | Authorize |
-| ------ | ----------------- | --------------- | ------------------------------- | ---------------------------- | --------- |
-| GET    | /settings/general | None            | includeLocalization, includeSeo | None                         | None      |
-| PUT    | /settings/general | None            | None                            | UpdateGeneralSettingsRequest | Admin     |

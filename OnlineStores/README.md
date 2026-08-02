@@ -42,9 +42,9 @@ Click here to see swagger documentation
 
 | Method | Endpoint                 | Path parameters | Query / filters & Pagination                                                                                                   | Request body             | Authorize |
 | ------ | ------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------ | --------- |
-| GET    | /orders                  | None            | search, customerId, status, paymentStatus, fulfillmentStatus, createdFrom, createdTo, minTotal, maxTotal, sort, page, pageSize | None                     | Admin     |
-| GET    | /orders/{orderId}        | orderId         | includeItems, includeCustomer, includePayments, includeHistory                                                                 | None                     | Admin     |
-| POST   | /orders                  | None            | None                                                                                                                           | CreateOrderRequest       | Admin     |
+| GET    | /orders                  | None            | search, customerId, status, paymentStatus, fulfillmentStatus, createdFrom, createdTo, minTotal, maxTotal, sort, page, pageSize | None                     | Admin, User |
+| GET    | /orders/{orderId}        | orderId         | includeItems, includeCustomer, includePayments, includeHistory                                                                 | None                     | Admin, User |
+| POST   | /orders                  | None            | None                                                                                                                           | CreateOrderRequest       | Admin, User |
 | PUT    | /orders/{orderId}        | orderId         | None                                                                                                                           | UpdateOrderRequest       | Admin     |
 | PATCH  | /orders/{orderId}/status | orderId         | notifyCustomer                                                                                                                 | UpdateOrderStatusRequest | Admin     |
 | DELETE | /orders/{orderId}        | orderId         | None                                                                                                                           | None                     | Admin     |

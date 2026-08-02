@@ -572,6 +572,67 @@
         }
       }
     },
+    "/api/v1/dashboard/summary": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "parameters": [
+          {
+            "name": "From",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "To",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "Timezone",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Currency",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/discounts": {
       "get": {
         "tags": [
@@ -2067,6 +2128,24 @@
         ],
         "type": "string"
       },
+      "DailySales": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sales": {
+            "type": "number",
+            "format": "double"
+          },
+          "orders": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
       "DiscountResponse": {
         "type": "object",
         "properties": {
@@ -2324,6 +2403,20 @@
         "type": "integer",
         "format": "int32"
       },
+      "OrdersSummary": {
+        "type": "object",
+        "properties": {
+          "totalOrders": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalRevenue": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -2468,6 +2561,38 @@
         "properties": {
           "user": {
             "$ref": "#/components/schemas/CurrentUserResponse"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SummaryResponse": {
+        "type": "object",
+        "properties": {
+          "totalSales": {
+            "type": "number",
+            "format": "double"
+          },
+          "ordersSummary": {
+            "$ref": "#/components/schemas/OrdersSummary"
+          },
+          "totalCustomers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalProducts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageOrderValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "salesTimeline": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySales"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -2628,6 +2753,9 @@
     },
     {
       "name": "Customers"
+    },
+    {
+      "name": "Dashboard"
     },
     {
       "name": "Discount"

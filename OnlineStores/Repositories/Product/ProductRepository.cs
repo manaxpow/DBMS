@@ -1,7 +1,3 @@
-
-
-
-
 public class ProductRepository : IProductRepository
 {
     private readonly List<Product> _products = new List<Product>();
@@ -93,4 +89,8 @@ public class ProductRepository : IProductRepository
         return Task.FromResult(products);
     }
 
+    public Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.FromResult(_products.Count);
+    }
 }

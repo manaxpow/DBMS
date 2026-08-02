@@ -7,4 +7,6 @@ public interface IOrderRepository
     Task UpdateAsync(Order order, CancellationToken cancellationToken = default);
     Task UpdateStatusAsync(Guid id, OrderStatus status, CancellationToken cancellationToken = default);
     Task DeleteAsync(Order order, CancellationToken cancellationToken = default);
+
+    Task<OrdersSummary> GetSummaryDataAsync(DateTime? from, DateTime? to, string? timezone, string? currency, CancellationToken cancellationToken = default);
 }

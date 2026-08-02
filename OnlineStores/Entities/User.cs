@@ -1,4 +1,4 @@
-﻿public sealed class User
+public sealed class User
 {
     public Guid Id { get; init; }
 
@@ -12,6 +12,11 @@
     public string Role { get; private set; } = "User";
 
     public bool IsActive { get; private set; } = true;
+
+    public string? AvatarUrl { get; private set; }
+
+    public ICollection<CustomerMember> CustomerMemberships { get; private set; } = new List<CustomerMember>();
+
     private User()
     {
     }

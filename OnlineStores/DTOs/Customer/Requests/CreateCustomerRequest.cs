@@ -1,7 +1,8 @@
 public record CreateCustomerRequest(
-    string Name,
-    string Email,
-    string? Phone,
+    string CompanyName,
+    string? Domain,
+    CustomerStatus Status,
     string? Category,
-    CustomerMemberType MemberType = CustomerMemberType.Regular
+    string? Description,
+    List<CreateCustomerUserRequest>? Users
 );

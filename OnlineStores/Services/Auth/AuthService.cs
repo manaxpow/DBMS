@@ -1,5 +1,3 @@
-using DevOne.Security.Cryptography.BCrypt;
-
 public class AuthService(IJwtTokenService jwtTokenService, IUserRepository userRepository) : IAuthService
 {
     private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
@@ -34,7 +32,7 @@ public class AuthService(IJwtTokenService jwtTokenService, IUserRepository userR
             return null;
         }
 
-        var isPasswordValid = BCryptHelper.CheckPassword(request.Password, user.PasswordHash);
+        var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
             return null;
@@ -99,7 +97,7 @@ public class AuthService(IJwtTokenService jwtTokenService, IUserRepository userR
         var user = User.Create(
             email: normalizedEmail,
             fullName: request.FullName,
-            passwordHash: BCryptHelper.HashPassword(request.Password, BCryptHelper.GenerateSalt()),
+            passwordHash: BCrypt.Net.BCrypt.HashPassword(request.Password, BCrypt.Net.BCrypt.GenerateSalt()),
             role: "User",
             isActive: true
         );

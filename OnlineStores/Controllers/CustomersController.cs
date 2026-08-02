@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OnlineStores.Services;
 
 [ApiController]
 [Route("api/v1/customers")]
@@ -12,7 +11,7 @@ public class CustomersController(ICustomerService customerService) : ControllerB
     [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<ActionResult<PagedResponse<CustomerResponse>>> GetCustomers(
-        [FromQuery] GetCustomersQuery query, 
+        [FromQuery] GetCustomersQuery query,
         CancellationToken cancellationToken)
     {
         var customers = await _customerService.GetCustomersAsync(query, cancellationToken);

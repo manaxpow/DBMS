@@ -1,6 +1,6 @@
 using FluentValidation;
-using OnlineStores.Repositories;
-using OnlineStores.Services;
+
+
 
 public static class DependencyInjection
 {
@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddSingleton<IStoreRepository, StoreRepository>();
         services.AddSingleton<IProductRepository, ProductRepository>();
         services.AddSingleton<ICustomerRepository, CustomerRepository>();
+        services.AddSingleton<IOrderRepository, OrderRepository>();
 
         // Register services
         services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IStoreService, StoreService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IOrderService, OrderService>();
 
         // Register validators
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);

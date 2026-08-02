@@ -61,6 +61,31 @@ public class OrderRepository : IOrderRepository
         return Task.FromResult(orders);
     }
 
+    public Task<OrdersSummary> GetSummaryDataAsync(DateTime? from, DateTime? to, string? timezone, string? currency, CancellationToken cancellationToken = default)
+    {
+        var filteredOrders = _orders.AsEnumerable();
+
+        if (from.HasValue)
+        {
+            filteredOrders = filteredOrders.Where(o => o.CreatedAt >= from.Value);
+        }
+
+        if (to.HasValue)
+        {
+            filteredOrders = filteredOrders.Where(o => o.CreatedAt <= to.Value);
+        }
+
+        var totalOrders = filteredOrders.Count();
+        var totalRevenue = filteredOrders.Sum(o => o.TotalAmount);
+
+        return Task.FromResult(new OrdersSummary
+        (
+            TotalOrders: totalOrders,
+            TotalRevenue: totalRevenue
+        )
+        );
+    }
+
     public Task UpdateAsync(Order order, CancellationToken cancellationToken = default)
     {
         var existingOrder = _orders.FirstOrDefault(o => o.Id == order.Id);

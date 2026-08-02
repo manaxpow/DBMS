@@ -45,18 +45,13 @@ public class CustomerRepository : ICustomerRepository
 
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
-            customers = customers.Where(c => c.Name.Contains(query.Search, StringComparison.OrdinalIgnoreCase) || 
-                                             c.Email.Contains(query.Search, StringComparison.OrdinalIgnoreCase));
+            customers = customers.Where(c => c.CompanyName.Contains(query.Search, StringComparison.OrdinalIgnoreCase) || 
+                                             (c.Domain != null && c.Domain.Contains(query.Search, StringComparison.OrdinalIgnoreCase)));
         }
 
         if (query.Status.HasValue)
         {
             customers = customers.Where(c => c.Status == query.Status.Value);
-        }
-
-        if (query.MemberType.HasValue)
-        {
-            customers = customers.Where(c => c.MemberType == query.MemberType.Value);
         }
         
         if (!string.IsNullOrWhiteSpace(query.Category))

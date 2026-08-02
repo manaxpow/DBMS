@@ -51,14 +51,29 @@ Click here to see swagger documentation
 
 ## 6. Customers
 
-| Method | Endpoint                       | Path parameters | Query / filters & Pagination                                                                                     | Request body          | Authorize |
-| ------ | ------------------------------ | --------------- | ---------------------------------------------------------------------------------------------------------------- | --------------------- | --------- |
-| GET    | /customers                     | None            | search, status, category, memberType, createdFrom, createdTo, lastActiveFrom, lastActiveTo, sort, page, pageSize | None                  | Admin     |
-| GET    | /customers/{customerId}        | customerId      | includeUsers, includeStatistics, includeMetadata                                                                 | None                  | Admin     |
-| POST   | /customers                     | None            | sendInvitation                                                                                                   | CreateCustomerRequest | Admin     |
-| PUT    | /customers/{customerId}        | customerId      | None                                                                                                             | UpdateCustomerRequest | Admin     |
-| DELETE | /customers/{customerId}        | customerId      | force, anonymizeData                                                                                             | None                  | Admin     |
-| GET    | /customers/{customerId}/orders | customerId      | status, paymentStatus, createdFrom, createdTo, sort, page, pageSize                                              | None                  | Admin     |
+### Customer endpoints
+
+| Method | Endpoint | Path parameters | Query / filters & Pagination | Request body | Authorize |
+| --- | --- | --- | --- | --- | --- |
+| GET | /customers | None | search, status, category, memberType, createdFrom, createdTo, lastActiveFrom, lastActiveTo, sort, page, pageSize | None | Admin |
+| GET | /customers/summary | None | from, to, timezone | None | Admin |
+| GET | /customers/export | None | search, status, category, memberType, createdFrom, createdTo, lastActiveFrom, lastActiveTo, format | None | Admin |
+| GET | /customers/{customerId} | customerId | includeUsers, includeStatistics, includeMetadata | None | Admin |
+| POST | /customers | None | sendInvitation | CreateCustomerRequest | Admin |
+| PUT | /customers/{customerId} | customerId | None | UpdateCustomerRequest | Admin |
+| DELETE | /customers/{customerId} | customerId | force, anonymizeData | None | Admin |
+| POST | /customers/{customerId}/logo | customerId | replaceExisting | multipart/form-data | Admin |
+| GET | /customers/{customerId}/orders | customerId | status, paymentStatus, createdFrom, createdTo, sort, page, pageSize | None | Admin |
+
+### Customer member endpoints
+
+| Method | Endpoint | Path parameters | Query / filters & Pagination | Request body | Authorize |
+| --- | --- | --- | --- | --- | --- |
+| GET | /customers/{customerId}/users | customerId | search, status, memberType, sort, page, pageSize | None | Admin |
+| POST | /customers/{customerId}/users | customerId | sendInvitation | CreateCustomerUserRequest | Admin |
+| GET | /customers/{customerId}/users/{userId} | customerId, userId | None | None | Admin |
+| PUT | /customers/{customerId}/users/{userId} | customerId, userId | None | UpdateCustomerUserRequest | Admin |
+| DELETE | /customers/{customerId}/users/{userId} | customerId, userId | None | None | Admin |
 
 ## 7. Discounts
 

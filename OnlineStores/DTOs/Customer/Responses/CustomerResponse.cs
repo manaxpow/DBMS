@@ -1,12 +1,13 @@
 public record CustomerResponse(
     Guid Id,
-    string Name,
-    string Email,
-    string? Phone,
+    string CompanyName,
+    string? LogoUrl,
+    string? Domain,
     CustomerStatus Status,
-    CustomerMemberType MemberType,
     string? Category,
+    string? Description,
+    int UserCount,
+    IReadOnlyList<CustomerUserSummaryResponse> Users,
     DateTime CreatedAt,
-    DateTime? UpdatedAt,
     DateTime? LastActiveAt
 );

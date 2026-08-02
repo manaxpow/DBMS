@@ -1,8 +1,7 @@
 public record UpdateCustomerRequest(
-    string Name,
-    string Email,
-    string? Phone,
+    string CompanyName,
+    string? Domain,
+    CustomerStatus Status,
     string? Category,
-    CustomerMemberType MemberType,
-    CustomerStatus Status
+    string? Description
 );

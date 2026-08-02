@@ -1,10 +1,9 @@
 using System.Text.Json.Serialization;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CustomerStatus
+public enum CustomerMemberRole
 {
-    Prospect,
-    Customer,
-    Churned,
-    Suspended
+    Owner,
+    Admin,
+    Member
 }

@@ -14,9 +14,5 @@ public class GetCustomersQueryValidator : AbstractValidator<GetCustomersQuery>
         RuleFor(x => x.CreatedTo)
             .GreaterThanOrEqualTo(x => x.CreatedFrom).WithMessage("CreatedTo cannot be earlier than CreatedFrom.")
             .When(x => x.CreatedTo.HasValue && x.CreatedFrom.HasValue);
-            
-        RuleFor(x => x.LastActiveTo)
-            .GreaterThanOrEqualTo(x => x.LastActiveFrom).WithMessage("LastActiveTo cannot be earlier than LastActiveFrom.")
-            .When(x => x.LastActiveTo.HasValue && x.LastActiveFrom.HasValue);
     }
 }

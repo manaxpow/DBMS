@@ -64,8 +64,8 @@ Click here to see swagger documentation
 
 | Method | Endpoint                | Path parameters | Query / filters & Pagination                                                                           | Request body          | Authorize |
 | ------ | ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------ | --------------------- | --------- |
-| GET    | /discounts              | None            | search, status, type, applicableTo, startsFrom, startsTo, expiresFrom, expiresTo, sort, page, pageSize | None                  | Admin     |
-| GET    | /discounts/{discountId} | discountId      | includeUsageStatistics, includeProducts                                                                | None                  | Admin     |
+| GET    | /discounts              | None            | search, status, type, applicableTo, startsFrom, startsTo, expiresFrom, expiresTo, sort, page, pageSize | None                  | Admin |
+| GET    | /discounts/{discountId} | discountId      | includeUsageStatistics, includeProducts                                                                | None                  | Admin, User |
 | POST   | /discounts              | None            | activateImmediately                                                                                    | CreateDiscountRequest | Admin     |
 | PUT    | /discounts/{discountId} | discountId      | None                                                                                                   | UpdateDiscountRequest | Admin     |
 | DELETE | /discounts/{discountId} | discountId      | force                                                                                                  | None                  | Admin     |

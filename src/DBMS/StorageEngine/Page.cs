@@ -11,12 +11,12 @@ public class Page(PageId pageId, byte[] data)
 
     public List<Slot> SlotDirectory { get; set; } = new List<Slot>();
 
-    public object InsertRecord(object record)
+    public Slot InsertRecord(Record record)
     {
         throw new NotImplementedException();
     }
 
-    public void UpdateRecord(object record)
+    public void UpdateRecord(Record record)
     {
         throw new NotImplementedException();
     }
@@ -31,7 +31,7 @@ public class Page(PageId pageId, byte[] data)
         throw new NotImplementedException();
     }
 
-    private int CalculateRequiredSpace(object record)
+    private int CalculateRequiredSpace(Record record)
     {
         throw new NotImplementedException();
     }
@@ -41,7 +41,7 @@ public class Page(PageId pageId, byte[] data)
         throw new NotImplementedException();
     }
 
-    private int WriteRecordData(object record)
+    private int WriteRecordData(Record record)
     {
         throw new NotImplementedException();
     }
@@ -67,6 +67,16 @@ public class Page(PageId pageId, byte[] data)
     }
 
     private void RemoveOrInvalidateSlot(object slotId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object GetRecord(int v)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Compact()
     {
         throw new NotImplementedException();
     }

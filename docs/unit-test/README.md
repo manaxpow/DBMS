@@ -21,10 +21,10 @@
 | Transaction Management | Transaction | 6 | 0 | 6 | 0% |
 | Transaction Management | TransactionManager | 5 | 0 | 5 | 0% |
 | Transaction Management | LockManager | 8 | 0 | 8 | 0% |
-| Storage Engine | BufferPool | 9 | 1 | 8 | 11% |
-| Storage Engine | Page | 8 | 0 | 8 | 0% |
-| Storage Engine | StorageEngine | 6 | 0 | 6 | 0% |
-| Storage Engine | FileManager | 9 | 0 | 9 | 0% |
+| Storage Engine | BufferPool | 9 | 8 | 1 | 89% |
+| Storage Engine | Page | 8 | 8 | 0 | 100% |
+| Storage Engine | StorageEngine | 6 | 6 | 0 | 100% |
+| Storage Engine | FileManager | 9 | 9 | 0 | 100% |
 | Recovery & WAL | WAL | 5 | 0 | 5 | 0% |
 | Recovery & WAL | Recovery | 5 | 0 | 5 | 0% |
 | Query Processor | Lexer | 2 | 0 | 2 | 0% |
@@ -33,7 +33,7 @@
 | Query Processor | Executor | 11 | 8 | 3 | 72% |
 | Security | Authentication | 3 | 0 | 3 | 0% |
 | Security | Authorization | 5 | 0 | 5 | 0% |
-| **Total** | | **169** | **91** | **78** | **53%** |
+| **Total** | | **169** | **121** | **48** | **72%** |
 
 ## Database Objects
 
@@ -421,8 +421,8 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_BufferPool classNode
-    class BP_001 completedTest
-    class BP_002,BP_003,BP_004,BP_005,BP_006,BP_007,BP_008,BP_009 missingTest
+    class BP_001,BP_002,BP_003,BP_005,BP_006,BP_007,BP_008,BP_009 completedTest
+    class BP_004 missingTest
 ```
 
 ### Page
@@ -445,7 +445,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Page classNode
-    class PG_001,PG_002,PG_003,PG_004,PG_005,PG_006,PG_007,PG_008 missingTest
+    class PG_001,PG_002,PG_003,PG_004,PG_005,PG_006,PG_007,PG_008 completedTest
 ```
 
 ### StorageEngine
@@ -466,7 +466,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_StorageEngine classNode
-    class ENG_001,ENG_002,ENG_003,ENG_004,ENG_005,ENG_006 missingTest
+    class ENG_001,ENG_002,ENG_003,ENG_004,ENG_005,ENG_006 completedTest
 ```
 
 ### FileManager
@@ -490,7 +490,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_FileManager classNode
-    class FM_001,FM_002,FM_003,FM_004,FM_005,FM_006,FM_007,FM_008,FM_009 missingTest
+    class FM_001,FM_002,FM_003,FM_004,FM_005,FM_006,FM_007,FM_008,FM_009 completedTest
 ```
 
 ## Recovery & WAL

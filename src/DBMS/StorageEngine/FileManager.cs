@@ -51,4 +51,9 @@ public class FileManager : IFileManager
     {
         throw new NotImplementedException();
     }
+
+    public void WritePage(PageId pageId, byte[] bytes)
+    {
+        throw new NotImplementedException();
+    }
 }

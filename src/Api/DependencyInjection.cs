@@ -6,6 +6,7 @@ public static class DependencyInjection
         services.AddScoped<IRowService, RowService>();
         services.AddScoped<ITableService, TableService>();
         services.AddScoped<IColumnService, ColumnService>();
+        services.AddScoped<ISchemaService, SchemaService>();
 
         // Repositories
         services.AddSingleton<ITableRepository, TableRepository>();

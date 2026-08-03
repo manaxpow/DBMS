@@ -1,13 +1,19 @@
-using System;
-using Xunit;
-
 public class TransactionTests
 {
+    private Transaction _transaction;
+    public TransactionTests()
+    {
+        _transaction = new Transaction();
+    }
     [Trait("Category", "Important")]
     [Fact]
     public void Begin_WhenTransactionIsNew_ShouldBecomeActive()
     {
-        throw new NotImplementedException();
+        // Arrange
+
+        // Act
+
+        // Assert
     }
 
     [Trait("Category", "Important")]

@@ -532,3 +532,355 @@ sequenceDiagram
     deactivate SE
 ```
 
+
+# 7. Additional Missing Storage Engine Tests
+
+## 1. BufferPool (Missing) Tests
+
+### 1.1 FetchPage_WhenPageIsBuffered_ShouldIncrementPinCount
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+
+    Test->>BP: FetchPage(pageId)
+    activate BP
+    BP->>BP: FindBufferedFrame(pageId)
+    BP-->>BP: existingFrame
+    BP->>BP: Pin(existingFrame)
+    Note right of BP: PinCount is incremented
+    BP-->>Test: existingFrame
+    deactivate BP
+```
+
+### 1.2 FetchPage_WhenDirtyVictimExists_ShouldFlushThenEvictVictim
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+    participant FM as FileManager
+
+    Test->>BP: FetchPage(pageId)
+    activate BP
+    BP->>BP: FindBufferedFrame(pageId)
+    BP-->>BP: null
+    BP->>BP: FindAvailableFrame()
+    BP-->>BP: null
+    BP->>BP: FindUnpinnedVictim()
+    BP-->>BP: dirtyVictimFrame
+    BP->>FM: WritePage(dirtyVictimFrame.PageId, dirtyVictimFrame.Data)
+    activate FM
+    FM-->>BP: success
+    deactivate FM
+    BP->>BP: Evict(dirtyVictimFrame)
+    BP->>FM: ReadPage(pageId)
+    activate FM
+    FM-->>BP: pageData
+    deactivate FM
+    BP->>BP: LoadPage(dirtyVictimFrame, pageData)
+    BP-->>Test: dirtyVictimFrame (now containing new page)
+    deactivate BP
+```
+
+### 1.3 FetchPage_WhenFileReadFails_ShouldNotRegisterPage
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+    participant FM as FileManager
+
+    Test->>BP: FetchPage(pageId)
+    activate BP
+    BP->>BP: FindBufferedFrame(pageId)
+    BP-->>BP: null
+    BP->>BP: FindAvailableFrame()
+    BP-->>BP: availableFrame
+    BP->>FM: ReadPage(pageId)
+    activate FM
+    FM-->>BP: throws IOException
+    deactivate FM
+    BP->>BP: Ensure availableFrame is clean and not registered
+    BP-->>Test: throws IOException
+    deactivate BP
+```
+
+### 1.4 Unpin_WhenPageIsPinned_ShouldDecreasePinCount
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+
+    Test->>BP: Unpin(frame)
+    activate BP
+    BP->>BP: Check frame.PinCount > 0
+    BP-->>BP: true
+    BP->>BP: frame.PinCount--
+    BP-->>Test: success
+    deactivate BP
+```
+
+### 1.5 Evict_WhenFrameIsPinned_ShouldThrow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as BufferPoolTests
+    participant BP as BufferPool
+
+    Test->>BP: Evict(frame)
+    activate BP
+    BP->>BP: Check frame.PinCount > 0
+    BP-->>BP: true
+    BP-->>Test: throws FramePinnedException
+    deactivate BP
+```
+
+## 2. Page (Missing) Tests
+
+### 2.1 GetRecord_WhenSlotExists_ShouldReturnRecord
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PageTests
+    participant Page as Page
+
+    Test->>Page: GetRecord(slotId)
+    activate Page
+    Page->>Page: FindSlot(slotId)
+    Page-->>Page: slot
+    Page->>Page: Read data at slot.Offset with slot.Length
+    Page-->>Page: recordData
+    Page-->>Test: recordData
+    deactivate Page
+```
+
+### 2.2 UpdateRecord_WhenSpaceIsInsufficient_ShouldPreserveOriginalRecord
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PageTests
+    participant Page as Page
+
+    Test->>Page: UpdateRecord(record)
+    activate Page
+    Page->>Page: FindSlot(record.SlotId)
+    Page-->>Page: existingSlot
+    Page->>Page: CalculateRequiredSpace(record)
+    Page-->>Page: requiredSpace
+    Page->>Page: HasAvailableSpace(requiredSpace - existingSlot.Length)
+    Page-->>Page: false
+    Page-->>Test: throws InsufficientSpaceException (Original Data Preserved)
+    deactivate Page
+```
+
+### 2.3 Compact_WhenDeletedRecordsExist_ShouldReclaimSpace
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PageTests
+    participant Page as Page
+
+    Test->>Page: Compact()
+    activate Page
+    Page->>Page: Iterate slots
+    loop For each slot
+        Page->>Page: If slot is active, shift data to beginning
+    end
+    Page->>Page: UpdateFreeSpaceMetadata()
+    Page-->>Test: success
+    deactivate Page
+```
+
+### 2.4 InsertRecord_WhenDeletedSlotExists_ShouldReuseSlot
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as PageTests
+    participant Page as Page
+
+    Test->>Page: InsertRecord(record)
+    activate Page
+    Page->>Page: Find first deleted/inactive slot
+    Page-->>Page: inactiveSlot
+    Page->>Page: WriteRecordData(record)
+    Page-->>Page: recordOffset
+    Page->>Page: Reactivate slot (update Offset and Length)
+    Page->>Page: UpdateFreeSpaceMetadata()
+    Page-->>Test: slotId (Reused)
+    deactivate Page
+```
+
+## 3. StorageEngine (Missing) Tests
+
+### 3.1 Initialize_WhenComponentFails_ShouldCleanUpInitializedComponents
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as StorageEngineTests
+    participant SE as StorageEngine
+    participant FM as FileManager
+    participant BP as BufferPool
+
+    Test->>SE: Initialize(configuration)
+    activate SE
+    SE->>FM: Initialize(configuration.FileSettings)
+    activate FM
+    FM-->>SE: success
+    deactivate FM
+    SE->>BP: Initialize(configuration.BufferPoolSettings)
+    activate BP
+    BP-->>SE: throws InitializationException
+    deactivate BP
+    SE->>FM: CloseAllFiles()
+    activate FM
+    FM-->>SE: success
+    deactivate FM
+    SE->>SE: SetState(Uninitialized)
+    SE-->>Test: throws InitializationException
+    deactivate SE
+```
+
+### 3.2 Shutdown_WhenFlushFails_ShouldPropagateFailure
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as StorageEngineTests
+    participant SE as StorageEngine
+    participant BP as BufferPool
+
+    Test->>SE: Shutdown()
+    activate SE
+    SE->>BP: FlushDirtyPages()
+    activate BP
+    BP-->>SE: throws FlushFailureException
+    deactivate BP
+    SE-->>Test: throws FlushFailureException
+    deactivate SE
+```
+
+## 4. FileManager (Missing) Tests
+
+### 4.1 CreateFile_WhenFileAlreadyExists_ShouldThrow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+    participant FS as PhysicalFileSystem
+
+    Test->>FM: CreateFile(path)
+    activate FM
+    FM->>FS: Exists(path)
+    activate FS
+    FS-->>FM: true
+    deactivate FS
+    FM-->>Test: throws FileAlreadyExistsException
+    deactivate FM
+```
+
+### 4.2 CreateFile_WhenPhysicalCreationFails_ShouldNotRegisterFile
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+    participant FS as PhysicalFileSystem
+
+    Test->>FM: CreateFile(path)
+    activate FM
+    FM->>FS: Exists(path)
+    activate FS
+    FS-->>FM: false
+    deactivate FS
+    FM->>FS: Create(path)
+    activate FS
+    FS-->>FM: throws IOException
+    deactivate FS
+    FM->>FM: Ensure path is not registered in OpenFiles
+    FM-->>Test: throws IOException
+    deactivate FM
+```
+
+### 4.3 OpenFile_WhenAccessModeConflicts_ShouldThrow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+
+    Test->>FM: OpenFile(path, ExclusiveMode)
+    activate FM
+    FM->>FM: IsFileOpen(path)
+    FM-->>FM: true (Already opened in SharedMode)
+    FM-->>Test: throws FileAccessConflictException
+    deactivate FM
+```
+
+### 4.4 ReadPage_WhenFileIsClosed_ShouldThrow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+
+    Test->>FM: ReadPage(pageId)
+    activate FM
+    FM->>FM: IsFileOpen(pageId.FilePath)
+    FM-->>FM: false
+    FM-->>Test: throws FileClosedException
+    deactivate FM
+```
+
+### 4.5 WritePage_WhenFileIsReadOnly_ShouldThrow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+
+    Test->>FM: WritePage(pageId, data)
+    activate FM
+    FM->>FM: GetFileHandle(pageId.FilePath)
+    FM-->>FM: fileHandle
+    FM->>FM: Check fileHandle.IsReadOnly
+    FM-->>FM: true
+    FM-->>Test: throws InvalidFileOperationException
+    deactivate FM
+```
+
+### 4.6 CloseFile_WhenFileIsOpen_ShouldCloseHandle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Test as FileManagerTests
+    participant FM as FileManager
+
+    Test->>FM: CloseFile(path)
+    activate FM
+    FM->>FM: GetFileHandle(path)
+    FM-->>FM: fileHandle
+    FM->>FM: fileHandle.Close()
+    FM->>FM: OpenFiles.Remove(path)
+    FM-->>Test: success
+    deactivate FM
+```

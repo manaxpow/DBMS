@@ -1,5 +1,3 @@
-using System;
-
 public class Transaction
 {
     public void Begin()

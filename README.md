@@ -423,14 +423,32 @@ classDiagram
 classDiagram
     direction TB
     class TransactionManager {
+        -List~Transaction~ _activeTransactions
         +BeginTransaction() Transaction
+        +Commit(Transaction transaction) void
+        +Rollback(Transaction transaction) void
+        +Complete(Transaction transaction) void
+        -NextTransactionId() int
     }
     class Transaction {
+        +int Id
+        +TransactionState State
+        +Begin() void
         +Commit() void
         +Rollback() void
+        +MarkFailed() void
     }
     class LockManager {
-        +AcquireLock() void
+        -Dictionary~object, LockQueue~ _lockTable
+        +Acquire(Transaction tx, object resource, LockMode mode) bool
+        +Upgrade(Transaction tx, object resource) bool
+        +Release(Transaction tx, object resource) void
+        +ReleaseAll(Transaction tx) void
+        +DetectDeadlock() bool
+        -GetLockQueue(object resource) LockQueue
+        -BuildWaitsForGraph() object
+        -FindCycles(object graph) object
+        -SelectVictim(object cycle) Transaction
     }
     class MVCCManager {
         +GetSnapshot() void
@@ -448,9 +466,20 @@ classDiagram
     direction TB
     class RecoveryManager {
         +Recover() void
+        -IdentifyCommittedTransactions(object logRecords) List~Transaction~
+        -IdentifyUncommittedTransactions(object logRecords) List~Transaction~
+        -ApplyRedo(object record) void
+        -ApplyUndo(object record) void
     }
     class WALManager {
-        +WriteLog() void
+        -List~LogRecord~ _logBuffer
+        -int _flushedLSN
+        -int _currentLSN
+        +Append(object record) int
+        +Flush(int targetLSN) void
+        +ReadAllRecords() List~LogRecord~
+        -GenerateNextLSN() int
+        -RevertNextLSN(int lsn) void
     }
     class BackupManager {
         +CreateBackup() void
@@ -466,16 +495,28 @@ classDiagram
 classDiagram
     direction TB
     class SecurityManager {
-        +Authenticate() void
+        +Authenticate(string username, string password) object
+        +Authorize(object userToken, string operation, string resource) bool
+        +AssignRole(int userId, int roleId) void
+        +RevokeRole(int userId, int roleId) void
+        -HashPassword(string password, string salt) string
     }
     class User {
+        +int Id
         +string Username
+        +string PasswordHash
+        +string Salt
+        +List~Role~ Roles
     }
     class Role {
+        +int Id
         +string RoleName
+        +List~Permission~ Permissions
     }
     class Permission {
+        +int Id
         +string Action
+        +string Resource
     }
 
     SecurityManager *-- User
@@ -1019,10 +1060,18 @@ classDiagram
 classDiagram
     direction TB
     class ReplicationManager {
+        -List~ClusterNode~ _followers
         +Sync() void
+        +Replicate(object logRecords) bool
+        +Commit() bool
+        +ElectLeader() void
     }
     class ClusterNode {
         +string NodeId
+        +bool IsAvailable
+        +ReceiveHeartbeat() void
+        +MarkUnavailable() void
+        +Create() void
     }
 
     ReplicationManager *-- ClusterNode
@@ -1034,7 +1083,10 @@ classDiagram
 classDiagram
     direction TB
     class MonitoringManager {
-        +CollectMetrics() void
+        -List~object~ _metricSources
+        +CollectMetrics() object
+        +RegisterSource(object source) void
+        +Evaluate() void
     }
 ```
 

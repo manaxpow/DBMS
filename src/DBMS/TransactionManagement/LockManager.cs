@@ -1,18 +1,48 @@
-using System;
-
 public class LockManager
 {
-    public void AcquireLock()
+    private Dictionary<object, LockQueue> _lockTable = new Dictionary<object, LockQueue>();
+
+    public bool Acquire(Transaction tx, object resource, LockMode mode)
     {
         throw new NotImplementedException();
     }
 
-    public void Acquire()
+    public bool Upgrade(Transaction tx, object resource)
     {
         throw new NotImplementedException();
     }
 
-    public void Release()
+    public void Release(Transaction tx, object resource)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ReleaseAll(Transaction tx)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool DetectDeadlock()
+    {
+        throw new NotImplementedException();
+    }
+
+    private LockQueue GetLockQueue(object resource)
+    {
+        throw new NotImplementedException();
+    }
+
+    private object BuildWaitsForGraph()
+    {
+        throw new NotImplementedException();
+    }
+
+    private object FindCycles(object graph)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Transaction SelectVictim(object cycle)
     {
         throw new NotImplementedException();
     }

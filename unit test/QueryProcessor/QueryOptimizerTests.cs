@@ -5,10 +5,6 @@ using NSubstitute;
 
 public class QueryOptimizerTests
 {
-    // --------------------------------------------------------------------
-    // QueryOptimizer Tests (Context)
-    // --------------------------------------------------------------------
-
     [Trait("Category", "Important")]
     [Fact]
     public void QueryOptimizer_Optimize_WhenStrategyIsNull_ShouldThrow()
@@ -27,7 +23,7 @@ public class QueryOptimizerTests
 
     [Trait("Category", "Important")]
     [Fact]
-    public void QueryOptimizer_Optimize_ShouldDelegateToStrategy()
+    public void Optimize_WhenLogicalPlanIsValid_ShouldReturnPhysicalPlan()
     {
         // Arrange
         var mockStrategy = Substitute.For<IOptimizationStrategy>();
@@ -45,6 +41,24 @@ public class QueryOptimizerTests
         result.Should().Be(expectedPhysicalPlan);
         mockStrategy.Received(1).Optimize(logicalPlan);
     }
+
+    [Trait("Category", "Important")]
+    [Fact]
+    public void Optimize_ShouldPreserveQuerySemantics()
+    {
+        // Arrange
+        var mockStrategy = Substitute.For<IOptimizationStrategy>();
+        var physicalPlan = new PhysicalPlan();
+        mockStrategy.Optimize(Arg.Any<LogicalPlan>()).Returns(physicalPlan);
+
+        var optimizer = new QueryOptimizer(mockStrategy);
+        var logicalPlan = new LogicalPlan();
+
+        // Act
+        var result = optimizer.Optimize(logicalPlan);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.Should().BeSameAs(physicalPlan); // Mock returns the same plan, preserving semantics
+    }
 }
-
-

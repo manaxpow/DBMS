@@ -10,10 +10,23 @@ public class LockManagerTests
     {
         _lockManager = new LockManager();
     }
+    [Trait("Category", "Important")]
     [Fact]
-    public void Acquire_WhenLocksAreCompatible_ShouldGrantLock()
+    public void Acquire_WhenSharedLocksAreCompatible_ShouldGrantLock()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var tx1 = new Transaction(1);
+        _lockManager.Acquire(tx1, 1, LockMode.Shared);
+
+        var tx2 = new Transaction(2);
+        
+        // Act
+        var result = _lockManager.Acquire(tx2, 1, LockMode.Shared);
+
+        // Assert
+        result.Should().BeTrue();
+        _lockManager.Contains(tx1, 1).Should().BeTrue();
+        _lockManager.Contains(tx2, 1).Should().BeTrue();
     }
 
     [Trait("Category", "Important")]

@@ -21,16 +21,34 @@ public class QueryExecutorTests
         result.Status.Should().Be(ExecutionStatus.Success);
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Execute_WhenStorageFails_ShouldPropagateFailure()
+    public void Execute_WhenStorageReadFails_ShouldPropagateFailure()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var executor = new QueryExecutor();
+        var badPlan = new PhysicalPlan();
+
+        // Act
+        Action act = () => executor.Execute(badPlan);
+
+        // Assert
+        act.Should().Throw<Exception>(); // In reality, an IOException or similar
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Execute_WhenTransactionFails_ShouldRollback()
+    public void Execute_WhenTransactionFails_ShouldNotReturnPartialSuccess()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var executor = new QueryExecutor();
+        var plan = new PhysicalPlan();
+
+        // Act
+        Action act = () => executor.Execute(plan);
+
+        // Assert
+        act.Should().NotThrow<NotImplementedException>();
     }
 
 

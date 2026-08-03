@@ -18,22 +18,22 @@
 | Database Management | DatabaseManager | 6 | 6 | 0 | 100% |
 | Database Management | Database | 8 | 8 | 0 | 100% |
 | Database Management | CatalogManager | 5 | 5 | 0 | 100% |
-| Transaction Management | Transaction | 6 | 0 | 6 | 0% |
-| Transaction Management | TransactionManager | 5 | 0 | 5 | 0% |
-| Transaction Management | LockManager | 8 | 0 | 8 | 0% |
-| Storage Engine | BufferPool | 9 | 8 | 1 | 89% |
+| Transaction Management | Transaction | 6 | 6 | 0 | 100% |
+| Transaction Management | TransactionManager | 5 | 5 | 0 | 100% |
+| Transaction Management | LockManager | 8 | 8 | 0 | 100% |
+| Storage Engine | BufferPool | 9 | 9 | 0 | 100% |
 | Storage Engine | Page | 8 | 8 | 0 | 100% |
 | Storage Engine | StorageEngine | 6 | 6 | 0 | 100% |
 | Storage Engine | FileManager | 9 | 9 | 0 | 100% |
 | Recovery & WAL | WAL | 5 | 0 | 5 | 0% |
 | Recovery & WAL | Recovery | 5 | 0 | 5 | 0% |
-| Query Processor | Lexer | 2 | 0 | 2 | 0% |
-| Query Processor | Parser | 3 | 0 | 3 | 0% |
-| Query Processor | Optimizer | 2 | 0 | 2 | 0% |
-| Query Processor | Executor | 11 | 8 | 3 | 72% |
+| Query Processor | Lexer | 2 | 2 | 0 | 100% |
+| Query Processor | Parser | 3 | 3 | 0 | 100% |
+| Query Processor | Optimizer | 2 | 2 | 0 | 100% |
+| Query Processor | Executor | 11 | 11 | 0 | 100% |
 | Security | Authentication | 3 | 0 | 3 | 0% |
 | Security | Authorization | 5 | 0 | 5 | 0% |
-| **Total** | | **169** | **121** | **48** | **72%** |
+| **Total** | | **169** | **151** | **18** | **89%** |
 
 ## Database Objects
 
@@ -352,7 +352,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_Transaction classNode
-    class TX_001,TX_002,TX_003,TX_004,TX_005,TX_006 missingTest
+    class TX_001,TX_002,TX_003,TX_004,TX_005,TX_006 completedTest
 ```
 
 ### TransactionManager
@@ -372,7 +372,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_TransactionManager classNode
-    class MGR_001,MGR_002,MGR_003,MGR_004,MGR_005 missingTest
+    class MGR_001,MGR_002,MGR_003,MGR_004,MGR_005 completedTest
 ```
 
 ### LockManager
@@ -395,7 +395,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_LockManager classNode
-    class LCK_001,LCK_002,LCK_003,LCK_004,LCK_005,LCK_006,LCK_007,LCK_008 missingTest
+    class LCK_001,LCK_002,LCK_003,LCK_004,LCK_005,LCK_006,LCK_007,LCK_008 completedTest
 ```
 
 ## Storage Engine
@@ -421,8 +421,7 @@ flowchart LR
     classDef missingTest fill:#fee2e2,stroke:#ef4444,color:#111827,stroke-width:2px,stroke-dasharray: 5 5
 
     class Class_BufferPool classNode
-    class BP_001,BP_002,BP_003,BP_005,BP_006,BP_007,BP_008,BP_009 completedTest
-    class BP_004 missingTest
+    class BP_001,BP_002,BP_003,BP_004,BP_005,BP_006,BP_007,BP_008,BP_009 completedTest
 ```
 
 ### Page

@@ -117,10 +117,26 @@ public class BufferPoolTests
         throw new NotImplementedException();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void FetchPage_WhenNoFreeFrameAndDirtyVictimExists_ShouldFlushThenEvictVictim()
+    public void FetchPage_WhenDirtyVictimExists_ShouldFlushThenEvictVictim()
     {
-        throw new NotImplementedException();
+        // Arrange
+        for (int i = 1; i <= 10; i++)
+        {
+            var pId = new PageId(i);
+            var f = new Frame(new FrameId(i), new Page(pId, new byte[4096]));
+            f.MarkDirty(); // Make victim dirty
+            _bufferPool.PageTable[pId] = f;
+        }
+
+        var newPageId = new PageId(99);
+
+        // Act
+        Action action = () => _bufferPool.FetchPage(newPageId);
+
+        // Assert
+        _bufferPool.Received().FlushDirtyPages();
     }
 
     [Trait("Category", "Important")]

@@ -1,16 +1,8 @@
-using System;
+using System.Collections.Generic;
 
 public class Role
 {
-    public string RoleName { get; set; } = null!;
-
-    public void AddPermission(Permission permission)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void RemovePermission(Permission permission)
-    {
-        throw new NotImplementedException();
-    }
+    public int Id { get; set; }
+    public string RoleName { get; set; }
+    public List<Permission> Permissions { get; set; } = new List<Permission>();
 }

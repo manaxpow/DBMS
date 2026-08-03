@@ -1,7 +1,7 @@
-using System;
-
 public class TransactionManager : IServerComponent
 {
+    private List<Transaction> _activeTransactions = new List<Transaction>();
+
     public void Start(object config)
     {
         throw new NotImplementedException();
@@ -23,6 +23,16 @@ public class TransactionManager : IServerComponent
     }
 
     public void Rollback(Transaction transaction)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Complete(Transaction transaction)
+    {
+        throw new NotImplementedException();
+    }
+
+    private int NextTransactionId()
     {
         throw new NotImplementedException();
     }

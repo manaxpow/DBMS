@@ -12,6 +12,8 @@ public class LockManager
         throw new NotImplementedException();
     }
 
+    public bool HasLock(Transaction tx, LockMode mode) => throw new NotImplementedException();
+
     public void Release(Transaction tx, object resource)
     {
         throw new NotImplementedException();
@@ -23,6 +25,11 @@ public class LockManager
     }
 
     public bool DetectDeadlock()
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Contains(Transaction tx, object resource)
     {
         throw new NotImplementedException();
     }

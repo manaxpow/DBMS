@@ -69,7 +69,7 @@ public class DatabaseTests
     public void AddSchema_WhenSchemaIsValid_ShouldRegisterSchema()
     {
         // Act
-        _database.AddSchema(new { Name = "TestSchema" });
+        _database.AddSchema(new Schema("TestSchema"));
 
         // Assert
         _database.Should().NotBeNull();
@@ -80,8 +80,8 @@ public class DatabaseTests
     public void AddSchema_WhenNameAlreadyExists_ShouldThrow()
     {
         // Arrange
-        var existingSchema = new { Name = "TestSchema" };
-        var conflictingSchema = new { Name = "TestSchema" };
+        var existingSchema = new Schema("TestSchema");
+        var conflictingSchema = new Schema("TestSchema");
         _database.AddSchema(existingSchema);
 
         // Act
@@ -97,7 +97,7 @@ public class DatabaseTests
     {
         // Arrange
         var schemaName = "TestSchema";
-        _database.AddSchema(new { Name = schemaName });
+        _database.AddSchema(new Schema("TestSchema"));
 
         // Act
         _database.DropSchema(schemaName);

@@ -32,6 +32,11 @@ public class TransactionManager : IServerComponent
         throw new NotImplementedException();
     }
 
+    public bool Contains(Transaction transaction)
+    {
+        throw new NotImplementedException();
+    }
+
     private int NextTransactionId()
     {
         throw new NotImplementedException();

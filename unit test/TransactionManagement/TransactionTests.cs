@@ -1,33 +1,43 @@
+using FluentAssertions;
+
 public class TransactionTests
 {
     private Transaction _transaction;
     public TransactionTests()
     {
-        _transaction = new Transaction();
+        _transaction = new Transaction(1);
     }
     [Trait("Category", "Important")]
     [Fact]
     public void Begin_WhenTransactionIsNew_ShouldBecomeActive()
     {
-        // Arrange
-
         // Act
+        _transaction.Begin();
 
         // Assert
+        _transaction.State.Should().Be(TransactionState.Active);
     }
 
     [Trait("Category", "Important")]
     [Fact]
     public void Commit_WhenTransactionIsActive_ShouldCommit()
     {
-        throw new NotImplementedException();
+        // Act
+        _transaction.Commit();
+
+        // Assert
+        _transaction.State.Should().Be(TransactionState.Committed);
     }
 
     [Trait("Category", "Important")]
     [Fact]
     public void Rollback_WhenTransactionIsActive_ShouldRollback()
     {
-        throw new NotImplementedException();
+        // Act
+        _transaction.Rollback();
+
+        // Assert
+        _transaction.State.Should().Be(TransactionState.Aborted);
     }
 
 
@@ -41,14 +51,27 @@ public class TransactionTests
     [Fact]
     public void Commit_WhenTransactionIsNotActive_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        _transaction.State = TransactionState.New;
+        // Act
+        Action act = () => _transaction.Commit();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Trait("Category", "Important")]
     [Fact]
     public void Rollback_WhenTransactionAlreadyCommitted_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        _transaction.State = TransactionState.Committed;
+
+        // Act
+        Action act = () => _transaction.Rollback();
+
+        // Assert
+        act.Should().Throw<InvalidOperationException>();
     }
 
     [Fact]
@@ -61,7 +84,13 @@ public class TransactionTests
     [Fact]
     public void MarkFailed_WhenTransactionIsActive_ShouldEnterFailedState()
     {
-        throw new NotImplementedException();
+        // Arrange
+        _transaction.State = TransactionState.Active;
+
+        // Act
+        _transaction.MarkFailed();
+
+        // Assert
+        _transaction.State.Should().Be(TransactionState.Failed);
     }
 }
-

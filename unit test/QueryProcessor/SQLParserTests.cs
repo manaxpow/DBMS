@@ -6,7 +6,7 @@ public class SQLParserTests
 {
     [Trait("Category", "Important")]
     [Fact]
-    public void Parse_WhenSelectStatementIsValid_ShouldReturnAST()
+    public void Parse_WhenSelectIsValid_ShouldReturnAST()
     {
         // Arrange
         var parser = new SQLParser();
@@ -23,7 +23,7 @@ public class SQLParserTests
 
     [Trait("Category", "Important")]
     [Fact]
-    public void Parse_WhenStatementIsIncomplete_ShouldThrowSyntaxError()
+    public void Parse_WhenSyntaxIsInvalid_ShouldThrow()
     {
         // Arrange
         var parser = new SQLParser();
@@ -36,10 +36,19 @@ public class SQLParserTests
         act.Should().Throw<SQLParserException>();
     }
 
+    [Trait("Category", "Important")]
     [Fact]
-    public void Parse_WhenTokensAreEmpty_ShouldRejectInput()
+    public void Parse_WhenInputIsEmpty_ShouldThrow()
     {
-        throw new NotImplementedException();
+        // Arrange
+        var parser = new SQLParser();
+        var tokens = new List<Token>(); // Empty tokens
+
+        // Act
+        Action act = () => parser.Parse(tokens);
+
+        // Assert
+        act.Should().Throw<SQLParserException>();
     }
 
     [Fact]

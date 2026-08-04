@@ -80,4 +80,9 @@ public class BufferPool
     {
         throw new NotImplementedException();
     }
+
+    public void Unpin(FrameId frameId)
+    {
+        throw new NotImplementedException();
+    }
 }

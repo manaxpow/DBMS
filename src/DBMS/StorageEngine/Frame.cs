@@ -7,4 +7,6 @@ public sealed class Frame(FrameId id, Page? page = null)
     public bool IsDirty { get; internal set; } = false;
 
     public int PinCount { get; internal set; } = 0;
+
+    public void MarkDirty() => IsDirty = true;
 }

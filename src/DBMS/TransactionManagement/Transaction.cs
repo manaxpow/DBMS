@@ -6,6 +6,12 @@ public class Transaction
 
     public TransactionState State { get; set; }
 
+    public Transaction(int id)
+    {
+        this.Id = id;
+        this.State = TransactionState.New;
+    }
+
     public void Begin()
     {
         throw new NotImplementedException();
